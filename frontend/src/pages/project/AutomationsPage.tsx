@@ -79,7 +79,7 @@ export default function AutomationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Zap className="h-5 w-5 text-amber-500" />
+          <Zap className="h-5 w-5 text-primary-500" />
           <h2 className="text-xl font-semibold text-text-primary">Automations</h2>
           {rules && (
             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-surface-200 text-text-secondary">
@@ -177,7 +177,7 @@ export default function AutomationsPage() {
                         {rule.name}
                       </p>
                       <div className="flex gap-1.5 mt-1">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-amber-300 text-amber-700 dark:text-amber-400">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-primary-300 text-primary-700 dark:text-primary-400">
                           When: {rule.trigger_type.replace(/_/g, ' ')}
                         </span>
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-green-300 text-green-700 dark:text-green-400">

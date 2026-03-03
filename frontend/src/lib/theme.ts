@@ -5,113 +5,113 @@
 
 export const colors = {
   primary: {
-    50: '#fffbeb',
-    100: '#fef3c7',
-    200: '#fde68a',
-    300: '#fcd34d',
-    400: '#fbbf24',
-    500: '#f59e0b',
-    600: '#d97706',
-    700: '#b45309',
+    50: '#E0F2F1',
+    100: '#B2DFDB',
+    200: '#80CBC4',
+    300: '#4DB6AC',
+    400: '#26A69A',
+    500: '#009688',
+    600: '#00796B',
+    700: '#00695C',
   },
   secondary: {
-    50: '#f0fdfa',
-    100: '#ccfbf1',
-    500: '#14b8a6',
-    600: '#0d9488',
-    700: '#0f766e',
+    50: '#F8F9FA',
+    100: '#ECEEF1',
+    500: '#8E9AAF',
+    600: '#6E7A8E',
+    700: '#515C6E',
   },
   surface: {
-    50: '#fffbf5',
-    100: '#fef7ed',
-    200: '#fef0db',
-    300: '#fde4ba',
+    50: '#FAFAF9',
+    100: '#F5F5F3',
+    200: '#EBEBEA',
+    300: '#DCDBD9',
   },
   text: {
-    primary: '#1c1917',
-    secondary: '#78716c',
-    tertiary: '#a8a29e',
+    primary: '#1A1A1A',
+    secondary: '#6B6B6B',
+    tertiary: '#A3A3A3',
   },
-  success: '#22c55e',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  info: '#3b82f6',
+  success: '#2E9E5A',
+  warning: '#E8A317',
+  error: '#D84040',
+  info: '#3574D4',
 } as const
 
 export const darkColors = {
   surface: {
-    50: '#1c1917',
-    100: '#292524',
-    200: '#44403c',
-    300: '#57534e',
+    50: '#0F1110',
+    100: '#1A1C1B',
+    200: '#252826',
+    300: '#333634',
   },
   text: {
-    primary: '#fafaf9',
-    secondary: '#a8a29e',
-    tertiary: '#78716c',
+    primary: '#F2F2F0',
+    secondary: '#9E9E9E',
+    tertiary: '#6B6B6B',
   },
 } as const
 
-/** Priority colors — used in Recharts tooltips, Gantt task bars, etc. */
+/** Priority colors */
 export const PRIORITY_COLORS: Record<string, string> = {
-  critical: '#dc2626',
-  high: '#ef4444',
-  medium: '#f59e0b',
-  low: '#22c55e',
-  none: '#a8a29e',
+  critical: '#C62828',
+  high: '#D84040',
+  medium: '#E8A317',
+  low: '#26A69A',
+  none: '#A3A3A3',
 }
 
 /** RAG status colors */
 export const RAG_COLORS: Record<string, string> = {
-  green: '#22c55e',
-  amber: '#f59e0b',
-  red: '#ef4444',
-  none: '#a8a29e',
+  green: '#2E9E5A',
+  amber: '#E8A317',
+  red: '#D84040',
+  none: '#A3A3A3',
 }
 
 /** Workflow status category colors */
 export const STATUS_CATEGORY_COLORS: Record<string, string> = {
-  todo: '#a8a29e',
-  in_progress: '#3b82f6',
-  done: '#22c55e',
+  todo: '#A3A3A3',
+  in_progress: '#3574D4',
+  done: '#2E9E5A',
 }
 
-/** Chart color palette — warm & friendly */
+/** Chart color palette — phthalo green & silver */
 export const CHART_COLORS = [
-  '#f59e0b', // amber
-  '#14b8a6', // teal
-  '#3b82f6', // blue
-  '#ef4444', // red
-  '#8b5cf6', // violet
-  '#22c55e', // green
-  '#ec4899', // pink
-  '#f97316', // orange
+  '#009688', // phthalo green
+  '#8E9AAF', // silver
+  '#3574D4', // steel blue
+  '#D84040', // muted red
+  '#7E57C2', // muted violet
+  '#00838F', // deep cyan
+  '#C2185B', // muted rose
+  '#EF6C00', // deep orange
 ] as const
 
 /** Gantt chart palette */
 export const GANTT_PALETTE = {
   light: {
-    taskBar: '#f59e0b',
-    taskBarHover: '#d97706',
-    taskProgress: '#22c55e',
-    milestone: '#8b5cf6',
-    link: '#78716c',
-    gridLine: '#e7e5e4',
-    headerBg: '#fef7ed',
-    headerText: '#1c1917',
-    todayLine: '#ef4444',
-    weekendBg: '#fef0db',
+    taskBar: '#009688',
+    taskBarHover: '#00796B',
+    taskProgress: '#8E9AAF',
+    milestone: '#7E57C2',
+    link: '#6B6B6B',
+    gridLine: '#EBEBEA',
+    headerBg: '#F5F5F3',
+    headerText: '#1A1A1A',
+    todayLine: '#D84040',
+    weekendBg: '#F5F5F3',
   },
   dark: {
-    taskBar: '#fbbf24',
-    taskBarHover: '#f59e0b',
-    taskProgress: '#22c55e',
-    milestone: '#a78bfa',
-    link: '#a8a29e',
-    gridLine: '#44403c',
-    headerBg: '#292524',
-    headerText: '#fafaf9',
-    todayLine: '#ef4444',
-    weekendBg: '#292524',
+    taskBar: '#26A69A',
+    taskBarHover: '#009688',
+    taskProgress: '#8E9AAF',
+    milestone: '#9575CD',
+    link: '#9E9E9E',
+    gridLine: '#252826',
+    headerBg: '#1A1C1B',
+    headerText: '#F2F2F0',
+    todayLine: '#D84040',
+    weekendBg: '#1A1C1B',
   },
 } as const

@@ -112,7 +112,7 @@ export default function ProjectsPage() {
                       'inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full capitalize',
                       project.status === 'active' && 'bg-primary-50 text-primary-700',
                       project.status === 'completed' && 'bg-green-50 text-green-700',
-                      project.status === 'planning' && 'bg-amber-50 text-amber-700',
+                      project.status === 'planning' && 'bg-secondary-50 text-secondary-700',
                       !['active', 'completed', 'planning'].includes(project.status) &&
                         'bg-surface-50 text-text-secondary',
                     )}

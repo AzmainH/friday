@@ -36,7 +36,15 @@ class IssueRepository(BaseRepository[Issue]):
             filters["priority"] = priority
         if milestone_id:
             filters["milestone_id"] = milestone_id
-        return await self.get_multi(filters=filters, **kwargs)
+        return await self.get_multi(
+            filters=filters,
+            eager_loads=[
+                selectinload(Issue.status),
+                selectinload(Issue.issue_type),
+                selectinload(Issue.assignee),
+            ],
+            **kwargs,
+        )
 
     async def get_by_key(self, issue_key: str) -> Issue | None:
         query = select(Issue).where(Issue.issue_key == issue_key)
@@ -68,6 +76,11 @@ class IssueRepository(BaseRepository[Issue]):
             .where(
                 Issue.project_id == project_id,
                 Issue.search_vector.op("@@")(ts_query),
+            )
+            .options(
+                selectinload(Issue.status),
+                selectinload(Issue.issue_type),
+                selectinload(Issue.assignee),
             )
         )
         query = self._apply_soft_delete_filter(query)

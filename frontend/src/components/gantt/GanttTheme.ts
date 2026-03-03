@@ -24,27 +24,27 @@ interface GanttPalette {
 }
 
 const LIGHT_PALETTE: GanttPalette = {
-  bg: '#fffbf5',           // surface-50
-  taskBg: '#fde4ba',       // surface-300
-  taskProgress: '#f59e0b', // primary-500
-  taskText: '#1c1917',     // text-primary
-  gridHeaderBg: '#fef7ed', // surface-100
-  gridHeaderText: '#78716c', // text-secondary
-  gridBorder: '#fef0db',   // surface-200
-  todayHighlight: 'rgba(245, 158, 11, 0.08)', // primary with alpha
-  linkColor: '#f59e0b',    // primary-500
+  bg: '#FAFAF9',             // surface-50
+  taskBg: '#B2DFDB',         // primary-100
+  taskProgress: '#009688',   // primary-500
+  taskText: '#1A1A1A',       // text-primary
+  gridHeaderBg: '#F5F5F3',   // surface-100
+  gridHeaderText: '#6B6B6B', // text-secondary
+  gridBorder: '#EBEBEA',     // surface-200
+  todayHighlight: 'rgba(0, 150, 136, 0.08)', // phthalo with alpha
+  linkColor: '#009688',      // primary-500
 }
 
 const DARK_PALETTE: GanttPalette = {
-  bg: '#1c1917',           // dark-bg
-  taskBg: '#44403c',       // warm gray
-  taskProgress: '#f59e0b', // primary-500
-  taskText: '#fef7ed',     // surface-100 (light text)
-  gridHeaderBg: '#292524', // dark-surface
-  gridHeaderText: '#a8a29e', // text-tertiary
-  gridBorder: '#44403c',   // dark-border
-  todayHighlight: 'rgba(245, 158, 11, 0.08)',
-  linkColor: '#f59e0b',    // primary-500
+  bg: '#0F1110',             // dark-bg
+  taskBg: '#252826',         // dark surface
+  taskProgress: '#009688',   // primary-500
+  taskText: '#F2F2F0',       // light text
+  gridHeaderBg: '#1A1C1B',   // dark-surface
+  gridHeaderText: '#9E9E9E', // text-secondary
+  gridBorder: '#252826',     // dark-border
+  todayHighlight: 'rgba(0, 150, 136, 0.08)',
+  linkColor: '#26A69A',      // primary-400
 }
 
 // ---------------------------------------------------------------------------

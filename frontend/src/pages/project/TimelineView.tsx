@@ -65,9 +65,9 @@ export default function TimelineView() {
       return false
     }
     if (filters.dateRange) {
-      const start = issue.start_date ?? issue.created_at
+      const start = issue.planned_start ?? issue.created_at
       if (start && start < filters.dateRange.from) return false
-      const end = issue.due_date ?? issue.start_date ?? issue.created_at
+      const end = issue.planned_end ?? issue.planned_start ?? issue.created_at
       if (end && end > filters.dateRange.to) return false
     }
     return true
@@ -85,8 +85,8 @@ export default function TimelineView() {
       endDate: string
     }) =>
       updateIssue(issueId, {
-        start_date: startDate,
-        due_date: endDate,
+        planned_start: startDate,
+        planned_end: endDate,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['issues', projectId] })

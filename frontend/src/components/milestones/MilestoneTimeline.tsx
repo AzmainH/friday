@@ -6,9 +6,9 @@ import { formatDate } from '@/utils/formatters'
 
 const STATUS_COLORS: Record<string, string> = {
   not_started: '#9e9e9e',
-  in_progress: '#3b82f6',
-  completed: '#22c55e',
-  blocked: '#ef4444',
+  in_progress: '#3574D4',
+  completed: '#2E9E5A',
+  blocked: '#D84040',
 }
 
 const STATUS_LABELS: Record<string, string> = {

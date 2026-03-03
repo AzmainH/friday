@@ -29,21 +29,21 @@ const AI_ACTIONS: AIAction[] = [
     label: 'Smart Schedule',
     description: 'Optimize task scheduling based on priorities, dependencies, and team capacity.',
     icon: <Calendar size={20} />,
-    colorClass: 'bg-[#f59e0b]',
+    colorClass: 'bg-[#009688]',
   },
   {
     type: 'risk_prediction',
     label: 'Risk Prediction',
     description: 'Identify potential risks and bottlenecks in your current sprint or project.',
     icon: <AlertTriangle size={20} />,
-    colorClass: 'bg-[#f59e0b]',
+    colorClass: 'bg-[#009688]',
   },
   {
     type: 'project_summary',
     label: 'Project Summary',
     description: 'Generate a comprehensive summary of project status, progress, and key metrics.',
     icon: <FileBarChart size={20} />,
-    colorClass: 'bg-[#3b82f6]',
+    colorClass: 'bg-[#3574D4]',
   },
 ]
 
@@ -63,17 +63,17 @@ function ScheduleResult({ data }: { data: Record<string, unknown> }) {
           {suggestions.map((s, i) => (
             <div key={i} className="flex items-start gap-2 py-1">
               <div className="mt-1.5 shrink-0">
-                <Circle size={8} className="text-[#f59e0b] fill-[#f59e0b]" />
+                <Circle size={8} className="text-[#009688] fill-[#009688]" />
               </div>
               <div className="min-w-0">
                 <span className="text-sm font-medium block">{s.issue_key as string}</span>
-                <span className="text-xs text-[#78716c] block">{s.recommendation as string}</span>
+                <span className="text-xs text-[#6B6B6B] block">{s.recommendation as string}</span>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-sm text-[#78716c]">
+        <p className="text-sm text-[#6B6B6B]">
           {(data.summary as string) ?? 'Schedule looks optimal.'}
         </p>
       )}
@@ -96,14 +96,14 @@ function RiskResult({ data }: { data: Record<string, unknown> }) {
                 ? 'text-red-500'
                 : (r.severity as string) === 'medium'
                   ? 'text-amber-500'
-                  : 'text-[#78716c]'
+                  : 'text-[#6B6B6B]'
 
             const badgeStyle =
               (r.severity as string) === 'high'
                 ? 'border-red-300 text-red-600'
                 : (r.severity as string) === 'medium'
                   ? 'border-amber-300 text-amber-600'
-                  : 'border-surface-300 text-[#78716c]'
+                  : 'border-surface-300 text-[#6B6B6B]'
 
             return (
               <div key={i} className="flex items-start gap-2 py-1">
@@ -112,7 +112,7 @@ function RiskResult({ data }: { data: Record<string, unknown> }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="text-sm font-medium block">{r.title as string}</span>
-                  <span className="text-xs text-[#78716c] block">{r.description as string}</span>
+                  <span className="text-xs text-[#6B6B6B] block">{r.description as string}</span>
                 </div>
                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${badgeStyle}`}>
                   {r.severity as string}
@@ -122,7 +122,7 @@ function RiskResult({ data }: { data: Record<string, unknown> }) {
           })}
         </div>
       ) : (
-        <p className="text-sm text-[#78716c]">
+        <p className="text-sm text-[#6B6B6B]">
           {(data.summary as string) ?? 'No significant risks detected.'}
         </p>
       )}
@@ -152,7 +152,7 @@ function SummaryResult({ data }: { data: Record<string, unknown> }) {
           {Object.entries(metrics).map(([key, val]) => (
             <span
               key={key}
-              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-surface-200 text-[#78716c]"
+              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-surface-200 text-[#6B6B6B]"
             >
               {key.replace(/_/g, ' ')}: {String(val)}
             </span>
@@ -179,7 +179,7 @@ function AIResultDisplay({
       return <SummaryResult data={data} />
     default:
       return (
-        <p className="text-sm text-[#78716c]">
+        <p className="text-sm text-[#6B6B6B]">
           {JSON.stringify(data, null, 2)}
         </p>
       )
@@ -219,7 +219,7 @@ export default function AIPanel({ projectId }: AIPanelProps) {
   return (
     <div>
       <div className="flex items-center gap-1.5 mb-3">
-        <Sparkles size={24} className="text-[#f59e0b]" />
+        <Sparkles size={24} className="text-[#009688]" />
         <h2 className="text-lg font-semibold">
           AI Assistant
         </h2>
@@ -230,7 +230,7 @@ export default function AIPanel({ projectId }: AIPanelProps) {
         {AI_ACTIONS.map((action) => (
           <div
             key={action.type}
-            className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface cursor-pointer transition-colors hover:border-[#f59e0b]"
+            className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface cursor-pointer transition-colors hover:border-[#009688]"
             onClick={() => handleTrigger(action.type)}
           >
             <div className="flex items-center gap-2 p-4">
@@ -243,7 +243,7 @@ export default function AIPanel({ projectId }: AIPanelProps) {
                 <span className="text-sm font-semibold block">
                   {action.label}
                 </span>
-                <span className="text-xs text-[#78716c]">
+                <span className="text-xs text-[#6B6B6B]">
                   {action.description}
                 </span>
               </div>
@@ -260,7 +260,7 @@ export default function AIPanel({ projectId }: AIPanelProps) {
           {isPolling && (
             <div className="flex items-center gap-2 py-3 justify-center">
               <div className="h-7 w-7 animate-spin rounded-full border-2 border-surface-300 border-t-primary-500" />
-              <p className="text-sm text-[#78716c]">
+              <p className="text-sm text-[#6B6B6B]">
                 {status === 'pending'
                   ? 'Queued, waiting to start...'
                   : 'Analyzing your project...'}

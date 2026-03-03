@@ -183,8 +183,8 @@ export default function PortfolioPage() {
                 <XAxis dataKey="name" fontSize={11} />
                 <YAxis fontSize={11} />
                 <RechartsTooltip formatter={(val: number) => formatCurrency(val)} />
-                <Bar dataKey="allocated" fill="#fde4ba" name="Allocated" />
-                <Bar dataKey="spent" fill="#f59e0b" name="Spent" />
+                <Bar dataKey="allocated" fill="#B2DFDB" name="Allocated" />
+                <Bar dataKey="spent" fill="#009688" name="Spent" />
               </BarChart>
             </ResponsiveContainer>
           ) : (

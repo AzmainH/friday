@@ -49,8 +49,8 @@ export function useStakeholders(projectId: string) {
   return useQuery<Stakeholder[]>({
     queryKey: stakeholderKeys.all(projectId),
     queryFn: async () => {
-      const { data } = await client.get(`/projects/${projectId}/stakeholders`)
-      return data
+      const { data } = await client.get(`/projects/${projectId}/stakeholders?limit=100`)
+      return data?.data ?? data
     },
     enabled: !!projectId,
   })
@@ -61,7 +61,7 @@ export function useStakeholderMatrix(projectId: string) {
     queryKey: stakeholderKeys.matrix(projectId),
     queryFn: async () => {
       const { data } = await client.get(`/projects/${projectId}/stakeholders/matrix`)
-      return data
+      return data?.data ?? data
     },
     enabled: !!projectId,
   })

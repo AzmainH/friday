@@ -114,7 +114,7 @@ function HeatmapGrid({
                   className="font-semibold"
                   style={{
                     fontSize: '0.65rem',
-                    color: cell.allocated > 0 ? '#fff' : 'var(--color-text-disabled, #a8a29e)',
+                    color: cell.allocated > 0 ? '#fff' : 'var(--color-text-disabled, #A3A3A3)',
                   }}
                 >
                   {cell.allocated > 0 ? formatHours(cell.allocated) : ''}
@@ -134,7 +134,7 @@ function HeatmapGrid({
           { label: '70-90%', color: '#81c784' },
           { label: '90-100%', color: '#66bb6a' },
           { label: '>100%', color: '#ffb74d' },
-          { label: '>120%', color: '#ef4444' },
+          { label: '>120%', color: '#D84040' },
         ].map(({ label, color }) => (
           <div key={label} className="flex items-center gap-1">
             <div
@@ -201,10 +201,10 @@ function WorkloadBarChart({
                 key={index}
                 fill={
                   entry.allocated > entry.capacity
-                    ? '#ef4444'
+                    ? '#D84040'
                     : entry.allocated > entry.capacity * 0.8
-                      ? '#f59e0b'
-                      : '#22c55e'
+                      ? '#E8A317'
+                      : '#2E9E5A'
                 }
               />
             ))}

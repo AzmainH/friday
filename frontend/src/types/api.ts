@@ -96,8 +96,10 @@ export interface Issue {
   actual_hours: number | null
   story_points: number | null
   percent_complete: number
-  start_date: string | null
-  due_date: string | null
+  planned_start: string | null
+  planned_end: string | null
+  actual_start: string | null
+  actual_end: string | null
   sort_order: number
   created_at: string
   updated_at: string

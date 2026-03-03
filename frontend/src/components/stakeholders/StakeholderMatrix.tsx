@@ -70,7 +70,7 @@ function NamedDot({ cx, cy, payload }: DotProps) {
   if (cx == null || cy == null || !payload) return null
   return (
     <g>
-      <circle cx={cx} cy={cy} r={6} fill="#f59e0b" stroke="#fff" strokeWidth={1.5} />
+      <circle cx={cx} cy={cy} r={6} fill="#009688" stroke="#fff" strokeWidth={1.5} />
       <text
         x={cx}
         y={cy - 10}
@@ -124,10 +124,10 @@ export default function StakeholderMatrix({ stakeholders }: StakeholderMatrixPro
             x2={5}
             y1={0}
             y2={5}
-            fill="#e7e5e4"
+            fill="#EBEBEA"
             fillOpacity={0.2}
           >
-            <Label value="Monitor" position="insideBottomLeft" fontSize={11} fill="#78716c" />
+            <Label value="Monitor" position="insideBottomLeft" fontSize={11} fill="#6B6B6B" />
           </ReferenceArea>
 
           {/* Bottom-right: Keep Informed (high interest, low influence) */}
@@ -136,10 +136,10 @@ export default function StakeholderMatrix({ stakeholders }: StakeholderMatrixPro
             x2={10}
             y1={0}
             y2={5}
-            fill="#fef3c7"
+            fill="#ECEEF1"
             fillOpacity={0.2}
           >
-            <Label value="Keep Informed" position="insideBottomRight" fontSize={11} fill="#b45309" />
+            <Label value="Keep Informed" position="insideBottomRight" fontSize={11} fill="#515C6E" />
           </ReferenceArea>
 
           {/* Top-left: Keep Satisfied (low interest, high influence) */}
@@ -148,10 +148,10 @@ export default function StakeholderMatrix({ stakeholders }: StakeholderMatrixPro
             x2={5}
             y1={5}
             y2={10}
-            fill="#ccfbf1"
+            fill="#B2DFDB"
             fillOpacity={0.3}
           >
-            <Label value="Keep Satisfied" position="insideTopLeft" fontSize={11} fill="#0f766e" />
+            <Label value="Keep Satisfied" position="insideTopLeft" fontSize={11} fill="#00695C" />
           </ReferenceArea>
 
           {/* Top-right: Manage Closely (high interest, high influence) */}
@@ -160,10 +160,10 @@ export default function StakeholderMatrix({ stakeholders }: StakeholderMatrixPro
             x2={10}
             y1={5}
             y2={10}
-            fill="#dcfce7"
+            fill="#E8F5E9"
             fillOpacity={0.3}
           >
-            <Label value="Manage Closely" position="insideTopRight" fontSize={11} fill="#15803d" />
+            <Label value="Manage Closely" position="insideTopRight" fontSize={11} fill="#1B5E20" />
           </ReferenceArea>
 
           <XAxis

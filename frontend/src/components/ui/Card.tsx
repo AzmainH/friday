@@ -13,10 +13,10 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           'bg-white dark:bg-surface-100',
-          'rounded-[--radius-lg] shadow-sm',
-          'border border-surface-200 dark:border-surface-200',
+          'rounded-[--radius-lg] shadow-xs',
+          'border border-surface-200/80 dark:border-surface-200',
           padding && 'p-6',
-          hover && 'hover:shadow-md hover:-translate-y-0.5 transition-all duration-200',
+          hover && 'hover:shadow-md hover:-translate-y-px transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
           className,
         )}
         {...props}

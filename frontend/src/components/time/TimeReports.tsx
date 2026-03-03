@@ -79,8 +79,8 @@ export default function TimeReports({ projectId }: TimeReportsProps) {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="hours" fill="#f59e0b" name="Total Hours" />
-                <Bar dataKey="billable_hours" fill="#22c55e" name="Billable Hours" />
+                <Bar dataKey="hours" fill="#009688" name="Total Hours" />
+                <Bar dataKey="billable_hours" fill="#2E9E5A" name="Billable Hours" />
               </BarChart>
             </ResponsiveContainer>
           </div>

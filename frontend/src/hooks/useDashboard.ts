@@ -76,8 +76,16 @@ async function fetchPersonalDashboard(): Promise<DashboardData> {
 }
 
 async function fetchProjectDashboard(projectId: string): Promise<DashboardData> {
-  const { data } = await client.get(`/dashboards/project/${projectId}`)
-  return parseDashboard(data)
+  try {
+    const { data } = await client.get(`/dashboards/project/${projectId}`)
+    return parseDashboard(data)
+  } catch (err: unknown) {
+    const status = (err as { response?: { status?: number } })?.response?.status
+    if (status === 404) {
+      return { id: '', name: 'Project Dashboard', scope: 'project', scope_id: projectId, layout: [], widgets: [] }
+    }
+    throw err
+  }
 }
 
 async function fetchPortfolioDashboard(workspaceId: string): Promise<DashboardData> {

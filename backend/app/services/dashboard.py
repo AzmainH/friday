@@ -207,9 +207,10 @@ class DashboardService:
 
         # Burndown data — issues created/resolved by week over last 12 weeks
         twelve_weeks_ago = now - timedelta(weeks=12)
+        week_trunc = func.date_trunc("week", Issue.created_at)
         burndown_q = (
             select(
-                func.date_trunc("week", Issue.created_at).label("week"),
+                week_trunc.label("week"),
                 func.count(Issue.id).label("created"),
                 func.count(
                     case(
@@ -223,8 +224,8 @@ class DashboardService:
                 Issue.is_deleted == False,  # noqa: E712
                 Issue.created_at >= twelve_weeks_ago,
             )
-            .group_by(func.date_trunc("week", Issue.created_at))
-            .order_by(func.date_trunc("week", Issue.created_at))
+            .group_by(week_trunc)
+            .order_by(week_trunc)
         )
         burndown_result = await self.session.execute(burndown_q)
         burndown_data = [
@@ -237,9 +238,10 @@ class DashboardService:
         ]
 
         # Velocity data — story points completed per week over last 12 weeks
+        vel_week = func.date_trunc("week", Issue.updated_at)
         velocity_q = (
             select(
-                func.date_trunc("week", Issue.updated_at).label("week"),
+                vel_week.label("week"),
                 func.coalesce(func.sum(Issue.story_points), 0).label("points"),
             )
             .join(WorkflowStatus, Issue.status_id == WorkflowStatus.id)
@@ -249,8 +251,8 @@ class DashboardService:
                 WorkflowStatus.category == StatusCategory.DONE,
                 Issue.updated_at >= twelve_weeks_ago,
             )
-            .group_by(func.date_trunc("week", Issue.updated_at))
-            .order_by(func.date_trunc("week", Issue.updated_at))
+            .group_by(vel_week)
+            .order_by(vel_week)
         )
         velocity_result = await self.session.execute(velocity_q)
         velocity_data = [

@@ -38,9 +38,9 @@ function statusChipClasses(status: string): string {
 }
 
 function dotColor(status: string, overdue: boolean): string {
-  if (status === 'completed') return 'var(--color-success, #22c55e)'
-  if (overdue) return 'var(--color-error, #ef4444)'
-  return 'var(--color-primary-500, #f59e0b)'
+  if (status === 'completed') return 'var(--color-success, #2E9E5A)'
+  if (overdue) return 'var(--color-error, #D84040)'
+  return 'var(--color-primary-500, #009688)'
 }
 
 function isOverdue(dueDate: string | null): boolean {

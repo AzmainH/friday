@@ -89,9 +89,9 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
         )}
       >
         <span
-          className="font-extrabold tracking-widest text-lg select-none"
+          className="font-bold tracking-[0.15em] text-lg select-none"
           style={{
-            background: 'linear-gradient(135deg, #f59e0b 0%, #14b8a6 100%)',
+            background: 'linear-gradient(135deg, #009688 0%, #004D40 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}
@@ -118,8 +118,8 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
                     'flex items-center gap-3 px-3 py-2.5 rounded-[--radius-sm] text-sm font-medium transition-colors',
                     collapsed && 'justify-center px-0',
                     isActive
-                      ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
-                      : 'text-text-secondary hover:bg-surface-100 hover:text-text-primary dark:hover:bg-surface-200',
+                      ? 'bg-primary-50/70 text-primary-700 border-l-2 border-primary-500 dark:bg-primary-900/15 dark:text-primary-300 dark:border-primary-400'
+                      : 'text-text-secondary hover:bg-surface-100/60 hover:text-text-primary dark:hover:bg-surface-200',
                   )}
                   title={collapsed ? label : undefined}
                 >
@@ -153,8 +153,8 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
                       className={cn(
                         'flex items-center gap-2.5 px-3 py-2 rounded-[--radius-sm] text-[13px] font-medium transition-colors',
                         isActive
-                          ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
-                          : 'text-text-secondary hover:bg-surface-100 hover:text-text-primary dark:hover:bg-surface-200',
+                          ? 'bg-primary-50/70 text-primary-700 border-l-2 border-primary-500 dark:bg-primary-900/15 dark:text-primary-300 dark:border-primary-400'
+                          : 'text-text-secondary hover:bg-surface-100/60 hover:text-text-primary dark:hover:bg-surface-200',
                       )}
                     >
                       <span className={cn(isActive ? 'text-primary-600 dark:text-primary-400' : 'text-text-tertiary')}>
@@ -210,7 +210,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'fixed inset-y-0 left-0 bg-white dark:bg-surface-100 border-r border-surface-200 dark:border-surface-200 overflow-x-hidden z-[--z-sticky]',
+        'fixed inset-y-0 left-0 bg-surface-50 dark:bg-surface-100 border-r border-surface-200/60 dark:border-surface-200 overflow-x-hidden z-[--z-sticky]',
         'transition-[width] duration-[225ms] ease-[cubic-bezier(0.4,0,0.6,1)]',
       )}
       style={{ width }}

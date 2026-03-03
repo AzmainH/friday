@@ -14,7 +14,7 @@ const WORKSPACE_ID = 'default' // Placeholder until workspace context is wired
 
 const STATUS_COLOR: Record<string, string> = {
   planned: 'bg-blue-50 text-blue-700 border-blue-200',
-  in_progress: 'bg-amber-50 text-amber-700 border-amber-200',
+  in_progress: 'bg-primary-50 text-primary-700 border-primary-200',
   released: 'bg-green-50 text-green-700 border-green-200',
   cancelled: 'bg-red-50 text-red-700 border-red-200',
 }
@@ -58,7 +58,7 @@ function ReleaseTimeline({ releases }: { releases: ReleaseWithProjects[] }) {
           y1={40}
           x2={SVG_WIDTH - PADDING}
           y2={40}
-          stroke="var(--color-surface-300, #fde4ba)"
+          stroke="var(--color-surface-300, #c6e8d0)"
           strokeWidth={2}
         />
 
@@ -69,8 +69,8 @@ function ReleaseTimeline({ releases }: { releases: ReleaseWithProjects[] }) {
             const x = dateToX(now.toISOString())
             return (
               <g>
-                <line x1={x} y1={20} x2={x} y2={60} stroke="var(--color-primary-500, #f59e0b)" strokeWidth={2} strokeDasharray="3 2" />
-                <text x={x} y={16} textAnchor="middle" fontSize={9} fill="var(--color-primary-500, #f59e0b)">
+                <line x1={x} y1={20} x2={x} y2={60} stroke="var(--color-primary-500, #009688)" strokeWidth={2} strokeDasharray="3 2" />
+                <text x={x} y={16} textAnchor="middle" fontSize={9} fill="var(--color-primary-500, #009688)">
                   Today
                 </text>
               </g>

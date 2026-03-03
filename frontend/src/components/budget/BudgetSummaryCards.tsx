@@ -6,9 +6,9 @@ import type { BudgetSummary } from '@/hooks/useBudget'
 // ---------------------------------------------------------------------------
 
 function usageColor(pct: number): string {
-  if (pct >= 95) return '#ef4444' // red
-  if (pct >= 80) return '#f59e0b' // amber
-  return '#22c55e' // green
+  if (pct >= 95) return '#D84040' // red
+  if (pct >= 80) return '#E8A317' // amber (warning threshold)
+  return '#2E9E5A' // green
 }
 
 interface SummaryCardProps {

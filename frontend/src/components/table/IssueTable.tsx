@@ -4,7 +4,6 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   getFilteredRowModel,
-  flexRender,
   type ColumnDef,
   type SortingState,
   type RowSelectionState,
@@ -215,18 +214,20 @@ export default function IssueTable({
                 const canSort = header.column.getCanSort()
                 const sorted = header.column.getIsSorted()
 
-                // Render the header value -- may be a render function or a string
+                // Call header function directly (avoid flexRender which wraps
+                // functions as React components, crashing on plain-object returns)
+                const headerDef = header.column.columnDef.header
                 const rendered = header.isPlaceholder
                   ? null
-                  : flexRender(header.column.columnDef.header, header.getContext())
+                  : typeof headerDef === 'function'
+                    ? (headerDef as (ctx: unknown) => unknown)(header.getContext())
+                    : headerDef
 
-                // If the header result is a checkbox descriptor, render it
-                const isCheckboxHeader =
+                const isDescriptor =
                   typeof rendered === 'object' &&
                   rendered !== null &&
                   !Array.isArray(rendered) &&
-                  'type' in (rendered as object) &&
-                  (rendered as { type?: unknown }).type === 'checkbox'
+                  'type' in (rendered as Record<string, unknown>)
 
                 return (
                   <th
@@ -234,7 +235,7 @@ export default function IssueTable({
                     className="px-3 py-2.5 text-left text-xs font-semibold text-text-secondary uppercase tracking-wide border-b border-surface-200"
                     style={{ width: header.getSize() }}
                   >
-                    {isCheckboxHeader ? (
+                    {isDescriptor ? (
                       <CellRenderer value={rendered} />
                     ) : canSort ? (
                       <button
@@ -284,13 +285,18 @@ export default function IssueTable({
                 )}
                 style={{ height: ROW_HEIGHT }}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-3 py-1">
-                    <CellRenderer
-                      value={flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    />
-                  </td>
-                ))}
+                {row.getVisibleCells().map((cell) => {
+                  const cellDef = cell.column.columnDef.cell
+                  const cellValue =
+                    typeof cellDef === 'function'
+                      ? (cellDef as (ctx: unknown) => unknown)(cell.getContext())
+                      : cellDef
+                  return (
+                    <td key={cell.id} className="px-3 py-1">
+                      <CellRenderer value={cellValue} />
+                    </td>
+                  )
+                })}
               </tr>
             )
           })}

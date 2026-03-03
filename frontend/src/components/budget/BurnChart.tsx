@@ -75,12 +75,12 @@ export default function BurnChart({ monthlyBurn, totalBudget }: BurnChartProps) 
           />
           <ReferenceLine
             y={totalBudget}
-            stroke="#ef4444"
+            stroke="#D84040"
             strokeDasharray="6 4"
             label={{
               value: `Budget: ${formatCurrency(totalBudget)}`,
               position: 'insideTopRight',
-              fill: '#ef4444',
+              fill: '#D84040',
               fontSize: 12,
             }}
           />
@@ -88,8 +88,8 @@ export default function BurnChart({ monthlyBurn, totalBudget }: BurnChartProps) 
             type="monotone"
             dataKey="spend"
             name="Cumulative Spend"
-            stroke="#f59e0b"
-            fill="rgba(245, 158, 11, 0.15)"
+            stroke="#009688"
+            fill="rgba(0, 150, 136, 0.12)"
             strokeWidth={2}
           />
         </AreaChart>

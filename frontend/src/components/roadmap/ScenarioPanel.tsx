@@ -94,7 +94,7 @@ export default function ScenarioPanel({
           >
             <span className="flex-shrink-0">
               {scenario.is_baseline ? (
-                <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                <Star className="h-4 w-4 fill-primary-400 text-primary-400" />
               ) : (
                 <Star className="h-4 w-4 text-text-tertiary" />
               )}
@@ -102,7 +102,7 @@ export default function ScenarioPanel({
             <span className="flex flex-col gap-0.5">
               <span className="text-text-primary">{scenario.name}</span>
               {scenario.is_baseline && (
-                <span className="inline-block w-fit rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-xs text-amber-600">
+                <span className="inline-block w-fit rounded-full border border-primary-300 bg-primary-50 px-1.5 py-0.5 text-xs text-primary-600">
                   Baseline
                 </span>
               )}

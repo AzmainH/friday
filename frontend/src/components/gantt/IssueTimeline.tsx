@@ -21,8 +21,8 @@ export interface IssueTimelineProps {
 /** Map an Issue to a DHTMLX Gantt task object. */
 function issueToGanttTask(issue: Issue) {
   const today = new Date().toISOString().slice(0, 10)
-  const startDate = issue.start_date ?? issue.created_at?.slice(0, 10) ?? today
-  const endDate = issue.due_date ?? startDate
+  const startDate = issue.planned_start ?? issue.created_at?.slice(0, 10) ?? today
+  const endDate = issue.planned_end ?? startDate
 
   // Ensure end >= start; default to start + 7 days if no due date
   let end = new Date(endDate)

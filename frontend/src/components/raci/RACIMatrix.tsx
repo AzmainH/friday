@@ -6,10 +6,10 @@ import { useRACIMatrix, useUpdateRACICell, type RACIRole } from '@/hooks/useRACI
 const RACI_CYCLE: RACIRole[] = ['R', 'A', 'C', 'I', null]
 
 const RACI_COLORS: Record<string, string> = {
-  R: '#3b82f6', // Responsible - blue
-  A: '#ef4444', // Accountable - red
-  C: '#f59e0b', // Consulted - amber
-  I: '#22c55e', // Informed - green
+  R: '#3574D4', // Responsible - blue
+  A: '#D84040', // Accountable - red
+  C: '#8E9AAF', // Consulted - silver
+  I: '#2E9E5A', // Informed - green
 }
 
 const RACI_LABELS: Record<string, string> = {
@@ -109,7 +109,7 @@ export default function RACIMatrix({ projectId }: RACIMatrixProps) {
           </div>
         ))}
         <div className="flex items-center gap-1">
-          <div className="flex h-6 w-6 items-center justify-center rounded border border-dashed border-stone-400 bg-stone-200" />
+          <div className="flex h-6 w-6 items-center justify-center rounded border border-dashed border-surface-300 bg-surface-200" />
           <span className="text-xs text-text-secondary">
             Unassigned (click to set)
           </span>
@@ -199,7 +199,7 @@ export default function RACIMatrix({ projectId }: RACIMatrixProps) {
                         </div>
                       ) : (
                         <div
-                          className="inline-flex h-8 w-8 items-center justify-center rounded border border-dashed border-stone-300 bg-stone-100 hover:border-primary-500 hover:bg-primary-50"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded border border-dashed border-surface-200 bg-surface-100 hover:border-primary-500 hover:bg-primary-50"
                           title="Click to assign"
                         />
                       )}

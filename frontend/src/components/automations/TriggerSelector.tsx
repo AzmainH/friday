@@ -67,9 +67,9 @@ export default function TriggerSelector({ value, onChange }: TriggerSelectorProp
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
-        <Zap className="h-4 w-4 text-amber-500" />
+        <Zap className="h-4 w-4 text-primary-500" />
         <span className="text-sm font-semibold text-text-primary">WHEN</span>
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-amber-300 text-amber-700 dark:text-amber-400">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-primary-300 text-primary-700 dark:text-primary-400">
           Trigger
         </span>
       </div>

@@ -86,7 +86,7 @@ export default function RAGStatusSelector({
               width: circleSize,
               height: circleSize,
               backgroundColor: color,
-              borderColor: isSelected ? 'var(--color-text-primary, #1c1917)' : 'transparent',
+              borderColor: isSelected ? 'var(--color-text-primary, #1A1A1A)' : 'transparent',
               boxShadow: isSelected ? `0 0 0 2px ${color}40` : 'none',
             }}
           />

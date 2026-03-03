@@ -74,7 +74,7 @@ export default function BurnUpWidget({ data }: BurnUpWidgetProps) {
           <Line
             type="monotone"
             dataKey="total"
-            stroke="#8b5cf6"
+            stroke="#7E57C2"
             strokeWidth={2}
             dot={false}
             name="Total Scope"
@@ -82,7 +82,7 @@ export default function BurnUpWidget({ data }: BurnUpWidgetProps) {
           <Line
             type="monotone"
             dataKey="completed"
-            stroke="#22c55e"
+            stroke="#2E9E5A"
             strokeWidth={2}
             dot={false}
             name="Completed"

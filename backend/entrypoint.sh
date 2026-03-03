@@ -21,5 +21,8 @@ alembic upgrade head
 echo "Seeding roles and default workspace..."
 python -m app.seed
 
+echo "Seeding demo project data..."
+python -m app.seed_demo
+
 echo "Starting uvicorn..."
 exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload

@@ -50,13 +50,13 @@ export function formatHours(hours: number): string {
   return `${hours.toFixed(1)}h`
 }
 
-/** Priority helpers — warm palette */
+/** Priority helpers — phthalo green palette */
 export const PRIORITY_COLORS: Record<string, string> = {
-  critical: '#dc2626',
-  high: '#ef4444',
-  medium: '#f59e0b',
-  low: '#22c55e',
-  none: '#a8a29e',
+  critical: '#C62828',
+  high: '#D84040',
+  medium: '#E8A317',
+  low: '#26A69A',
+  none: '#A3A3A3',
 }
 
 export const PRIORITY_ORDER: Record<string, number> = {
@@ -67,19 +67,19 @@ export const PRIORITY_ORDER: Record<string, number> = {
   none: 4,
 }
 
-/** RAG status colors — warm palette */
+/** RAG status colors — phthalo green palette */
 export const RAG_COLORS: Record<string, string> = {
-  green: '#22c55e',
-  amber: '#f59e0b',
-  red: '#ef4444',
-  none: '#a8a29e',
+  green: '#2E9E5A',
+  amber: '#E8A317',
+  red: '#D84040',
+  none: '#A3A3A3',
 }
 
-/** Status category colors — warm palette */
+/** Status category colors — phthalo green palette */
 export const STATUS_CATEGORY_COLORS: Record<string, string> = {
-  todo: '#a8a29e',
-  in_progress: '#3b82f6',
-  done: '#22c55e',
+  todo: '#A3A3A3',
+  in_progress: '#3574D4',
+  done: '#2E9E5A',
 }
 
 /** File size formatter */

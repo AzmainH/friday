@@ -74,9 +74,14 @@ class BaseRepository(Generic[ModelType]):
         sort_by: str = "created_at",
         sort_order: str = "desc",
         include_count: bool = False,
+        eager_loads: list | None = None,
     ) -> dict[str, Any]:
         query = select(self.model_class)
         query = self._apply_soft_delete_filter(query)
+
+        if eager_loads:
+            for loader in eager_loads:
+                query = query.options(loader)
 
         if filters:
             for key, value in filters.items():

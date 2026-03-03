@@ -175,7 +175,7 @@ export default function DependencyMap({ dependencies, projects }: DependencyMapP
   if (projects.length === 0) {
     return (
       <div className="text-center py-6">
-        <p className="text-[#78716c]">No projects to display.</p>
+        <p className="text-[#6B6B6B]">No projects to display.</p>
       </div>
     )
   }
@@ -202,11 +202,11 @@ export default function DependencyMap({ dependencies, projects }: DependencyMapP
               )}
             />
           </button>
-          <span className="text-sm text-[#78716c]">
+          <span className="text-sm text-[#6B6B6B]">
             Highlight critical path
           </span>
         </label>
-        <span className="text-xs text-[#78716c]">
+        <span className="text-xs text-[#6B6B6B]">
           {dependencies.length} dependenc{dependencies.length === 1 ? 'y' : 'ies'} across{' '}
           {projects.length} project{projects.length !== 1 ? 's' : ''}
         </span>
@@ -216,9 +216,9 @@ export default function DependencyMap({ dependencies, projects }: DependencyMapP
       <div className="overflow-x-auto overflow-y-auto max-h-[560px] border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface">
         <svg ref={svgRef} width={width} height={height} style={{ display: 'block' }}>
           <defs>
-            <ArrowMarker id="arrow-default" color="#a8a29e" />
-            <ArrowMarker id="arrow-critical" color="#ef4444" />
-            <ArrowMarker id="arrow-highlight" color="#f59e0b" />
+            <ArrowMarker id="arrow-default" color="#A3A3A3" />
+            <ArrowMarker id="arrow-critical" color="#D84040" />
+            <ArrowMarker id="arrow-highlight" color="#009688" />
           </defs>
 
           {/* Edges */}
@@ -227,16 +227,16 @@ export default function DependencyMap({ dependencies, projects }: DependencyMapP
             const isHighlighted = hoveredEdges.has(i)
             const isCrit = highlightCritical && edge.isCritical
 
-            let stroke = '#a8a29e'
+            let stroke = '#A3A3A3'
             let markerId = 'url(#arrow-default)'
             let strokeWidth = 1.5
             if (isCrit) {
-              stroke = '#ef4444'
+              stroke = '#D84040'
               markerId = 'url(#arrow-critical)'
               strokeWidth = 2.5
             }
             if (isHighlighted) {
-              stroke = '#f59e0b'
+              stroke = '#009688'
               markerId = 'url(#arrow-highlight)'
               strokeWidth = 2.5
             }
@@ -262,7 +262,7 @@ export default function DependencyMap({ dependencies, projects }: DependencyMapP
                   y={midY - 6}
                   textAnchor="middle"
                   fontSize={10}
-                  fill={isHighlighted ? '#f59e0b' : '#999'}
+                  fill={isHighlighted ? '#009688' : '#999'}
                   opacity={hoveredNode && !isHighlighted ? 0.2 : 1}
                 >
                   {edge.label}
@@ -293,7 +293,7 @@ export default function DependencyMap({ dependencies, projects }: DependencyMapP
                     cy={node.y}
                     r={NODE_RADIUS + 4}
                     fill="none"
-                    stroke="#ef4444"
+                    stroke="#D84040"
                     strokeWidth={2}
                     strokeDasharray="4 2"
                   />
@@ -304,7 +304,7 @@ export default function DependencyMap({ dependencies, projects }: DependencyMapP
                   cy={node.y}
                   r={NODE_RADIUS}
                   fill={ragColor}
-                  stroke={hoveredNode === node.id ? '#f59e0b' : '#fff'}
+                  stroke={hoveredNode === node.id ? '#009688' : '#fff'}
                   strokeWidth={hoveredNode === node.id ? 3 : 2}
                 />
                 {/* Node label */}
@@ -324,7 +324,7 @@ export default function DependencyMap({ dependencies, projects }: DependencyMapP
                   y={node.y + NODE_RADIUS + 14}
                   textAnchor="middle"
                   fontSize={10}
-                  fill="#78716c"
+                  fill="#6B6B6B"
                 >
                   {node.name}
                 </text>

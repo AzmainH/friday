@@ -33,7 +33,7 @@ type ViewMode = 'chart' | 'table'
 // Helpers
 // ---------------------------------------------------------------------------
 
-const CHART_COLORS = ['#f59e0b', '#22c55e', '#d97706', '#ef4444', '#8b5cf6', '#14b8a6', '#78716c']
+const CHART_COLORS = ['#009688', '#8E9AAF', '#00796B', '#D84040', '#7E57C2', '#00838F', '#6B6B6B']
 
 function getDataColumns(dataPoints: ReportDataPoint[]): string[] {
   if (dataPoints.length === 0) return []

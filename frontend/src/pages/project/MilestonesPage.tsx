@@ -23,9 +23,9 @@ const MILESTONE_TYPES = ['milestone', 'gate', 'phase', 'deliverable'] as const
 
 const STATUS_COLORS: Record<string, string> = {
   not_started: '#9e9e9e',
-  in_progress: '#3b82f6',
-  completed: '#22c55e',
-  blocked: '#ef4444',
+  in_progress: '#3574D4',
+  completed: '#2E9E5A',
+  blocked: '#D84040',
 }
 
 // ---- Gate Approvals sub-component ----
@@ -293,18 +293,15 @@ export default function MilestonesPage() {
                   </tr>
 
                   {/* Expanded gate approvals */}
-                  <tr>
-                    <td colSpan={8} className="p-0">
-                      <div
-                        className="overflow-hidden transition-all duration-200"
-                        style={{ maxHeight: isExpanded ? '2000px' : '0px' }}
-                      >
+                  {isExpanded && (
+                    <tr>
+                      <td colSpan={8} className="p-0">
                         <div className="bg-surface-50">
                           <GateApprovalsSection milestoneId={m.id} />
                         </div>
-                      </div>
-                    </td>
-                  </tr>
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               )
             })}

@@ -29,11 +29,11 @@ export interface WorkloadWidgetProps {
 // Constants
 // ---------------------------------------------------------------------------
 
-const COLOR_ERROR = '#ef4444'
-const COLOR_WARNING = '#f59e0b'
-const COLOR_PRIMARY = '#f59e0b'
-const COLOR_TEXT_SECONDARY = 'var(--color-text-secondary, #78716c)'
-const COLOR_DIVIDER = 'var(--color-surface-200, #e7e5e4)'
+const COLOR_ERROR = '#D84040'
+const COLOR_WARNING = '#E8A317'
+const COLOR_PRIMARY = '#009688'
+const COLOR_TEXT_SECONDARY = 'var(--color-text-secondary, #6B6B6B)'
+const COLOR_DIVIDER = 'var(--color-surface-200, #EBEBEA)'
 
 // ---------------------------------------------------------------------------
 // Component

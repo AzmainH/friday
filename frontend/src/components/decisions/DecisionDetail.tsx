@@ -225,11 +225,11 @@ export default function DecisionDetail({ decision, onLinkIssue }: DecisionDetail
                 </div>
               )}
 
-              {decision.linked_issue_ids.length > 0 && (
+              {(decision.linked_issue_ids?.length ?? 0) > 0 && (
                 <div>
                   <p className="text-xs font-semibold text-text-secondary">Linked Issues</p>
                   <p className="text-sm text-text-primary">
-                    {decision.linked_issue_ids.length} issue(s) linked
+                    {decision.linked_issue_ids?.length ?? 0} issue(s) linked
                   </p>
                 </div>
               )}

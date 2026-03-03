@@ -14,10 +14,10 @@ const PROJECT_STATUSES: Project['status'][] = ['active', 'paused', 'completed', 
 const RAG_STATUSES: Project['rag_status'][] = ['green', 'amber', 'red', 'none']
 
 const ragColors: Record<string, string> = {
-  green: '#22c55e',
-  amber: '#f59e0b',
-  red: '#ef4444',
-  none: '#9e9e9e',
+  green: '#2E9E5A',
+  amber: '#E8A317',
+  red: '#D84040',
+  none: '#A3A3A3',
 }
 
 const inputClasses =

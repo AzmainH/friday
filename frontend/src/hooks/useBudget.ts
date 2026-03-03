@@ -19,6 +19,7 @@ export interface CostEntry {
   amount: number
   description: string | null
   date: string
+  entry_date?: string
   issue_id: string | null
   created_at: string
 }
@@ -90,8 +91,9 @@ export function useCostEntries(projectId: string) {
   return useQuery<CostEntry[]>({
     queryKey: budgetKeys.costs(projectId),
     queryFn: async () => {
-      const { data } = await client.get(`/projects/${projectId}/costs`)
-      return data
+      const { data } = await client.get(`/projects/${projectId}/costs?limit=100&include_count=false`)
+      const items: CostEntry[] = data?.data ?? data
+      return items.map((e: CostEntry) => ({ ...e, date: e.entry_date ?? e.date }))
     },
     enabled: !!projectId,
   })

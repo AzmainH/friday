@@ -50,8 +50,8 @@ export function useDecisions(projectId: string) {
   return useQuery<Decision[]>({
     queryKey: decisionKeys.all(projectId),
     queryFn: async () => {
-      const { data } = await client.get(`/projects/${projectId}/decisions`)
-      return data
+      const { data } = await client.get(`/projects/${projectId}/decisions?limit=100`)
+      return data?.data ?? data
     },
     enabled: !!projectId,
   })

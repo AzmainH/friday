@@ -100,7 +100,7 @@ export default function BaselineCompare({ baselineId }: BaselineCompareProps) {
   if (!data || data.entries.length === 0) {
     return (
       <div className="py-4 text-center">
-        <p className="text-sm text-[#78716c]">
+        <p className="text-sm text-[#6B6B6B]">
           No baseline data available for comparison.
         </p>
       </div>
@@ -115,7 +115,7 @@ export default function BaselineCompare({ baselineId }: BaselineCompareProps) {
           <p className="text-base font-semibold">
             Baseline: {data.baseline_name}
           </p>
-          <span className="text-xs text-[#78716c]">
+          <span className="text-xs text-[#6B6B6B]">
             Created {formatDate(data.created_at)}
           </span>
         </div>
@@ -123,8 +123,8 @@ export default function BaselineCompare({ baselineId }: BaselineCompareProps) {
           <span
             className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
             style={{
-              backgroundColor: summary.slipped > 0 ? '#ef444420' : '#f5f5f4',
-              color: summary.slipped > 0 ? '#ef4444' : '#78716c',
+              backgroundColor: summary.slipped > 0 ? '#D8404020' : '#f5f5f4',
+              color: summary.slipped > 0 ? '#D84040' : '#6B6B6B',
             }}
           >
             {summary.slipped} slipped
@@ -132,13 +132,13 @@ export default function BaselineCompare({ baselineId }: BaselineCompareProps) {
           <span
             className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
             style={{
-              backgroundColor: '#22c55e20',
-              color: '#22c55e',
+              backgroundColor: '#2E9E5A20',
+              color: '#2E9E5A',
             }}
           >
             {summary.onTrack} on track
           </span>
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-surface-200 text-[#78716c]">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-surface-200 text-[#6B6B6B]">
             {summary.total} total
           </span>
         </div>
@@ -164,7 +164,7 @@ export default function BaselineCompare({ baselineId }: BaselineCompareProps) {
                 {/* Issue key + summary */}
                 <td className="px-3 py-2">
                   <span className="text-sm font-semibold block">{row.issue_key}</span>
-                  <span className="text-xs text-[#78716c] block max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap">
+                  <span className="text-xs text-[#6B6B6B] block max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap">
                     {row.issue_summary}
                   </span>
                 </td>
@@ -214,7 +214,7 @@ function VarianceBadge({ days }: { days: number | null }) {
     return (
       <span
         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.7rem] font-semibold"
-        style={{ backgroundColor: '#22c55e15', color: '#22c55e' }}
+        style={{ backgroundColor: '#2E9E5A15', color: '#2E9E5A' }}
       >
         <Minus size={14} />
         On time
@@ -223,7 +223,7 @@ function VarianceBadge({ days }: { days: number | null }) {
   }
 
   const isSlipped = days > 0
-  const color = isSlipped ? '#ef4444' : '#22c55e'
+  const color = isSlipped ? '#D84040' : '#2E9E5A'
   const Icon = isSlipped ? ArrowDown : ArrowUp
   const label = isSlipped ? `+${days}d late` : `${Math.abs(days)}d early`
 

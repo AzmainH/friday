@@ -14,19 +14,19 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 focus-visible:ring-primary-500/30',
+    'bg-primary-600 text-white shadow-sm hover:bg-primary-700 hover:shadow-md active:bg-primary-800 focus-visible:ring-primary-500/25',
   secondary:
-    'bg-teal-500 text-white hover:bg-teal-600 active:bg-teal-700 focus-visible:ring-teal-500/30',
+    'bg-surface-100 text-text-primary border border-surface-200 hover:bg-surface-200 active:bg-surface-300 focus-visible:ring-surface-300/30',
   ghost:
-    'text-text-secondary hover:bg-surface-100 active:bg-surface-200 focus-visible:ring-surface-300/30',
+    'text-text-secondary hover:bg-surface-100 hover:text-text-primary active:bg-surface-200 focus-visible:ring-surface-300/30',
   danger:
-    'bg-red-500 text-white hover:bg-red-600 active:bg-red-700 focus-visible:ring-red-500/30',
+    'bg-error text-white hover:bg-red-700 active:bg-red-800 focus-visible:ring-error/25',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'text-sm px-3 py-1.5 gap-1.5',
-  md: 'text-sm px-4 py-2 gap-2',
-  lg: 'text-base px-5 py-2.5 gap-2.5',
+  sm: 'text-xs px-3.5 py-1.5 gap-1.5',
+  md: 'text-sm px-4.5 py-2 gap-2',
+  lg: 'text-base px-6 py-2.5 gap-2.5',
 };
 
 function Spinner({ className }: { className?: string }) {
