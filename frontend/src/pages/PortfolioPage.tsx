@@ -58,7 +58,7 @@ export default function PortfolioPage() {
 
   /* ---- RAG donut data ---- */
   const ragData = useMemo(() => {
-    if (!overview) return []
+    if (!overview?.summary?.by_rag) return []
     return Object.entries(overview.summary.by_rag)
       .filter(([, count]) => count > 0)
       .map(([rag, count]) => ({ name: rag, value: count, color: RAG_PIE_COLORS[rag] ?? '#999' }))
@@ -66,7 +66,7 @@ export default function PortfolioPage() {
 
   /* ---- Budget bar data ---- */
   const budgetData = useMemo(() => {
-    if (!overview) return []
+    if (!overview?.projects) return []
     return overview.projects
       .filter((p) => p.budget_allocated != null && p.budget_allocated > 0)
       .map((p) => ({
@@ -78,7 +78,7 @@ export default function PortfolioPage() {
 
   /* ---- Timeline bar data (progress per project) ---- */
   const timelineData = useMemo(() => {
-    if (!overview) return []
+    if (!overview?.projects) return []
     return overview.projects.map((p) => ({
       name: p.key_prefix,
       progress: p.progress_pct,
@@ -192,8 +192,8 @@ export default function PortfolioPage() {
               Budget Overview
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Spent: {formatCurrency(overview.summary.total_budget_spent)} / Allocated:{' '}
-              {formatCurrency(overview.summary.total_budget_allocated)}
+              Spent: {formatCurrency(overview.summary?.total_budget_spent ?? 0)} / Allocated:{' '}
+              {formatCurrency(overview.summary?.total_budget_allocated ?? 0)}
             </Typography>
             {budgetData.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>

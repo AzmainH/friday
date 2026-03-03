@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import get_current_user_id, get_db
+from app.core.deps import get_current_user_id, get_db, resolve_workspace_id
 from app.schemas.base import CursorPage, MessageResponse, PaginationMeta
 from app.schemas.member import (
     ProjectMemberCreate,
@@ -69,6 +69,33 @@ async def create_project(
     data = body.model_dump()
     data["workspace_id"] = workspace_id
     return await service.create_project(data, created_by=user_id)
+
+
+@router.get(
+    "/projects",
+    response_model=CursorPage[ProjectResponse],
+)
+async def list_projects_query(
+    workspace_id: str = Query("default", alias="workspace_id"),
+    include_archived: bool = Query(False),
+    cursor: str | None = Query(None),
+    limit: int = Query(50, ge=1, le=100),
+    include_count: bool = Query(True),
+    session: AsyncSession = Depends(get_db),
+):
+    """Frontend-friendly alias: GET /projects?workspace_id=default"""
+    resolved = await resolve_workspace_id(workspace_id, session)
+    if not resolved:
+        return _build_page({"data": [], "next_cursor": None, "has_more": False, "total_count": 0})
+    service = ProjectService(session)
+    result = await service.list_by_workspace(
+        resolved,
+        include_archived=include_archived,
+        cursor=cursor,
+        limit=limit,
+        include_count=include_count,
+    )
+    return _build_page(result)
 
 
 # ── Direct project routes ────────────────────────────────────────

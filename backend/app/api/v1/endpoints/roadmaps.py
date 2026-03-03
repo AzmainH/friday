@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import get_current_user_id, get_db
+from app.core.deps import get_current_user_id, get_db, resolve_workspace_id
 from app.schemas.base import CursorPage, MessageResponse, PaginationMeta
 from app.schemas.roadmap import (
     RoadmapPlanCreate,
@@ -48,6 +48,31 @@ async def list_plans(
     service = RoadmapService(session)
     result = await service.list_plans(
         workspace_id,
+        cursor=cursor,
+        limit=limit,
+        include_count=include_count,
+    )
+    return _build_page(result)
+
+
+@router.get(
+    "/roadmaps",
+    response_model=CursorPage[RoadmapPlanResponse],
+)
+async def list_plans_query(
+    workspace_id: str = Query(..., alias="workspace_id"),
+    cursor: str | None = Query(None),
+    limit: int = Query(50, ge=1, le=100),
+    include_count: bool = Query(False),
+    session: AsyncSession = Depends(get_db),
+):
+    """Alias for frontend: GET /roadmaps?workspace_id=default"""
+    resolved = await resolve_workspace_id(workspace_id, session)
+    if not resolved:
+        return _build_page({"data": [], "next_cursor": None, "has_more": False, "total_count": 0})
+    service = RoadmapService(session)
+    result = await service.list_plans(
+        resolved,
         cursor=cursor,
         limit=limit,
         include_count=include_count,

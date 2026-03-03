@@ -36,8 +36,9 @@ export default function RecentActivityWidget() {
   const { data, isLoading } = useQuery<RecentItem[]>({
     queryKey: ['recent-items'],
     queryFn: async () => {
-      const { data } = await client.get('/recent-items')
-      return data
+      const { data: res } = await client.get('/recent-items')
+      const items = res?.data ?? res
+      return Array.isArray(items) ? items : []
     },
   })
 

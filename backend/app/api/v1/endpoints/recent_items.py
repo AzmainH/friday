@@ -18,10 +18,11 @@ class RecentItemResponse(BaseModel):
     user_id: UUID
     entity_type: str
     entity_id: UUID
-    accessed_at: datetime
+    viewed_at: datetime
 
 
 @router.get("/me/recent", response_model=list[RecentItemResponse])
+@router.get("/recent-items", response_model=list[RecentItemResponse])
 async def get_recent_items(
     limit: int = Query(20, ge=1, le=100),
     session: AsyncSession = Depends(get_db),

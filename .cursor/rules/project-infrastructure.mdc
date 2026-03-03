@@ -1,0 +1,28 @@
+---
+description: Friday project infrastructure and local dev environment details
+alwaysApply: true
+---
+
+# Friday Local Development
+
+## Port Mapping
+
+| Service  | Host Port | Container Port |
+|----------|-----------|----------------|
+| Frontend | **3001**  | 3000           |
+| Backend  | **8001**  | 8000           |
+| Postgres | 5432      | 5432           |
+| Redis    | 6379      | 6379           |
+
+Ports are configured via `.env` (`FRONTEND_PORT=3001`, `BACKEND_PORT=8001`).
+
+- Frontend URL: `http://localhost:3001`
+- Backend API: `http://localhost:8001/api/v1`
+- The frontend Vite dev server proxies/calls the backend at `VITE_API_URL=http://localhost:8001/api/v1`
+
+## Docker Compose
+
+- Backend code is volume-mounted (`./backend/app:/app/app`) — changes reflect without rebuild.
+- Frontend src is volume-mounted (`./frontend/src:/app/src`) — HMR picks up changes.
+- If the backend crashes, run `docker compose restart backend` to restart it.
+- Always use `docker compose logs <service> --tail N` to check service health.

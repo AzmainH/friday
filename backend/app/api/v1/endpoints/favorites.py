@@ -26,6 +26,10 @@ def _build_page(result: dict) -> CursorPage:
     "/me/favorites",
     response_model=CursorPage[FavoriteResponse],
 )
+@router.get(
+    "/favorites",
+    response_model=CursorPage[FavoriteResponse],
+)
 async def list_favorites(
     cursor: str | None = Query(None),
     limit: int = Query(50, ge=1, le=100),

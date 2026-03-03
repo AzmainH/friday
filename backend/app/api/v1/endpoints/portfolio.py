@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import get_current_user_id, get_db
+from app.core.deps import get_current_user_id, get_db, resolve_workspace_id
 from app.schemas.base import CursorPage, MessageResponse, PaginationMeta
 from app.schemas.portfolio import (
     CrossProjectDependencyCreate,
@@ -52,6 +52,23 @@ async def get_portfolio_overview(
     return await service.get_overview(workspace_id)
 
 
+@router.get(
+    "/portfolio/overview",
+    response_model=PortfolioOverviewResponse,
+)
+async def get_portfolio_overview_query(
+    workspace_id: str = Query(..., alias="workspace_id"),
+    session: AsyncSession = Depends(get_db),
+    user_id: UUID = Depends(get_current_user_id),
+):
+    """Alias for frontend: GET /portfolio/overview?workspace_id=default"""
+    resolved = await resolve_workspace_id(workspace_id, session)
+    if not resolved:
+        return PortfolioOverviewResponse(projects=[], total_budget=0.0, total_spent=0.0)
+    service = PortfolioService(session)
+    return await service.get_overview(resolved)
+
+
 # ── Releases scoped under workspaces ────────────────────────────
 
 
@@ -70,6 +87,32 @@ async def list_releases(
     service = ReleaseService(session)
     result = await service.list_by_workspace(
         workspace_id,
+        cursor=cursor,
+        limit=limit,
+        include_count=include_count,
+    )
+    return _build_page(result)
+
+
+@router.get(
+    "/releases",
+    response_model=CursorPage[ReleaseResponse],
+)
+async def list_releases_query(
+    workspace_id: str = Query(..., alias="workspace_id"),
+    cursor: str | None = Query(None),
+    limit: int = Query(50, ge=1, le=100),
+    include_count: bool = Query(False),
+    session: AsyncSession = Depends(get_db),
+    user_id: UUID = Depends(get_current_user_id),
+):
+    """Alias for frontend: GET /releases?workspace_id=default"""
+    resolved = await resolve_workspace_id(workspace_id, session)
+    if not resolved:
+        return _build_page({"data": [], "next_cursor": None, "has_more": False, "total_count": 0})
+    service = ReleaseService(session)
+    result = await service.list_by_workspace(
+        resolved,
         cursor=cursor,
         limit=limit,
         include_count=include_count,
@@ -183,6 +226,32 @@ async def list_dependencies(
     service = DependencyService(session)
     result = await service.list_by_workspace(
         workspace_id,
+        cursor=cursor,
+        limit=limit,
+        include_count=include_count,
+    )
+    return _build_page(result)
+
+
+@router.get(
+    "/portfolio/dependencies",
+    response_model=CursorPage[CrossProjectDependencyResponse],
+)
+async def list_dependencies_query(
+    workspace_id: str = Query(..., alias="workspace_id"),
+    cursor: str | None = Query(None),
+    limit: int = Query(50, ge=1, le=100),
+    include_count: bool = Query(False),
+    session: AsyncSession = Depends(get_db),
+    user_id: UUID = Depends(get_current_user_id),
+):
+    """Alias for frontend: GET /portfolio/dependencies?workspace_id=default"""
+    resolved = await resolve_workspace_id(workspace_id, session)
+    if not resolved:
+        return _build_page({"data": [], "next_cursor": None, "has_more": False, "total_count": 0})
+    service = DependencyService(session)
+    result = await service.list_by_workspace(
+        resolved,
         cursor=cursor,
         limit=limit,
         include_count=include_count,

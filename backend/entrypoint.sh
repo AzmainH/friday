@@ -18,5 +18,8 @@ echo "Redis is ready."
 echo "Running database migrations..."
 alembic upgrade head
 
+echo "Seeding roles and default workspace..."
+python -m app.seed
+
 echo "Starting uvicorn..."
 exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload

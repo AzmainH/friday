@@ -8,15 +8,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.issue_extras import (
     Component,
-    Favorite,
     Label,
+    TimeEntry,
+    Version,
+)
+from app.models.notification import (
+    Favorite,
     Notification,
     RecentItem,
     SavedView,
     TaskStatus,
-    TimeEntry,
     Upload,
-    Version,
 )
 from app.repositories.base import BaseRepository
 
@@ -178,7 +180,7 @@ class RecentItemRepository(BaseRepository[RecentItem]):
         if existing:
             from datetime import datetime, timezone
 
-            existing.accessed_at = datetime.now(timezone.utc)
+            existing.viewed_at = datetime.now(timezone.utc)
             await self.session.flush()
             await self.session.refresh(existing)
             return existing
@@ -197,7 +199,7 @@ class RecentItemRepository(BaseRepository[RecentItem]):
         query = (
             select(RecentItem)
             .where(RecentItem.user_id == user_id)
-            .order_by(RecentItem.accessed_at.desc())
+            .order_by(RecentItem.viewed_at.desc())
             .limit(limit)
         )
         result = await self.session.execute(query)
@@ -218,7 +220,7 @@ class TaskStatusRepository(BaseRepository[TaskStatus]):
     async def update_progress(
         self, task_id: UUID, progress: int, status: str | None = None
     ) -> TaskStatus | None:
-        data: dict[str, Any] = {"progress": progress}
+        data: dict[str, Any] = {"progress_pct": progress}
         if status is not None:
             data["status"] = status
         return await self.update(task_id, data)

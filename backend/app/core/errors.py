@@ -6,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from app.core.config import settings
 from app.core.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -107,6 +108,7 @@ def _get_request_id(request: Request) -> str | None:
 
 
 def _build_response(
+    request: Request,
     status_code: int,
     error_code: ErrorCode,
     message: str,
@@ -120,10 +122,16 @@ def _build_response(
         details=details,
         request_id=request_id,
     )
+    resp_headers = dict(headers) if headers else {}
+    # Ensure CORS headers on error responses so browser doesn't block
+    origin = request.headers.get("origin")
+    if origin and origin in settings.CORS_ORIGINS:
+        resp_headers["Access-Control-Allow-Origin"] = origin
+        resp_headers["Access-Control-Allow-Credentials"] = "true"
     return JSONResponse(
         status_code=status_code,
         content=jsonable_encoder(body),
-        headers=headers,
+        headers=resp_headers,
     )
 
 
@@ -137,6 +145,7 @@ async def _app_exception_handler(request: Request, exc: AppException) -> JSONRes
         request_id=request_id,
     )
     return _build_response(
+        request,
         status_code=exc.status_code,
         error_code=exc.error_code,
         message=exc.message,
@@ -162,6 +171,7 @@ async def _validation_exception_handler(
         request_id=request_id,
     )
     return _build_response(
+        request,
         status_code=422,
         error_code=ErrorCode.VALIDATION_ERROR,
         message="Request validation failed",
@@ -180,6 +190,7 @@ async def _unhandled_exception_handler(
         request_id=request_id,
     )
     return _build_response(
+        request,
         status_code=500,
         error_code=ErrorCode.INTERNAL_ERROR,
         message="An unexpected error occurred",

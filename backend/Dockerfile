@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
-    libgdk-pixbuf2.0-0 \
+    libgdk-pixbuf-2.0-0 \
     libffi-dev \
     libcairo2 \
     libglib2.0-0 \
@@ -21,6 +21,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 EXPOSE 8000
+
+# Fix Windows CRLF line endings in shell scripts
+RUN sed -i 's/\r$//' /app/entrypoint.sh 2>/dev/null || true
 
 RUN chmod +x /app/entrypoint.sh
 

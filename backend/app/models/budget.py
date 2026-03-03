@@ -36,7 +36,13 @@ class ProjectBudget(BaseModel, AuditMixin):
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     project = relationship("Project")
-    cost_entries = relationship("CostEntry", back_populates="project_budget", lazy="selectin")
+    cost_entries = relationship(
+        "CostEntry",
+        primaryjoin="ProjectBudget.project_id == CostEntry.project_id",
+        foreign_keys="[CostEntry.project_id]",
+        viewonly=True,
+        lazy="selectin",
+    )
 
 
 class CostEntry(BaseModel, AuditMixin):
@@ -69,6 +75,6 @@ class CostEntry(BaseModel, AuditMixin):
     project_budget = relationship(
         "ProjectBudget",
         primaryjoin="CostEntry.project_id == ProjectBudget.project_id",
-        foreign_keys=[project_id],
+        foreign_keys="[CostEntry.project_id]",
         viewonly=True,
     )

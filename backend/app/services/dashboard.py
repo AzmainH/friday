@@ -67,7 +67,10 @@ class DashboardService:
             )
         )
         result = await self.session.execute(base)
-        row = result.one()
+        row = result.one_or_none()
+        total = row.total if row else 0
+        overdue = row.overdue if row else 0
+        due_this_week = row.due_this_week if row else 0
 
         # Recent activity for user's issues (last 20)
         activity_q = (
@@ -124,9 +127,9 @@ class DashboardService:
         ]
 
         return {
-            "assigned_to_me": row.total,
-            "overdue": row.overdue,
-            "due_this_week": row.due_this_week,
+            "assigned_to_me": total,
+            "overdue": overdue,
+            "due_this_week": due_this_week,
             "recent_activity": recent_activity,
             "my_projects": my_projects,
         }
@@ -752,7 +755,7 @@ class ReportService:
 
     async def run_saved_report(self, report_id: UUID) -> dict[str, Any]:
         report = await self.get_report(report_id)
-        return await self.run_report(report.report_type, report.config_json)
+        return await self.run_report(report.report_type, report.config_json or {})
 
 
 def pg_timestamp():

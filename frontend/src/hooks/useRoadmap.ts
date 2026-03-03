@@ -99,7 +99,7 @@ export function useRoadmapPlans(workspaceId: string | undefined) {
       const { data } = await client.get('/roadmaps', {
         params: { workspace_id: workspaceId },
       })
-      return data
+      return (data?.data ?? data) ?? []
     },
     enabled: !!workspaceId,
   })

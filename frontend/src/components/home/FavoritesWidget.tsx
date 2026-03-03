@@ -48,15 +48,16 @@ function getEntityUrl(entityType: string, entityId: string): string {
 export default function FavoritesWidget() {
   const navigate = useNavigate()
 
-  const { data, isLoading } = useQuery<FavoriteItem[]>({
+  const { data, isLoading } = useQuery({
     queryKey: ['favorites'],
     queryFn: async () => {
-      const { data } = await client.get('/favorites')
-      return data
+      const { data: res } = await client.get('/favorites')
+      return res
     },
   })
 
-  const favorites = data ?? []
+  const raw = data?.data ?? data
+  const favorites: FavoriteItem[] = Array.isArray(raw) ? raw : []
 
   return (
     <Card sx={{ height: '100%' }}>
