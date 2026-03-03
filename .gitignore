@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Node
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+.npm
+
+# Environment
+.env
+!.env.example
+
+# Uploads
+uploads/
+
+# SQL backups
+*.sql.bak
+*.sql.gz
+*.dump
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Docker volumes
+pgdata/
+redisdata/
+
+# Coverage reports
+coverage/
+lcov-info/
+.nyc_output/
+
+# Generated API files
+frontend/src/api/generated/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/

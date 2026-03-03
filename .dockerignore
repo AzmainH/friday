@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.coverage
+htmlcov
+*.egg-info
+.venv
+venv
+
+# Node
+node_modules
+.npm
+.vite
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Docker
+docker-compose.yml
+docker-compose*.yml
+Makefile
+
+# Documentation
+*.md
+LICENSE
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads and backups
+uploads
+*.sql.bak
+*.sql.gz
+*.dump
+
+# Coverage
+coverage
+.nyc_output
+lcov-info
