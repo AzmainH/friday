@@ -70,3 +70,6 @@ desktop.ini
 # Logs
 *.log
 logs/
+
+# Claude Code worktrees
+.claude/worktrees/

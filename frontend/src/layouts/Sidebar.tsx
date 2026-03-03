@@ -16,6 +16,9 @@ import TimelineIcon from '@mui/icons-material/Timeline'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import ArticleIcon from '@mui/icons-material/Article'
 import SettingsIcon from '@mui/icons-material/Settings'
+import WorkIcon from '@mui/icons-material/Work'
+import NewReleasesIcon from '@mui/icons-material/NewReleases'
+import AssessmentIcon from '@mui/icons-material/Assessment'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useUiStore } from '@/stores/uiStore'
@@ -27,7 +30,10 @@ const navItems = [
   { label: 'Home', path: '/', icon: <HomeIcon /> },
   { label: 'Projects', path: '/projects', icon: <FolderIcon /> },
   { label: 'Roadmaps', path: '/roadmaps', icon: <TimelineIcon /> },
+  { label: 'Portfolio', path: '/portfolio', icon: <WorkIcon /> },
+  { label: 'Releases', path: '/releases', icon: <NewReleasesIcon /> },
   { label: 'Dashboards', path: '/dashboards', icon: <DashboardIcon /> },
+  { label: 'Reports', path: '/reports', icon: <AssessmentIcon /> },
   { label: 'Wiki', path: '/wiki', icon: <ArticleIcon /> },
   { label: 'Settings', path: '/settings', icon: <SettingsIcon /> },
 ]

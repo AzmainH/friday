@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     DB_MAX_OVERFLOW: int = 10
     DB_POOL_RECYCLE: int = 1800
     RATE_LIMIT_PER_MINUTE: int = 200
+    AI_RATE_LIMIT_PER_MINUTE: int = 10
+    BULK_RATE_LIMIT_PER_MINUTE: int = 20
     UPLOAD_DIR: str = "/app/uploads"
 
     model_config = {

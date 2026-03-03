@@ -50,6 +50,30 @@ from app.models.workflow import (
     WorkflowTransition,
 )
 
+# Phase 3-10 – PM, Roadmap, Wiki, Dashboard, Automation models
+from app.models.approval import ApprovalStep, IssueApproval
+from app.models.automation import AutomationExecutionLog, AutomationRule
+from app.models.baseline import Baseline, BaselineSnapshot
+from app.models.budget import CostEntry, ProjectBudget
+from app.models.dashboard import CustomDashboard, SavedReport
+from app.models.decision import Decision, DecisionIssueLink
+from app.models.intake import IntakeForm, IntakeSubmission
+from app.models.milestone import GateApproval, Milestone
+from app.models.portfolio import CrossProjectDependency, Release, ReleaseProject
+from app.models.raci import RACIAssignment
+from app.models.recurring import RecurringRule
+from app.models.roadmap import (
+    RoadmapPlan,
+    RoadmapPlanProject,
+    RoadmapScenario,
+    RoadmapScenarioOverride,
+)
+from app.models.schedule import ScheduleRun
+from app.models.sla import IssueSLAStatus, SLAPolicy
+from app.models.stakeholder import Stakeholder
+from app.models.template import ProjectTemplate
+from app.models.wiki import WikiPage, WikiPageComment, WikiPageVersion, WikiSpace
+
 __all__ = [
     # Base
     "Base",
@@ -100,4 +124,39 @@ __all__ = [
     "RecentItem",
     "TaskStatus",
     "Upload",
+    # Phase 3-10
+    "Milestone",
+    "GateApproval",
+    "Baseline",
+    "BaselineSnapshot",
+    "RACIAssignment",
+    "ProjectBudget",
+    "CostEntry",
+    "Decision",
+    "DecisionIssueLink",
+    "Stakeholder",
+    "RoadmapPlan",
+    "RoadmapPlanProject",
+    "RoadmapScenario",
+    "RoadmapScenarioOverride",
+    "ScheduleRun",
+    "Release",
+    "ReleaseProject",
+    "CrossProjectDependency",
+    "RecurringRule",
+    "SLAPolicy",
+    "IssueSLAStatus",
+    "IntakeForm",
+    "IntakeSubmission",
+    "ApprovalStep",
+    "IssueApproval",
+    "WikiSpace",
+    "WikiPage",
+    "WikiPageVersion",
+    "WikiPageComment",
+    "CustomDashboard",
+    "SavedReport",
+    "AutomationRule",
+    "AutomationExecutionLog",
+    "ProjectTemplate",
 ]
