@@ -43,8 +43,11 @@ async def list_issues(
     priority: str | None = Query(None),
     milestone_id: UUID | None = Query(None),
     cursor: str | None = Query(None),
-    limit: int = Query(50, ge=1, le=100),
+    limit: int = Query(50, ge=1, le=500),
     include_count: bool = Query(False),
+    sort_by: str | None = Query(None),
+    sort_order: str | None = Query(None),
+    search: str | None = Query(None),
     session: AsyncSession = Depends(get_db),
 ):
     service = IssueService(session)
@@ -55,6 +58,7 @@ async def list_issues(
         assignee_id=assignee_id,
         priority=priority,
         milestone_id=milestone_id,
+        search_text=search,
         cursor=cursor,
         limit=limit,
         include_count=include_count,

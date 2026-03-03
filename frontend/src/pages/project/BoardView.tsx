@@ -27,7 +27,11 @@ import { EmptyState } from '@/components/ui/EmptyState'
  * drag-and-drop support for moving issues between columns. Uses
  * optimistic updates via useMoveIssue to keep the UI snappy.
  */
-export default function BoardView() {
+interface BoardViewProps {
+  onAddIssue?: () => void
+}
+
+export default function BoardView({ onAddIssue }: BoardViewProps) {
   const currentProject = useProjectStore((s) => s.currentProject)
   const statuses = useProjectStore((s) => s.statuses)
 
@@ -151,10 +155,9 @@ export default function BoardView() {
     setActiveIssue(null)
   }, [])
 
-  // Placeholder callback for the "+" button in column headers
   const handleAddIssue = useCallback((_statusId: string) => {
-    // TODO: Open issue creation dialog pre-filled with the selected status
-  }, [])
+    onAddIssue?.()
+  }, [onAddIssue])
 
   // --- Empty state: no project selected ---
   if (!currentProject) {

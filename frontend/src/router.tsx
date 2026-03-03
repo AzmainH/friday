@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 import AppShell from '@/layouts/AppShell'
+import ProjectLayout from '@/layouts/ProjectLayout'
 
 // Top-level pages
 const HomePage = lazy(() => import('@/pages/HomePageNew'))
@@ -59,24 +60,31 @@ export const router = createBrowserRouter([
       { path: 'projects', element: withSuspense(ProjectsPage) },
       { path: 'projects/new', element: withSuspense(ProjectCreationWizard) },
 
-      // Project-scoped routes
-      { path: 'projects/:projectId/issues', element: withSuspense(ProjectIssuesPage) },
-      { path: 'projects/:projectId/board', element: withSuspense(BoardView) },
-      { path: 'projects/:projectId/table', element: withSuspense(TableView) },
-      { path: 'projects/:projectId/timeline', element: withSuspense(TimelineView) },
-      { path: 'projects/:projectId/milestones', element: withSuspense(MilestonesPage) },
-      { path: 'projects/:projectId/budget', element: withSuspense(BudgetPage) },
-      { path: 'projects/:projectId/decisions', element: withSuspense(DecisionsPage) },
-      { path: 'projects/:projectId/stakeholders', element: withSuspense(StakeholdersPage) },
-      { path: 'projects/:projectId/documents', element: withSuspense(DocumentsPage) },
-      { path: 'projects/:projectId/time-tracking', element: withSuspense(TimeTrackingPage) },
-      { path: 'projects/:projectId/dashboard', element: withSuspense(ProjectDashboard) },
-      { path: 'projects/:projectId/settings', element: withSuspense(ProjectSettingsPage) },
-      { path: 'projects/:projectId/automations', element: withSuspense(AutomationsPage) },
-      { path: 'projects/:projectId/intake', element: withSuspense(IntakeFormsPage) },
-      { path: 'projects/:projectId/approvals', element: withSuspense(ApprovalsPage) },
-      { path: 'projects/:projectId/import-export', element: withSuspense(ImportExportPage) },
-      { path: 'projects/:projectId/reports', element: withSuspense(ProjectReportsPage) },
+      // Project-scoped routes (wrapped by ProjectLayout to load project data)
+      {
+        path: 'projects/:projectId',
+        element: <ProjectLayout />,
+        children: [
+          { index: true, element: withSuspense(BoardView) },
+          { path: 'issues', element: withSuspense(ProjectIssuesPage) },
+          { path: 'board', element: withSuspense(BoardView) },
+          { path: 'table', element: withSuspense(TableView) },
+          { path: 'timeline', element: withSuspense(TimelineView) },
+          { path: 'milestones', element: withSuspense(MilestonesPage) },
+          { path: 'budget', element: withSuspense(BudgetPage) },
+          { path: 'decisions', element: withSuspense(DecisionsPage) },
+          { path: 'stakeholders', element: withSuspense(StakeholdersPage) },
+          { path: 'documents', element: withSuspense(DocumentsPage) },
+          { path: 'time-tracking', element: withSuspense(TimeTrackingPage) },
+          { path: 'dashboard', element: withSuspense(ProjectDashboard) },
+          { path: 'settings', element: withSuspense(ProjectSettingsPage) },
+          { path: 'automations', element: withSuspense(AutomationsPage) },
+          { path: 'intake', element: withSuspense(IntakeFormsPage) },
+          { path: 'approvals', element: withSuspense(ApprovalsPage) },
+          { path: 'import-export', element: withSuspense(ImportExportPage) },
+          { path: 'reports', element: withSuspense(ProjectReportsPage) },
+        ],
+      },
 
       // Planning (combined: roadmaps + portfolio + releases)
       { path: 'planning', element: withSuspense(PlanningPage) },

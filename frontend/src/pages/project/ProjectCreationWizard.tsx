@@ -270,23 +270,17 @@ export default function ProjectCreationWizard() {
 
     try {
       const payload = {
-        template_id: state.templateId,
+        template_id: null,
         name: state.name,
         key_prefix: state.keyPrefix,
         description: state.description || null,
-        workspace_id: state.workspaceId || undefined,
+        workspace_id: state.workspaceId || null,
         lead_id: state.lead?.id ?? null,
-        members: state.members.map((m) => ({
-          user_id: m.user.id,
-          role: m.role,
-        })),
-        labels: state.labels,
-        workflow_statuses: selectedTemplate?.defaultWorkflow ?? [],
       }
 
       const { data } = await client.post('/wizard/create-project', payload)
       const projectId = data.id ?? data.project_id
-      navigate(`/projects/${projectId}`)
+      navigate(`/projects/${projectId}/board`)
     } catch (err) {
       setSubmitError(
         err instanceof Error ? err.message : 'Failed to create project. Please try again.',

@@ -1,13 +1,16 @@
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import NotFoundException, ValidationException
 from app.models.issue_extras import Label
 from app.models.issue_type import IssueType
+from app.models.organization import Organization
 from app.models.project import Project
 from app.models.template import ProjectTemplate
 from app.models.workflow import Workflow, WorkflowStatus, WorkflowTransition
+from app.models.workspace import Workspace
 from app.repositories.project import ProjectRepository
 from app.repositories.template import ProjectTemplateRepository
 
@@ -127,6 +130,26 @@ class TemplateService:
 
     # ── Wizard: one-shot project creation ───────────────────────
 
+    async def _resolve_default_workspace_id(self) -> UUID:
+        """Return the default workspace id for the default organization."""
+        org_result = await self.session.execute(
+            select(Organization).where(Organization.slug == "default")
+        )
+        org = org_result.scalar_one_or_none()
+        if not org:
+            raise ValidationException("No default organization found")
+        ws_result = await self.session.execute(
+            select(Workspace).where(
+                Workspace.org_id == org.id,
+                Workspace.slug == "default",
+                Workspace.is_deleted == False,  # noqa: E712
+            )
+        )
+        ws = ws_result.scalar_one_or_none()
+        if not ws:
+            raise ValidationException("No default workspace found")
+        return ws.id
+
     async def create_project_from_wizard(
         self,
         data: dict,
@@ -139,9 +162,23 @@ class TemplateService:
                 "A project with this key prefix already exists"
             )
 
+        # Resolve workspace_id: use provided value or fall back to default
+        workspace_id = data.get("workspace_id")
+        if not workspace_id:
+            workspace_id = await self._resolve_default_workspace_id()
+
+        # Resolve template_id: only use valid UUIDs (ignore client-side names)
+        raw_template_id = data.get("template_id")
+        template_id: UUID | None = None
+        if raw_template_id:
+            try:
+                template_id = UUID(str(raw_template_id))
+            except ValueError:
+                template_id = None
+
         # Create the project
         project_data = {
-            "workspace_id": data["workspace_id"],
+            "workspace_id": workspace_id,
             "name": data["name"],
             "key_prefix": data["key_prefix"],
             "description": data.get("description"),
@@ -153,7 +190,6 @@ class TemplateService:
         )
 
         # Apply template if provided
-        template_id = data.get("template_id")
         if template_id:
             await self.apply_template(
                 project.id, template_id, created_by=user_id

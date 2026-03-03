@@ -264,12 +264,19 @@ export function useWorkflow(projectId: string | undefined) {
   return useQuery<WorkflowDetail>({
     queryKey: ['workflow', projectId],
     queryFn: async () => {
-      const { data } = await client.get(`/projects/${projectId}/workflows`)
-      // API may return a single workflow or an array; normalise
-      const wf: WorkflowDetail = Array.isArray(data) ? data[0] : data
-      setWorkflow(wf)
-      setStatuses(wf.statuses ?? [])
-      return wf
+      const { data: listResp } = await client.get(`/projects/${projectId}/workflows`)
+      const workflows = listResp?.data ?? listResp
+      const items = Array.isArray(workflows) ? workflows : [workflows]
+      const defaultWf = items.find((w: { is_default?: boolean }) => w.is_default) ?? items[0]
+      if (!defaultWf?.id) {
+        setWorkflow(null)
+        setStatuses([])
+        return defaultWf
+      }
+      const { data: detail } = await client.get(`/workflows/${defaultWf.id}`)
+      setWorkflow(detail)
+      setStatuses(detail.statuses ?? [])
+      return detail
     },
     enabled: !!projectId,
   })

@@ -44,10 +44,10 @@ class ProjectTemplateResponse(BaseModel):
 
 
 class ProjectWizardRequest(BaseModel):
-    workspace_id: UUID
+    workspace_id: UUID | None = None
     name: str = Field(..., max_length=255)
     key_prefix: str = Field(..., max_length=10)
-    template_id: UUID | None = None
+    template_id: str | None = None
     description: str | None = None
     lead_id: UUID | None = None
 

@@ -1,11 +1,15 @@
-import { lazy, Suspense, useCallback, useMemo } from 'react'
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { Plus } from 'lucide-react'
 import { Divider } from '@/components/ui/Divider'
+import { Button } from '@/components/ui/Button'
 import { useProjectStore } from '@/stores/projectStore'
 import { useFilterState, type FilterState } from '@/hooks/useFilterState'
+import { useProjectMembers, useLabels } from '@/hooks/useProjectSettings'
 import ViewSwitcher, { type ViewType } from '@/components/views/ViewSwitcher'
 import SavedViewSelector from '@/components/views/SavedViewSelector'
 import FilterBar from '@/components/views/FilterBar'
+import IssueCreateModal from '@/components/issue/IssueCreateModal'
 
 // ---------------------------------------------------------------------------
 // Lazy-loaded view panels
@@ -42,6 +46,17 @@ export default function ProjectIssuesPage() {
   const statuses = useProjectStore((s) => s.statuses)
   const issueTypes = useProjectStore((s) => s.issueTypes)
 
+  const [createModalOpen, setCreateModalOpen] = useState(false)
+
+  const projectId = currentProject?.id
+  const { data: members = [] } = useProjectMembers(projectId)
+  const { data: labels = [] } = useLabels(projectId)
+
+  const memberUsers = useMemo(
+    () => members.filter((m) => m.user).map((m) => m.user!),
+    [members],
+  )
+
   // ---- View state from URL ----
   const rawView = searchParams.get('view')
   const currentView: ViewType = isValidView(rawView) ? rawView : 'board'
@@ -67,6 +82,8 @@ export default function ProjectIssuesPage() {
     [setFilter],
   )
 
+  const handleOpenCreate = useCallback(() => setCreateModalOpen(true), [])
+
   // ---- Active view panel ----
   const viewPanel = useMemo(() => {
     switch (currentView) {
@@ -76,9 +93,9 @@ export default function ProjectIssuesPage() {
         return <TableView />
       case 'board':
       default:
-        return <BoardView />
+        return <BoardView onAddIssue={handleOpenCreate} />
     }
-  }, [currentView])
+  }, [currentView, handleOpenCreate])
 
   return (
     <div className="flex h-full flex-col p-4 md:p-6">
@@ -87,6 +104,11 @@ export default function ProjectIssuesPage() {
         <h2 className="mr-auto text-xl font-semibold text-text-primary">
           {currentProject?.name ?? 'Issues'}
         </h2>
+
+        <Button size="sm" onClick={handleOpenCreate}>
+          <Plus size={16} className="-ml-0.5" />
+          Create Issue
+        </Button>
 
         <ViewSwitcher
           currentView={currentView}
@@ -117,6 +139,17 @@ export default function ProjectIssuesPage() {
       <div className="min-h-0 flex-1 overflow-auto">
         <Suspense fallback={<ViewFallback />}>{viewPanel}</Suspense>
       </div>
+
+      {/* ---- Create Issue modal ---- */}
+      {projectId && (
+        <IssueCreateModal
+          open={createModalOpen}
+          onClose={() => setCreateModalOpen(false)}
+          projectId={projectId}
+          members={memberUsers}
+          labels={labels}
+        />
+      )}
     </div>
   )
 }
