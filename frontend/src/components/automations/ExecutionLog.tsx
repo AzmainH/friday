@@ -1,16 +1,4 @@
-import Box from '@mui/material/Box'
-import Chip from '@mui/material/Chip'
-import Skeleton from '@mui/material/Skeleton'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import Typography from '@mui/material/Typography'
-import Paper from '@mui/material/Paper'
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import { CheckCircle, AlertCircle } from 'lucide-react'
 import { useAutomationLogs } from '@/hooks/useAutomations'
 import { formatDateTime } from '@/utils/formatters'
 
@@ -31,11 +19,11 @@ export default function ExecutionLog({ ruleId }: ExecutionLogProps) {
 
   if (isLoading) {
     return (
-      <Box sx={{ py: 2 }}>
+      <div className="py-4">
         {Array.from({ length: 5 }, (_, i) => (
-          <Skeleton key={i} variant="rectangular" height={36} sx={{ mb: 0.5, borderRadius: 1 }} />
+          <div key={i} className="skeleton-shimmer h-9 rounded mb-1" />
         ))}
-      </Box>
+      </div>
     )
   }
 
@@ -43,82 +31,66 @@ export default function ExecutionLog({ ruleId }: ExecutionLogProps) {
 
   if (entries.length === 0) {
     return (
-      <Box sx={{ py: 3, textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary">
+      <div className="py-6 text-center">
+        <p className="text-sm text-text-secondary">
           No executions recorded yet.
-        </Typography>
-      </Box>
+        </p>
+      </div>
     )
   }
 
   return (
-    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Timestamp</TableCell>
-            <TableCell>Issue</TableCell>
-            <TableCell>Trigger</TableCell>
-            <TableCell>Result</TableCell>
-            <TableCell>Error</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
+    <div className="border border-surface-200 rounded-lg overflow-hidden dark:border-dark-border">
+      <table className="w-full text-sm">
+        <thead className="bg-surface-50 dark:bg-dark-surface">
+          <tr>
+            <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Timestamp</th>
+            <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Issue</th>
+            <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Trigger</th>
+            <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Result</th>
+            <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Error</th>
+          </tr>
+        </thead>
+        <tbody>
           {entries.map((entry) => (
-            <TableRow key={entry.id} hover>
-              <TableCell>
-                <Typography variant="body2" noWrap>
+            <tr key={entry.id} className="hover:bg-surface-50 dark:hover:bg-dark-border/30">
+              <td className="px-4 py-2 border-t border-surface-200 dark:border-dark-border">
+                <span className="text-sm text-text-primary whitespace-nowrap">
                   {formatDateTime(entry.executed_at)}
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography variant="body2" fontWeight={500}>
+                </span>
+              </td>
+              <td className="px-4 py-2 border-t border-surface-200 dark:border-dark-border">
+                <span className="text-sm font-medium text-text-primary">
                   {entry.issue_key}
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography variant="body2" color="text.secondary">
+                </span>
+              </td>
+              <td className="px-4 py-2 border-t border-surface-200 dark:border-dark-border">
+                <span className="text-sm text-text-secondary">
                   {entry.trigger_type.replace(/_/g, ' ')}
-                </Typography>
-              </TableCell>
-              <TableCell>
+                </span>
+              </td>
+              <td className="px-4 py-2 border-t border-surface-200 dark:border-dark-border">
                 {entry.success ? (
-                  <Chip
-                    icon={<CheckCircleOutlineIcon />}
-                    label="Success"
-                    size="small"
-                    color="success"
-                    variant="outlined"
-                  />
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border border-green-300 text-green-700 bg-green-50 dark:bg-green-500/10 dark:text-green-400">
+                    <CheckCircle className="h-3 w-3" />
+                    Success
+                  </span>
                 ) : (
-                  <Chip
-                    icon={<ErrorOutlineIcon />}
-                    label="Failed"
-                    size="small"
-                    color="error"
-                    variant="outlined"
-                  />
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border border-red-300 text-red-700 bg-red-50 dark:bg-red-500/10 dark:text-red-400">
+                    <AlertCircle className="h-3 w-3" />
+                    Failed
+                  </span>
                 )}
-              </TableCell>
-              <TableCell>
-                <Typography
-                  variant="caption"
-                  color="error"
-                  sx={{
-                    maxWidth: 260,
-                    display: 'block',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {entry.error_message ?? '—'}
-                </Typography>
-              </TableCell>
-            </TableRow>
+              </td>
+              <td className="px-4 py-2 border-t border-surface-200 dark:border-dark-border">
+                <span className="text-xs text-red-600 dark:text-red-400 block max-w-[260px] truncate">
+                  {entry.error_message ?? '\u2014'}
+                </span>
+              </td>
+            </tr>
           ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+        </tbody>
+      </table>
+    </div>
   )
 }

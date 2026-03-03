@@ -1,15 +1,6 @@
-import { useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Checkbox from '@mui/material/Checkbox'
-import Divider from '@mui/material/Divider'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import IconButton from '@mui/material/IconButton'
-import Popover from '@mui/material/Popover'
-import Typography from '@mui/material/Typography'
-import DragHandleIcon from '@mui/icons-material/DragHandle'
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
+import { useCallback, useEffect, useRef } from 'react'
+import { Button } from '@/components/ui/Button'
+import { ChevronUp, ChevronDown, GripVertical } from 'lucide-react'
 
 export interface ColumnInfo {
   id: string
@@ -42,7 +33,7 @@ export default function ColumnConfig({
   onReorder,
   onReset,
 }: ColumnConfigProps) {
-  const open = Boolean(anchorEl)
+  const panelRef = useRef<HTMLDivElement>(null)
 
   const moveColumn = useCallback(
     (index: number, direction: -1 | 1) => {
@@ -56,89 +47,97 @@ export default function ColumnConfig({
     [columns, onReorder],
   )
 
-  return (
-    <Popover
-      open={open}
-      anchorEl={anchorEl}
-      onClose={onClose}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      slotProps={{
-        paper: { sx: { width: 280, maxHeight: 420, p: 1 } },
-      }}
-    >
-      <Typography variant="subtitle2" sx={{ px: 1, pt: 0.5, pb: 1 }}>
-        Configure Columns
-      </Typography>
-      <Divider />
+  // Close on click outside
+  useEffect(() => {
+    if (!anchorEl) return
 
-      <Box sx={{ overflowY: 'auto', maxHeight: 300, py: 0.5 }}>
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        panelRef.current &&
+        !panelRef.current.contains(e.target as Node) &&
+        !anchorEl.contains(e.target as Node)
+      ) {
+        onClose()
+      }
+    }
+
+    // Close on Escape key
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [anchorEl, onClose])
+
+  if (!anchorEl) return null
+
+  return (
+    <div
+      ref={panelRef}
+      className="absolute right-0 top-full mt-1 w-[280px] max-h-[420px] bg-white dark:bg-surface-100 border border-surface-200 rounded-[--radius-md] shadow-lg z-50 p-2"
+    >
+      <p className="px-2 pt-1 pb-2 text-sm font-semibold text-text-primary">Configure Columns</p>
+      <div className="h-px bg-surface-200 mb-1" />
+
+      <div className="overflow-y-auto max-h-[300px] py-1">
         {columns.map((col, index) => {
           // The "select" column cannot be hidden or reordered
           const isFixed = col.id === 'select'
           return (
-            <Box
+            <div
               key={col.id}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                px: 0.5,
-                '&:hover': { bgcolor: 'action.hover' },
-                borderRadius: 0.5,
-              }}
+              className="flex items-center px-1 rounded hover:bg-surface-50 transition-colors"
             >
               {/* Drag / reorder handle area */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', mr: 0.5 }}>
-                {!isFixed && (
+              <div className="flex flex-col mr-1">
+                {!isFixed ? (
                   <>
-                    <IconButton
-                      size="small"
+                    <button
                       disabled={index === 0}
                       onClick={() => moveColumn(index, -1)}
-                      sx={{ p: 0.25 }}
+                      className="p-0.5 text-text-tertiary hover:text-text-primary disabled:opacity-30"
                       aria-label={`Move ${col.label} up`}
                     >
-                      <ArrowUpwardIcon sx={{ fontSize: 14 }} />
-                    </IconButton>
-                    <IconButton
-                      size="small"
+                      <ChevronUp size={14} />
+                    </button>
+                    <button
                       disabled={index === columns.length - 1}
                       onClick={() => moveColumn(index, 1)}
-                      sx={{ p: 0.25 }}
+                      className="p-0.5 text-text-tertiary hover:text-text-primary disabled:opacity-30"
                       aria-label={`Move ${col.label} down`}
                     >
-                      <ArrowDownwardIcon sx={{ fontSize: 14 }} />
-                    </IconButton>
+                      <ChevronDown size={14} />
+                    </button>
                   </>
+                ) : (
+                  <GripVertical size={16} className="text-text-tertiary mx-0.5" />
                 )}
-                {isFixed && <DragHandleIcon sx={{ fontSize: 16, color: 'text.disabled', mx: 0.5 }} />}
-              </Box>
+              </div>
 
-              <FormControlLabel
-                sx={{ flex: 1, m: 0 }}
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={visibleColumns.includes(col.id)}
-                    onChange={() => onToggle(col.id)}
-                    disabled={isFixed}
-                  />
-                }
-                label={
-                  <Typography variant="body2" noWrap>
-                    {col.label}
-                  </Typography>
-                }
-              />
-            </Box>
+              <label className="flex-1 flex items-center gap-2 py-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={visibleColumns.includes(col.id)}
+                  onChange={() => onToggle(col.id)}
+                  disabled={isFixed}
+                  className="w-4 h-4 rounded border-surface-300 text-primary-500 focus:ring-primary-500"
+                />
+                <span className="text-sm text-text-primary truncate">{col.label}</span>
+              </label>
+            </div>
           )
         })}
-      </Box>
+      </div>
 
-      <Divider sx={{ my: 0.5 }} />
-      <Button size="small" onClick={onReset} fullWidth>
+      <div className="h-px bg-surface-200 my-1" />
+      <Button variant="ghost" size="sm" onClick={onReset} className="w-full">
         Reset to defaults
       </Button>
-    </Popover>
+    </div>
   )
 }

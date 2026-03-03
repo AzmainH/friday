@@ -1,7 +1,5 @@
 import { useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Tooltip from '@mui/material/Tooltip'
-import Typography from '@mui/material/Typography'
+import { cn } from '@/lib/cn'
 import { RAG_COLORS } from '@/utils/formatters'
 
 // ---- Types ----
@@ -53,74 +51,58 @@ export default function RAGStatusSelector({
   )
 
   return (
-    <Box
-      sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 1,
-        opacity: disabled ? 0.5 : 1,
-        pointerEvents: disabled ? 'none' : 'auto',
-      }}
+    <div
+      className={cn(
+        'inline-flex items-center gap-2',
+        disabled && 'opacity-50 pointer-events-none',
+      )}
     >
       {RAG_OPTIONS.map(({ value: ragValue, label }) => {
         const isSelected = value === ragValue
         const color = RAG_COLORS[ragValue]
 
         return (
-          <Tooltip key={ragValue} title={label} arrow>
-            <Box
-              role="button"
-              tabIndex={disabled ? -1 : 0}
-              aria-label={label}
-              aria-pressed={isSelected}
-              onClick={() => handleClick(ragValue)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  handleClick(ragValue)
-                }
-              }}
-              sx={{
-                width: circleSize,
-                height: circleSize,
-                borderRadius: '50%',
-                bgcolor: color,
-                cursor: 'pointer',
-                border: '3px solid',
-                borderColor: isSelected ? 'text.primary' : 'transparent',
-                boxShadow: isSelected
-                  ? `0 0 0 2px ${color}40`
-                  : 'none',
-                transition: 'all 0.15s ease-in-out',
-                opacity: isSelected ? 1 : 0.5,
-                '&:hover': {
-                  opacity: 1,
-                  transform: 'scale(1.1)',
-                },
-                '&:focus-visible': {
-                  outline: '2px solid',
-                  outlineColor: 'primary.main',
-                  outlineOffset: 2,
-                },
-              }}
-            />
-          </Tooltip>
+          <div
+            key={ragValue}
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-label={label}
+            aria-pressed={isSelected}
+            title={label}
+            onClick={() => handleClick(ragValue)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                handleClick(ragValue)
+              }
+            }}
+            className={cn(
+              'rounded-full cursor-pointer border-[3px] transition-all duration-150',
+              'hover:opacity-100 hover:scale-110',
+              'focus-visible:outline-2 focus-visible:outline-primary-500 focus-visible:outline-offset-2',
+              isSelected ? 'opacity-100' : 'opacity-50',
+            )}
+            style={{
+              width: circleSize,
+              height: circleSize,
+              backgroundColor: color,
+              borderColor: isSelected ? 'var(--color-text-primary, #1c1917)' : 'transparent',
+              boxShadow: isSelected ? `0 0 0 2px ${color}40` : 'none',
+            }}
+          />
         )
       })}
 
       {showLabel && (
-        <Typography
-          variant="body2"
-          sx={{
-            ml: 0.5,
-            fontWeight: 600,
-            color: value !== 'none' ? RAG_COLORS[value] : 'text.secondary',
-            textTransform: 'capitalize',
+        <span
+          className="ml-1 text-sm font-semibold capitalize"
+          style={{
+            color: value !== 'none' ? RAG_COLORS[value] : undefined,
           }}
         >
           {value === 'none' ? 'Not set' : value}
-        </Typography>
+        </span>
       )}
-    </Box>
+    </div>
   )
 }

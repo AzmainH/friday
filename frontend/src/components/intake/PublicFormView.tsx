@@ -1,18 +1,6 @@
 import { useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Checkbox from '@mui/material/Checkbox'
-import Container from '@mui/material/Container'
-import FormControl from '@mui/material/FormControl'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import Select, { type SelectChangeEvent } from '@mui/material/Select'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
-import Alert from '@mui/material/Alert'
-import CircularProgress from '@mui/material/CircularProgress'
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import { CheckCircle } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 import client from '@/api/client'
 import type { IntakeForm, FormField } from '@/hooks/useIntakeForms'
 
@@ -37,100 +25,124 @@ function RenderField({
   value: unknown
   onChange: (val: unknown) => void
 }) {
+  const inputClasses =
+    'w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border'
+
   switch (field.type) {
     case 'textarea':
       return (
-        <TextField
-          label={field.label}
-          placeholder={field.placeholder}
-          required={field.required}
-          multiline
-          rows={4}
-          value={(value as string) ?? ''}
-          onChange={(e) => onChange(e.target.value)}
-          fullWidth
-        />
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-1">
+            {field.label}{field.required && <span className="text-red-500 ml-0.5">*</span>}
+          </label>
+          <textarea
+            placeholder={field.placeholder}
+            required={field.required}
+            rows={4}
+            value={(value as string) ?? ''}
+            onChange={(e) => onChange(e.target.value)}
+            className={inputClasses}
+          />
+        </div>
       )
     case 'select':
       return (
-        <FormControl fullWidth required={field.required}>
-          <InputLabel>{field.label}</InputLabel>
-          <Select
-            label={field.label}
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-1">
+            {field.label}{field.required && <span className="text-red-500 ml-0.5">*</span>}
+          </label>
+          <select
+            required={field.required}
             value={(value as string) ?? ''}
-            onChange={(e: SelectChangeEvent) => onChange(e.target.value)}
+            onChange={(e) => onChange(e.target.value)}
+            className={inputClasses}
           >
+            <option value="">Select...</option>
             {field.options?.map((opt) => (
-              <MenuItem key={opt.value} value={opt.value}>
+              <option key={opt.value} value={opt.value}>
                 {opt.label}
-              </MenuItem>
+              </option>
             ))}
-          </Select>
-        </FormControl>
+          </select>
+        </div>
       )
     case 'checkbox':
       return (
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={!!value}
-              onChange={(e) => onChange(e.target.checked)}
-            />
-          }
-          label={
-            <span>
-              {field.label}
-              {field.required && <span style={{ color: 'red' }}> *</span>}
-            </span>
-          }
-        />
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={!!value}
+            onChange={(e) => onChange(e.target.checked)}
+            className="h-4 w-4 rounded border-surface-300"
+          />
+          <span className="text-sm text-text-primary">
+            {field.label}
+            {field.required && <span className="text-red-500 ml-0.5">*</span>}
+          </span>
+        </label>
       )
     case 'number':
       return (
-        <TextField
-          label={field.label}
-          placeholder={field.placeholder}
-          required={field.required}
-          type="number"
-          value={(value as string) ?? ''}
-          onChange={(e) => onChange(e.target.value)}
-          fullWidth
-        />
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-1">
+            {field.label}{field.required && <span className="text-red-500 ml-0.5">*</span>}
+          </label>
+          <input
+            type="number"
+            placeholder={field.placeholder}
+            required={field.required}
+            value={(value as string) ?? ''}
+            onChange={(e) => onChange(e.target.value)}
+            className={inputClasses}
+          />
+        </div>
       )
     case 'email':
       return (
-        <TextField
-          label={field.label}
-          placeholder={field.placeholder ?? 'email@example.com'}
-          required={field.required}
-          type="email"
-          value={(value as string) ?? ''}
-          onChange={(e) => onChange(e.target.value)}
-          fullWidth
-        />
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-1">
+            {field.label}{field.required && <span className="text-red-500 ml-0.5">*</span>}
+          </label>
+          <input
+            type="email"
+            placeholder={field.placeholder ?? 'email@example.com'}
+            required={field.required}
+            value={(value as string) ?? ''}
+            onChange={(e) => onChange(e.target.value)}
+            className={inputClasses}
+          />
+        </div>
       )
     case 'date':
       return (
-        <TextField
-          label={field.label}
-          required={field.required}
-          type="date"
-          value={(value as string) ?? ''}
-          onChange={(e) => onChange(e.target.value)}
-          fullWidth
-          slotProps={{ inputLabel: { shrink: true } }}
-        />
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-1">
+            {field.label}{field.required && <span className="text-red-500 ml-0.5">*</span>}
+          </label>
+          <input
+            type="date"
+            required={field.required}
+            value={(value as string) ?? ''}
+            onChange={(e) => onChange(e.target.value)}
+            className={inputClasses}
+          />
+        </div>
       )
     default:
       return (
-        <TextField
-          label={field.label}
-          placeholder={field.placeholder}
-          required={field.required}
-          value={(value as string) ?? ''}
-          onChange={(e) => onChange(e.target.value)}
-          fullWidth
-        />
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-1">
+            {field.label}{field.required && <span className="text-red-500 ml-0.5">*</span>}
+          </label>
+          <input
+            type="text"
+            placeholder={field.placeholder}
+            required={field.required}
+            value={(value as string) ?? ''}
+            onChange={(e) => onChange(e.target.value)}
+            className={inputClasses}
+          />
+        </div>
       )
   }
 }
@@ -172,39 +184,38 @@ export default function PublicFormView({ form }: PublicFormViewProps) {
   // Success state
   if (submitted) {
     return (
-      <Container maxWidth="sm" sx={{ py: 8, textAlign: 'center' }}>
-        <CheckCircleOutlineIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-        <Typography variant="h5" gutterBottom fontWeight={600}>
+      <div className="max-w-lg mx-auto px-6 py-16 text-center">
+        <CheckCircle className="h-16 w-16 mx-auto text-green-500 mb-4" />
+        <h2 className="text-xl font-semibold text-text-primary mb-2">
           Thank you!
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
+        </h2>
+        <p className="text-base text-text-secondary">
           Your submission has been received and is under review.
-        </Typography>
-      </Container>
+        </p>
+      </div>
     )
   }
 
   return (
-    <Container maxWidth="sm" sx={{ py: 6 }}>
-      <Typography variant="h4" gutterBottom fontWeight={600}>
+    <div className="max-w-lg mx-auto px-6 py-12">
+      <h1 className="text-2xl font-semibold text-text-primary mb-2">
         {form.name}
-      </Typography>
+      </h1>
       {form.description && (
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+        <p className="text-base text-text-secondary mb-8">
           {form.description}
-        </Typography>
+        </p>
       )}
 
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
-        </Alert>
+        </div>
       )}
 
-      <Box
-        component="form"
+      <form
         onSubmit={handleSubmit}
-        sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
+        className="flex flex-col gap-6"
       >
         {form.fields_schema.map((field) => (
           <RenderField
@@ -217,14 +228,15 @@ export default function PublicFormView({ form }: PublicFormViewProps) {
 
         <Button
           type="submit"
-          variant="contained"
-          size="large"
+          variant="primary"
+          size="lg"
           disabled={submitting}
-          sx={{ alignSelf: 'flex-start', mt: 1 }}
+          loading={submitting}
+          className="self-start mt-2"
         >
-          {submitting ? <CircularProgress size={24} /> : 'Submit'}
+          Submit
         </Button>
-      </Box>
-    </Container>
+      </form>
+    </div>
   )
 }

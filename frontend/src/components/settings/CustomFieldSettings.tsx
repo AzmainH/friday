@@ -1,28 +1,7 @@
 import { useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
-import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import TextField from '@mui/material/TextField'
-import MenuItem from '@mui/material/MenuItem'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Chip from '@mui/material/Chip'
-import Skeleton from '@mui/material/Skeleton'
-import Alert from '@mui/material/Alert'
-import Stack from '@mui/material/Stack'
-import AddIcon from '@mui/icons-material/Add'
-import EditIcon from '@mui/icons-material/Edit'
-import DeleteIcon from '@mui/icons-material/Delete'
+import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Dialog, DialogFooter } from '@/components/ui/Dialog'
+import { Button } from '@/components/ui/Button'
 import {
   useCustomFields,
   useCreateCustomField,
@@ -137,118 +116,126 @@ export default function CustomFieldSettings({ projectId }: CustomFieldSettingsPr
 
   if (isLoading) {
     return (
-      <Stack spacing={2}>
-        <Skeleton variant="rounded" height={48} />
-        <Skeleton variant="rounded" height={200} />
-      </Stack>
+      <div className="space-y-4">
+        <div className="skeleton-shimmer h-12 rounded-lg" />
+        <div className="skeleton-shimmer h-52 rounded-lg" />
+      </div>
     )
   }
 
   if (error) {
-    return <Alert severity="error">Failed to load custom fields.</Alert>
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
+        Failed to load custom fields.
+      </div>
+    )
   }
 
   return (
-    <Stack spacing={3}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">Custom Fields</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog}>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-text-primary">Custom Fields</h3>
+        <Button variant="primary" leftIcon={<Plus className="h-4 w-4" />} onClick={openCreateDialog}>
           Add Field
         </Button>
-      </Box>
+      </div>
 
-      <TableContainer component={Paper} variant="outlined">
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>Options</TableCell>
-              <TableCell align="center" width={100}>
-                Actions
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+      <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-surface-50">
+            <tr>
+              <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Name</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Type</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Options</th>
+              <th className="px-4 py-2 text-center text-xs font-semibold text-text-secondary uppercase w-[100px]">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
             {fields.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={4} align="center">
-                  <Typography variant="body2" color="text.secondary" sx={{ py: 4 }}>
-                    No custom fields defined. Add fields to extend your issue tracking.
-                  </Typography>
-                </TableCell>
-              </TableRow>
+              <tr>
+                <td colSpan={4} className="px-4 py-10 text-center text-sm text-text-secondary border-t border-surface-200">
+                  No custom fields defined. Add fields to extend your issue tracking.
+                </td>
+              </tr>
             )}
             {fields.map((field) => (
-              <TableRow key={field.id}>
-                <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="body2" fontWeight={500}>
-                      {field.name}
-                    </Typography>
+              <tr key={field.id}>
+                <td className="px-4 py-2 border-t border-surface-200">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-text-primary">{field.name}</span>
                     {field.is_required && (
-                      <Chip label="Required" size="small" color="warning" variant="outlined" />
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-amber-300 text-amber-700 bg-amber-50">
+                        Required
+                      </span>
                     )}
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label={FIELD_TYPE_LABELS[field.field_type]}
-                    size="small"
-                    variant="outlined"
-                  />
-                </TableCell>
-                <TableCell>
+                  </div>
+                </td>
+                <td className="px-4 py-2 border-t border-surface-200">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-surface-300 text-text-secondary">
+                    {FIELD_TYPE_LABELS[field.field_type]}
+                  </span>
+                </td>
+                <td className="px-4 py-2 border-t border-surface-200">
                   {field.options && field.options.length > 0 ? (
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    <div className="flex flex-wrap gap-1">
                       {field.options.slice(0, 5).map((opt) => (
-                        <Chip key={opt} label={opt} size="small" />
+                        <span key={opt} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-surface-100 text-text-primary">
+                          {opt}
+                        </span>
                       ))}
                       {field.options.length > 5 && (
-                        <Chip label={`+${field.options.length - 5} more`} size="small" variant="outlined" />
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-surface-300 text-text-secondary">
+                          +{field.options.length - 5} more
+                        </span>
                       )}
-                    </Box>
+                    </div>
                   ) : (
-                    <Typography variant="caption" color="text.secondary">
-                      --
-                    </Typography>
+                    <span className="text-xs text-text-secondary">--</span>
                   )}
-                </TableCell>
-                <TableCell align="center">
-                  <IconButton size="small" onClick={() => openEditDialog(field)} aria-label="Edit field">
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    color="error"
+                </td>
+                <td className="px-4 py-2 border-t border-surface-200 text-center">
+                  <button
+                    type="button"
+                    onClick={() => openEditDialog(field)}
+                    aria-label="Edit field"
+                    className="inline-flex items-center justify-center rounded-[--radius-sm] p-1.5 text-text-secondary hover:bg-surface-100 hover:text-text-primary transition-colors"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => handleDelete(field.id)}
                     aria-label="Delete field"
+                    className="inline-flex items-center justify-center rounded-[--radius-sm] p-1.5 text-red-500 hover:bg-red-50 hover:text-red-700 transition-colors"
                   >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </tbody>
+        </table>
+      </div>
 
       {/* Add/Edit Dialog */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingId ? 'Edit Custom Field' : 'New Custom Field'}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={3} sx={{ mt: 1 }}>
-            <TextField
-              label="Field Name"
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} title={editingId ? 'Edit Custom Field' : 'New Custom Field'} size="sm">
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="cf-name" className="block text-sm font-medium text-text-primary mb-1">Field Name</label>
+            <input
+              id="cf-name"
+              type="text"
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-              fullWidth
               autoFocus
+              className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
             />
+          </div>
 
-            <TextField
-              select
-              label="Field Type"
+          <div>
+            <label htmlFor="cf-type" className="block text-sm font-medium text-text-primary mb-1">Field Type</label>
+            <select
+              id="cf-type"
               value={form.field_type}
               onChange={(e) =>
                 setForm((prev) => ({
@@ -256,41 +243,44 @@ export default function CustomFieldSettings({ projectId }: CustomFieldSettingsPr
                   field_type: e.target.value as CustomFieldDefinition['field_type'],
                 }))
               }
-              fullWidth
+              className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
             >
               {FIELD_TYPES.map((t) => (
-                <MenuItem key={t} value={t}>
+                <option key={t} value={t}>
                   {FIELD_TYPE_LABELS[t]}
-                </MenuItem>
+                </option>
               ))}
-            </TextField>
+            </select>
+          </div>
 
-            {hasOptions && (
-              <TextField
-                label="Options"
+          {hasOptions && (
+            <div>
+              <label htmlFor="cf-options" className="block text-sm font-medium text-text-primary mb-1">Options</label>
+              <textarea
+                id="cf-options"
                 value={form.options}
                 onChange={(e) => setForm((prev) => ({ ...prev, options: e.target.value }))}
-                fullWidth
-                multiline
-                minRows={2}
-                helperText="Comma-separated list of options (e.g. Low, Medium, High)"
+                rows={2}
+                className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
               />
-            )}
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setDialogOpen(false)} color="inherit">
+              <p className="mt-1 text-xs text-text-secondary">Comma-separated list of options (e.g. Low, Medium, High)</p>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setDialogOpen(false)}>
             Cancel
           </Button>
           <Button
-            variant="contained"
+            variant="primary"
             onClick={handleSave}
             disabled={!form.name.trim() || createField.isPending || updateField.isPending}
           >
             {editingId ? 'Save' : 'Create'}
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </Dialog>
-    </Stack>
+    </div>
   )
 }

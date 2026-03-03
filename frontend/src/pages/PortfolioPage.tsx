@@ -1,14 +1,5 @@
 import { useState, useMemo } from 'react'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Grid from '@mui/material/Grid2'
-import Paper from '@mui/material/Paper'
-import MenuItem from '@mui/material/MenuItem'
-import TextField from '@mui/material/TextField'
-import CircularProgress from '@mui/material/CircularProgress'
-import Alert from '@mui/material/Alert'
-import FilterListIcon from '@mui/icons-material/FilterList'
+import { Filter } from 'lucide-react'
 import {
   PieChart,
   Pie,
@@ -88,181 +79,148 @@ export default function PortfolioPage() {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center py-16">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-surface-200 border-t-primary-500" />
+      </div>
     )
   }
 
   if (error) {
     return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Alert severity="error">Failed to load portfolio: {error.message}</Alert>
-      </Container>
+      <div>
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[--radius-sm]">
+          Failed to load portfolio: {error.message}
+        </div>
+      </div>
     )
   }
 
   if (!overview || !filteredOverview) {
     return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Alert severity="info">No portfolio data available.</Alert>
-      </Container>
+      <div>
+        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-[--radius-sm]">
+          No portfolio data available.
+        </div>
+      </div>
     )
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <div>
       {/* Page header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h4" fontWeight={700}>
-          Portfolio
-        </Typography>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-text-primary">Portfolio</h2>
 
-        <TextField
-          select
-          size="small"
-          label="Status"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          sx={{ minWidth: 160 }}
-          slotProps={{
-            input: {
-              startAdornment: <FilterListIcon fontSize="small" sx={{ mr: 0.5, color: 'text.secondary' }} />,
-            },
-          }}
-        >
-          <MenuItem value="all">All</MenuItem>
-          <MenuItem value="active">Active</MenuItem>
-          <MenuItem value="paused">Paused</MenuItem>
-          <MenuItem value="completed">Completed</MenuItem>
-          <MenuItem value="archived">Archived</MenuItem>
-        </TextField>
-      </Box>
+        <div className="relative inline-flex items-center">
+          <Filter className="absolute left-3 h-4 w-4 text-text-secondary pointer-events-none" />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="appearance-none rounded-[--radius-sm] border border-surface-300 bg-white dark:bg-dark-surface pl-9 pr-8 py-1.5 text-sm text-text-primary outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors min-w-[160px]"
+          >
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+            <option value="completed">Completed</option>
+            <option value="archived">Archived</option>
+          </select>
+          <svg
+            className="absolute right-2.5 h-4 w-4 text-text-tertiary pointer-events-none"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
 
       {/* Summary charts */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         {/* RAG distribution donut */}
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Paper sx={{ p: 2, height: 280 }}>
-            <Typography variant="subtitle2" gutterBottom>
-              RAG Distribution
-            </Typography>
-            {ragData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={230}>
-                <PieChart>
-                  <Pie
-                    data={ragData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={3}
-                    dataKey="value"
-                    nameKey="name"
-                  >
-                    {ragData.map((entry) => (
-                      <Cell key={entry.name} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <Box
-                sx={{
-                  height: 230,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Typography variant="body2" color="text.secondary">
-                  No data
-                </Typography>
-              </Box>
-            )}
-          </Paper>
-        </Grid>
+        <div className="p-4 bg-white dark:bg-dark-surface border border-surface-200 rounded-[--radius-md] shadow-sm h-[280px]">
+          <h3 className="text-sm font-semibold text-text-primary mb-2">RAG Distribution</h3>
+          {ragData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={230}>
+              <PieChart>
+                <Pie
+                  data={ragData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={80}
+                  paddingAngle={3}
+                  dataKey="value"
+                  nameKey="name"
+                >
+                  {ragData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.color} />
+                  ))}
+                </Pie>
+                <RechartsTooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[230px] flex items-center justify-center">
+              <span className="text-sm text-text-secondary">No data</span>
+            </div>
+          )}
+        </div>
 
         {/* Budget overview */}
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Paper sx={{ p: 2, height: 280 }}>
-            <Typography variant="subtitle2" gutterBottom>
-              Budget Overview
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Spent: {formatCurrency(overview.summary?.total_budget_spent ?? 0)} / Allocated:{' '}
-              {formatCurrency(overview.summary?.total_budget_allocated ?? 0)}
-            </Typography>
-            {budgetData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={budgetData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" fontSize={11} />
-                  <YAxis fontSize={11} />
-                  <RechartsTooltip formatter={(val: number) => formatCurrency(val)} />
-                  <Bar dataKey="allocated" fill="#90caf9" name="Allocated" />
-                  <Bar dataKey="spent" fill="#1976d2" name="Spent" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <Box
-                sx={{
-                  height: 200,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Typography variant="body2" color="text.secondary">
-                  No budget data
-                </Typography>
-              </Box>
-            )}
-          </Paper>
-        </Grid>
+        <div className="p-4 bg-white dark:bg-dark-surface border border-surface-200 rounded-[--radius-md] shadow-sm h-[280px]">
+          <h3 className="text-sm font-semibold text-text-primary mb-1">Budget Overview</h3>
+          <p className="text-xs text-text-secondary mb-2">
+            Spent: {formatCurrency(overview.summary?.total_budget_spent ?? 0)} / Allocated:{' '}
+            {formatCurrency(overview.summary?.total_budget_allocated ?? 0)}
+          </p>
+          {budgetData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={budgetData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" fontSize={11} />
+                <YAxis fontSize={11} />
+                <RechartsTooltip formatter={(val: number) => formatCurrency(val)} />
+                <Bar dataKey="allocated" fill="#fde4ba" name="Allocated" />
+                <Bar dataKey="spent" fill="#f59e0b" name="Spent" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[200px] flex items-center justify-center">
+              <span className="text-sm text-text-secondary">No budget data</span>
+            </div>
+          )}
+        </div>
 
         {/* Timeline / progress chart */}
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Paper sx={{ p: 2, height: 280 }}>
-            <Typography variant="subtitle2" gutterBottom>
-              Project Progress
-            </Typography>
-            {timelineData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={230}>
-                <BarChart data={timelineData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" domain={[0, 100]} fontSize={11} />
-                  <YAxis type="category" dataKey="name" width={60} fontSize={11} />
-                  <RechartsTooltip formatter={(val: number) => `${Math.round(val)}%`} />
-                  <Bar dataKey="progress" name="Progress">
-                    {timelineData.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <Box
-                sx={{
-                  height: 230,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Typography variant="body2" color="text.secondary">
-                  No data
-                </Typography>
-              </Box>
-            )}
-          </Paper>
-        </Grid>
-      </Grid>
+        <div className="p-4 bg-white dark:bg-dark-surface border border-surface-200 rounded-[--radius-md] shadow-sm h-[280px]">
+          <h3 className="text-sm font-semibold text-text-primary mb-2">Project Progress</h3>
+          {timelineData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={230}>
+              <BarChart data={timelineData} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" domain={[0, 100]} fontSize={11} />
+                <YAxis type="category" dataKey="name" width={60} fontSize={11} />
+                <RechartsTooltip formatter={(val: number) => `${Math.round(val)}%`} />
+                <Bar dataKey="progress" name="Progress">
+                  {timelineData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[230px] flex items-center justify-center">
+              <span className="text-sm text-text-secondary">No data</span>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Program Board */}
       <ProgramBoard overview={filteredOverview} />
-    </Container>
+    </div>
   )
 }

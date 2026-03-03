@@ -1,24 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Breadcrumbs from '@mui/material/Breadcrumbs'
-import Link from '@mui/material/Link'
-import Skeleton from '@mui/material/Skeleton'
-import Divider from '@mui/material/Divider'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
-import Collapse from '@mui/material/Collapse'
-import AddIcon from '@mui/icons-material/Add'
-import ArticleIcon from '@mui/icons-material/Article'
-import MenuBookIcon from '@mui/icons-material/MenuBook'
-import NavigateNextIcon from '@mui/icons-material/NavigateNext'
-import SearchIcon from '@mui/icons-material/Search'
-import CloseIcon from '@mui/icons-material/Close'
+import { Plus, BookOpen, ChevronRight, Search, X } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { Skeleton } from '@/components/ui/Skeleton'
 import WikiTree from '@/components/wiki/WikiTree'
 import WikiEditor from '@/components/wiki/WikiEditor'
 import WikiSearch from '@/components/wiki/WikiSearch'
@@ -51,30 +34,24 @@ function findBreadcrumbPath(
 
 function WelcomeScreen({ onCreatePage }: { onCreatePage: () => void }) {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100%',
-        minHeight: 400,
-        textAlign: 'center',
-        p: 4,
-      }}
-    >
-      <MenuBookIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-      <Typography variant="h5" gutterBottom fontWeight={600}>
+    <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-center p-8">
+      <BookOpen className="h-16 w-16 text-text-tertiary mb-4" />
+      <h2 className="text-xl font-semibold text-text-primary mb-2">
         Welcome to the Wiki
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 480 }}>
+      </h2>
+      <p className="text-sm text-text-secondary mb-6 max-w-[480px]">
         Your team knowledge base. Create pages to document processes, decisions, and everything your
         team needs to know. Select a page from the tree on the left, or create a new one.
-      </Typography>
-      <Button variant="contained" startIcon={<AddIcon />} onClick={onCreatePage}>
+      </p>
+      <button
+        type="button"
+        onClick={onCreatePage}
+        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-[--radius-sm] bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 transition-colors"
+      >
+        <Plus className="h-4 w-4" />
         Create your first page
-      </Button>
-    </Box>
+      </button>
+    </div>
   )
 }
 
@@ -134,82 +111,61 @@ export default function WikiPageNew() {
   // Loading state
   if (spacesLoading) {
     return (
-      <Box sx={{ display: 'flex', height: 'calc(100vh - 64px)' }}>
-        <Box sx={{ width: 250, borderRight: '1px solid', borderColor: 'divider', p: 2 }}>
+      <div className="flex h-[calc(100vh-64px)]">
+        <div className="w-[250px] border-r border-surface-200 p-4">
           {Array.from({ length: 6 }, (_, i) => (
-            <Skeleton key={i} variant="text" width="80%" height={24} sx={{ mb: 1 }} />
+            <Skeleton key={i} width="80%" height={20} rounded="sm" className="mb-2" />
           ))}
-        </Box>
-        <Box sx={{ flex: 1, p: 4 }}>
-          <Skeleton variant="text" width="40%" height={40} />
-          <Skeleton variant="rectangular" width="100%" height={300} sx={{ mt: 2, borderRadius: 1 }} />
-        </Box>
-      </Box>
+        </div>
+        <div className="flex-1 p-8">
+          <Skeleton width="40%" height={36} rounded="sm" />
+          <Skeleton width="100%" height={300} rounded="sm" className="mt-4" />
+        </div>
+      </div>
     )
   }
 
   // No spaces state
   if (!spaces || spaces.length === 0) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: 'calc(100vh - 64px)',
-          textAlign: 'center',
-          p: 4,
-        }}
-      >
-        <Box>
-          <MenuBookIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-          <Typography variant="h5" gutterBottom fontWeight={600}>
+      <div className="flex items-center justify-center h-[calc(100vh-64px)] text-center p-8">
+        <div>
+          <BookOpen className="h-16 w-16 text-text-tertiary mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-text-primary mb-2">
             No wiki spaces yet
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
+          </h2>
+          <p className="text-sm text-text-secondary">
             Wiki spaces will appear here once they are created for this workspace.
-          </Typography>
-        </Box>
-      </Box>
+          </p>
+        </div>
+      </div>
     )
   }
 
   return (
-    <Box sx={{ display: 'flex', height: 'calc(100vh - 64px)' }}>
+    <div className="flex h-[calc(100vh-64px)]">
       {/* Left sidebar */}
-      <Box
-        sx={{
-          width: 250,
-          flexShrink: 0,
-          borderRight: '1px solid',
-          borderColor: 'divider',
-          display: 'flex',
-          flexDirection: 'column',
-          bgcolor: 'background.default',
-        }}
-      >
+      <div className="w-[250px] shrink-0 border-r border-surface-200 flex flex-col bg-white dark:bg-dark-surface">
         {/* Space selector */}
         {spaces.length > 1 && (
-          <Box sx={{ p: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-            <FormControl fullWidth size="small">
-              <InputLabel id="wiki-space-select-label">Space</InputLabel>
-              <Select
-                labelId="wiki-space-select-label"
-                value={spaceId ?? ''}
-                label="Space"
-                onChange={(e) => {
-                  setSelectedSpaceId(e.target.value)
-                  setCurrentPageId(null)
-                }}
-              >
-                {spaces.map((space) => (
-                  <MenuItem key={space.id} value={space.id}>
-                    {space.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
+          <div className="p-3 border-b border-surface-200">
+            <label htmlFor="wiki-space-select" className="sr-only">Space</label>
+            <select
+              id="wiki-space-select"
+              value={spaceId ?? ''}
+              onChange={(e) => {
+                setSelectedSpaceId(e.target.value)
+                setCurrentPageId(null)
+              }}
+              className="w-full text-sm border border-surface-200 rounded-[--radius-sm] px-3 py-1.5 bg-white dark:bg-dark-surface text-text-primary outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+            >
+              {spaces.map((space) => (
+                <option key={space.id} value={space.id}>
+                  {space.name}
+                </option>
+              ))}
+            </select>
+          </div>
         )}
 
         {/* Tree */}
@@ -220,120 +176,109 @@ export default function WikiPageNew() {
             onPageSelect={handlePageSelect}
           />
         )}
-      </Box>
+      </div>
 
       {/* Main content */}
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            px: 3,
-            py: 1,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            minHeight: 48,
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0, flex: 1 }}>
+        <div className="flex items-center justify-between px-6 py-2 border-b border-surface-200 min-h-[48px]">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             {/* Breadcrumbs */}
             {breadcrumbs.length > 0 ? (
-              <Breadcrumbs
-                separator={<NavigateNextIcon sx={{ fontSize: 16 }} />}
-                sx={{ '& .MuiBreadcrumbs-li': { minWidth: 0 } }}
-              >
-                <Link
-                  component="button"
-                  variant="body2"
-                  underline="hover"
-                  color="text.secondary"
-                  onClick={() => setCurrentPageId(null)}
-                  sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                >
-                  <MenuBookIcon sx={{ fontSize: 16 }} />
-                  {selectedSpace?.name ?? 'Wiki'}
-                </Link>
-                {breadcrumbs.map((crumb, index) => {
-                  const isLast = index === breadcrumbs.length - 1
-                  return isLast ? (
-                    <Typography
-                      key={crumb.id}
-                      variant="body2"
-                      color="text.primary"
-                      fontWeight={600}
-                      noWrap
+              <nav aria-label="Breadcrumb" className="flex items-center text-sm">
+                <ol className="flex items-center gap-1">
+                  <li className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPageId(null)}
+                      className="inline-flex items-center gap-1 text-sm text-text-secondary hover:text-primary-500 hover:underline transition-colors"
                     >
-                      {crumb.title}
-                    </Typography>
-                  ) : (
-                    <Link
-                      key={crumb.id}
-                      component="button"
-                      variant="body2"
-                      underline="hover"
-                      color="text.secondary"
-                      onClick={() => handlePageSelect(crumb.id)}
-                      sx={{ maxWidth: 120 }}
-                      noWrap
-                    >
-                      {crumb.title}
-                    </Link>
-                  )
-                })}
-              </Breadcrumbs>
+                      <BookOpen className="h-4 w-4" />
+                      {selectedSpace?.name ?? 'Wiki'}
+                    </button>
+                  </li>
+                  {breadcrumbs.map((crumb, index) => {
+                    const isLast = index === breadcrumbs.length - 1
+                    return (
+                      <li key={crumb.id} className="flex items-center gap-1">
+                        <ChevronRight className="h-3.5 w-3.5 text-text-tertiary shrink-0" aria-hidden="true" />
+                        {isLast ? (
+                          <span className="text-sm font-semibold text-text-primary truncate" aria-current="page">
+                            {crumb.title}
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handlePageSelect(crumb.id)}
+                            className="text-sm text-text-secondary hover:text-primary-500 hover:underline transition-colors truncate max-w-[120px]"
+                          >
+                            {crumb.title}
+                          </button>
+                        )}
+                      </li>
+                    )
+                  })}
+                </ol>
+              </nav>
             ) : (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <MenuBookIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary" fontWeight={600}>
+              <div className="flex items-center gap-1.5">
+                <BookOpen className="h-4 w-4 text-text-secondary" />
+                <span className="text-sm font-semibold text-text-secondary">
                   {selectedSpace?.name ?? 'Wiki'}
-                </Typography>
-              </Box>
+                </span>
+              </div>
             )}
-          </Box>
+          </div>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Tooltip title="Search">
-              <IconButton size="small" onClick={() => setShowSearch(!showSearch)}>
-                {showSearch ? <CloseIcon fontSize="small" /> : <SearchIcon fontSize="small" />}
-              </IconButton>
-            </Tooltip>
-            <Button
-              size="small"
-              variant="outlined"
-              startIcon={<AddIcon />}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setShowSearch(!showSearch)}
+              className="inline-flex items-center justify-center h-8 w-8 rounded-[--radius-sm] text-text-secondary hover:bg-surface-100 transition-colors"
+              title="Search"
+            >
+              {showSearch ? <X className="h-4 w-4" /> : <Search className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
               onClick={handleCreateRootPage}
               disabled={!spaceId}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-[--radius-sm] border border-surface-200 text-text-primary hover:bg-surface-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
             >
+              <Plus className="h-4 w-4" />
               New Page
-            </Button>
-          </Box>
-        </Box>
+            </button>
+          </div>
+        </div>
 
         {/* Search bar (collapsible) */}
-        <Collapse in={showSearch} timeout="auto">
-          <Box sx={{ px: 3, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <div
+          className={cn(
+            'overflow-hidden transition-all duration-200',
+            showSearch ? 'max-h-[200px]' : 'max-h-0',
+          )}
+        >
+          <div className="px-6 py-3 border-b border-surface-200">
             {spaceId && (
               <WikiSearch spaceId={spaceId} onPageSelect={handleSearchSelect} />
             )}
-          </Box>
-        </Collapse>
+          </div>
+        </div>
 
         {/* Content area */}
-        <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
+        <div className="flex-1 overflow-auto p-6">
           {currentPageId && pageLoading ? (
-            <Box>
-              <Skeleton variant="text" width="40%" height={48} />
-              <Skeleton variant="rectangular" width="100%" height={300} sx={{ mt: 2, borderRadius: 1 }} />
-            </Box>
+            <div>
+              <Skeleton width="40%" height={40} rounded="sm" />
+              <Skeleton width="100%" height={300} rounded="sm" className="mt-4" />
+            </div>
           ) : currentPage ? (
             <WikiEditor page={currentPage} onSave={handleSave} />
           ) : (
             <WelcomeScreen onCreatePage={handleCreateRootPage} />
           )}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }

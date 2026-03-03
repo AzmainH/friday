@@ -1,29 +1,9 @@
 import { useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Stack from '@mui/material/Stack'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
-import IconButton from '@mui/material/IconButton'
-import TextField from '@mui/material/TextField'
-import Slider from '@mui/material/Slider'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import CircularProgress from '@mui/material/CircularProgress'
-import Alert from '@mui/material/Alert'
-import AddIcon from '@mui/icons-material/Add'
-import EditIcon from '@mui/icons-material/Edit'
+import { Plus, Pencil } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
+import { Button } from '@/components/ui/Button'
+import { Dialog, DialogFooter } from '@/components/ui/Dialog'
 import StakeholderMatrix from '@/components/stakeholders/StakeholderMatrix'
 import {
   useStakeholders,
@@ -105,83 +85,99 @@ function StakeholderDialog({ open, onClose, projectId, existing }: StakeholderDi
   )
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={() => handleClose()}
+      title={isEdit ? 'Edit Stakeholder' : 'Add Stakeholder'}
+      size="sm"
+    >
       <form onSubmit={handleSubmit(onSubmit)}>
-        <DialogTitle>{isEdit ? 'Edit Stakeholder' : 'Add Stakeholder'}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2.5} sx={{ mt: 1 }}>
-            <Controller
-              name="name"
-              control={control}
-              rules={{ required: 'Name is required' }}
-              render={({ field }) => (
-                <TextField
+        <div className="flex flex-col gap-5">
+          <Controller
+            name="name"
+            control={control}
+            rules={{ required: 'Name is required' }}
+            render={({ field }) => (
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Name</label>
+                <input
                   {...field}
-                  label="Name"
-                  fullWidth
-                  error={!!errors.name}
-                  helperText={errors.name?.message}
+                  className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
                 />
-              )}
-            />
-
-            <Controller
-              name="role"
-              control={control}
-              render={({ field }) => (
-                <TextField {...field} label="Role" fullWidth />
-              )}
-            />
-
-            <Box>
-              <Typography variant="body2" gutterBottom>
-                Interest Level
-              </Typography>
-              <Controller
-                name="interest_level"
-                control={control}
-                render={({ field }) => (
-                  <Slider
-                    {...field}
-                    onChange={(_e, val) => field.onChange(val)}
-                    min={0}
-                    max={10}
-                    step={1}
-                    marks
-                    valueLabelDisplay="auto"
-                  />
+                {errors.name && (
+                  <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>
                 )}
-              />
-            </Box>
+              </div>
+            )}
+          />
 
-            <Box>
-              <Typography variant="body2" gutterBottom>
-                Influence Level
-              </Typography>
-              <Controller
-                name="influence_level"
-                control={control}
-                render={({ field }) => (
-                  <Slider
-                    {...field}
-                    onChange={(_e, val) => field.onChange(val)}
-                    min={0}
-                    max={10}
-                    step={1}
-                    marks
-                    valueLabelDisplay="auto"
-                  />
-                )}
-              />
-            </Box>
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleClose} color="inherit">Cancel</Button>
-          <Button type="submit" variant="contained" disabled={isSubmitting}>
+          <Controller
+            name="role"
+            control={control}
+            render={({ field }) => (
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Role</label>
+                <input
+                  {...field}
+                  className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
+                />
+              </div>
+            )}
+          />
+
+          <Controller
+            name="interest_level"
+            control={control}
+            render={({ field }) => (
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-sm font-medium text-text-secondary">Interest Level</label>
+                  <span className="text-sm font-semibold text-text-primary">{field.value}</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={10}
+                  step={1}
+                  value={field.value}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  onBlur={field.onBlur}
+                  className="w-full accent-primary-500"
+                />
+              </div>
+            )}
+          />
+
+          <Controller
+            name="influence_level"
+            control={control}
+            render={({ field }) => (
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-sm font-medium text-text-secondary">Influence Level</label>
+                  <span className="text-sm font-semibold text-text-primary">{field.value}</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={10}
+                  step={1}
+                  value={field.value}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  onBlur={field.onBlur}
+                  className="w-full accent-primary-500"
+                />
+              </div>
+            )}
+          />
+        </div>
+
+        <DialogFooter>
+          <Button variant="ghost" type="button" onClick={handleClose}>Cancel</Button>
+          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Saving...' : isEdit ? 'Update' : 'Add'}
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </form>
     </Dialog>
   )
@@ -217,87 +213,87 @@ export default function StakeholdersPage() {
 
   if (isLoading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
-        <CircularProgress />
-      </Container>
+      <div className="max-w-6xl mx-auto px-6 py-8 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-surface-200 border-t-primary-500 mx-auto" />
+      </div>
     )
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div className="max-w-6xl mx-auto px-6 py-8">
       {/* Header */}
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4">Stakeholders</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleCreate}
-        >
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-text-primary">Stakeholders</h1>
+        <Button leftIcon={<Plus className="h-4 w-4" />} onClick={handleCreate}>
           Add Stakeholder
         </Button>
-      </Stack>
+      </div>
 
       {/* Error */}
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm mb-4">
           Failed to load stakeholders.
-        </Alert>
+        </div>
       )}
 
       {/* Matrix */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h6" gutterBottom>
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold text-text-primary mb-2">
           Interest vs Influence Matrix
-        </Typography>
-        <Paper variant="outlined" sx={{ p: 2 }}>
+        </h2>
+        <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface p-4">
           <StakeholderMatrix stakeholders={stakeholders ?? []} />
-        </Paper>
-      </Box>
+        </div>
+      </div>
 
       {/* Table */}
-      <Box>
-        <Typography variant="h6" gutterBottom>
+      <div>
+        <h2 className="text-lg font-semibold text-text-primary mb-2">
           Stakeholder Directory
-        </Typography>
-        <TableContainer component={Paper} variant="outlined">
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Role</TableCell>
-                <TableCell align="center">Interest</TableCell>
-                <TableCell align="center">Influence</TableCell>
-                <TableCell align="center">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+        </h2>
+        <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-surface-50">
+              <tr>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Name</th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Role</th>
+                <th className="px-4 py-2 text-center text-xs font-semibold text-text-secondary uppercase">Interest</th>
+                <th className="px-4 py-2 text-center text-xs font-semibold text-text-secondary uppercase">Influence</th>
+                <th className="px-4 py-2 text-center text-xs font-semibold text-text-secondary uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
               {(!stakeholders || stakeholders.length === 0) ? (
-                <TableRow>
-                  <TableCell colSpan={5} align="center">
-                    <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center border-t border-surface-200">
+                    <p className="text-sm text-text-secondary">
                       No stakeholders yet. Add one to get started.
-                    </Typography>
-                  </TableCell>
-                </TableRow>
+                    </p>
+                  </td>
+                </tr>
               ) : (
                 stakeholders.map((s) => (
-                  <TableRow key={s.id} hover>
-                    <TableCell>{s.name}</TableCell>
-                    <TableCell>{s.role ?? '--'}</TableCell>
-                    <TableCell align="center">{s.interest_level}</TableCell>
-                    <TableCell align="center">{s.influence_level}</TableCell>
-                    <TableCell align="center">
-                      <IconButton size="small" onClick={() => handleEdit(s)}>
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
+                  <tr key={s.id} className="hover:bg-surface-50 transition-colors">
+                    <td className="px-4 py-2 border-t border-surface-200">{s.name}</td>
+                    <td className="px-4 py-2 border-t border-surface-200">{s.role ?? '--'}</td>
+                    <td className="px-4 py-2 border-t border-surface-200 text-center">{s.interest_level}</td>
+                    <td className="px-4 py-2 border-t border-surface-200 text-center">{s.influence_level}</td>
+                    <td className="px-4 py-2 border-t border-surface-200 text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(s)}
+                        className="p-1 rounded hover:bg-surface-100 transition-colors text-text-secondary"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
                 ))
               )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Dialog */}
       <StakeholderDialog
@@ -306,6 +302,6 @@ export default function StakeholdersPage() {
         projectId={pid}
         existing={editingStakeholder}
       />
-    </Container>
+    </div>
   )
 }

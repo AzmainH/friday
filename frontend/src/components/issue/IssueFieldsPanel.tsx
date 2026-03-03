@@ -1,24 +1,11 @@
 import { useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Avatar from '@mui/material/Avatar'
-import Chip from '@mui/material/Chip'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import TextField from '@mui/material/TextField'
-import Slider from '@mui/material/Slider'
-import Autocomplete from '@mui/material/Autocomplete'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
-import Stack from '@mui/material/Stack'
-import EditIcon from '@mui/icons-material/Edit'
-import CheckIcon from '@mui/icons-material/Check'
-import CloseIcon from '@mui/icons-material/Close'
+import { Pencil, X } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import StatusTransitionDropdown from '@/components/issue/StatusTransitionDropdown'
 import { useIssueUpdate } from '@/hooks/useIssueDetail'
 import { useProjectStore } from '@/stores/projectStore'
 import { PRIORITY_COLORS } from '@/utils/formatters'
-import type { Issue, User, Label, WorkflowStatus } from '@/types/api'
+import type { Issue, User, Label } from '@/types/api'
 
 interface IssueFieldsPanelProps {
   issue: Issue
@@ -50,45 +37,45 @@ function InlineField({
   const isEditing = editingField === fieldKey
 
   return (
-    <Box sx={{ py: 1 }}>
-      <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 0.5, display: 'block' }}>
+    <div className="py-2">
+      <span className="mb-1 block text-xs font-semibold text-text-secondary">
         {label}
-      </Typography>
+      </span>
       {isEditing ? (
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5 }}>
-          <Box sx={{ flex: 1 }}>{editContent}</Box>
-          <Tooltip title="Cancel">
-            <IconButton size="small" onClick={onCancel}>
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
+        <div className="flex items-start gap-1">
+          <div className="flex-1">{editContent}</div>
+          <button
+            type="button"
+            title="Cancel"
+            onClick={onCancel}
+            className={cn(
+              'mt-1 rounded-[--radius-sm] p-1 text-text-secondary',
+              'hover:bg-surface-100 hover:text-text-primary',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
+            )}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       ) : (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.5,
-            cursor: 'pointer',
-            borderRadius: 1,
-            px: 0.5,
-            py: 0.25,
-            mx: -0.5,
-            '&:hover': {
-              bgcolor: 'action.hover',
-              '& .edit-icon': { opacity: 1 },
-            },
-          }}
+        <div
+          className={cn(
+            'group flex cursor-pointer items-center gap-1 rounded-[--radius-sm]',
+            '-mx-1 px-1 py-0.5',
+            'hover:bg-surface-50 dark:hover:bg-surface-200',
+          )}
           onClick={() => onStartEdit(fieldKey)}
         >
-          <Box sx={{ flex: 1, minWidth: 0 }}>{value}</Box>
-          <EditIcon
-            className="edit-icon"
-            sx={{ fontSize: 14, opacity: 0, color: 'text.secondary', transition: 'opacity 0.15s' }}
+          <div className="min-w-0 flex-1">{value}</div>
+          <Pencil
+            className={cn(
+              'h-3.5 w-3.5 shrink-0 text-text-secondary',
+              'opacity-0 transition-opacity duration-150 group-hover:opacity-100',
+            )}
           />
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 
@@ -100,6 +87,7 @@ export default function IssueFieldsPanel({
   labels = [],
 }: IssueFieldsPanelProps) {
   const [editingField, setEditingField] = useState<EditingField>(null)
+  const [selectedLabels, setSelectedLabels] = useState<Label[]>([])
   const updateMutation = useIssueUpdate()
   const statuses = useProjectStore((s) => s.statuses)
 
@@ -112,6 +100,9 @@ export default function IssueFieldsPanel({
   )
 
   const handleStartEdit = (key: string) => {
+    if (key === 'labels') {
+      setSelectedLabels(issue.labels ?? [])
+    }
     setEditingField(key)
   }
 
@@ -123,18 +114,18 @@ export default function IssueFieldsPanel({
   const issueLabels = issue.labels ?? []
 
   return (
-    <Box sx={{ px: 2, py: 1 }}>
+    <div className="px-4 py-2">
       {/* Status */}
-      <Box sx={{ py: 1 }}>
-        <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 0.5, display: 'block' }}>
+      <div className="py-2">
+        <span className="mb-1 block text-xs font-semibold text-text-secondary">
           Status
-        </Typography>
+        </span>
         <StatusTransitionDropdown
           currentStatusId={issue.status_id}
           statuses={statuses}
           onChange={(statusId) => saveField('status_id', statusId)}
         />
-      </Box>
+      </div>
 
       {/* Assignee */}
       <InlineField
@@ -145,48 +136,43 @@ export default function IssueFieldsPanel({
         onCancel={handleCancel}
         value={
           assignee ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Avatar
-                src={assignee.avatar_url ?? undefined}
-                sx={{ width: 24, height: 24, fontSize: '0.7rem' }}
-              >
-                {assignee.display_name.charAt(0).toUpperCase()}
-              </Avatar>
-              <Typography variant="body2">{assignee.display_name}</Typography>
-            </Box>
+            <div className="flex items-center gap-2">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-100 text-[0.65rem] font-medium text-primary-700">
+                {assignee.avatar_url ? (
+                  <img
+                    src={assignee.avatar_url}
+                    alt={assignee.display_name}
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                ) : (
+                  assignee.display_name.charAt(0).toUpperCase()
+                )}
+              </div>
+              <span className="text-sm text-text-primary">{assignee.display_name}</span>
+            </div>
           ) : (
-            <Typography variant="body2" color="text.secondary">
-              Unassigned
-            </Typography>
+            <span className="text-sm text-text-secondary">Unassigned</span>
           )
         }
         editContent={
-          <Select
-            size="small"
-            fullWidth
+          <select
+            className={cn(
+              'w-full rounded-[--radius-sm] border border-surface-200 bg-white px-2 py-1.5 text-sm',
+              'focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500',
+              'dark:border-surface-300 dark:bg-surface-100',
+            )}
             value={issue.assignee_id ?? ''}
             onChange={(e) => saveField('assignee_id', e.target.value || null)}
             autoFocus
             onBlur={handleCancel}
-            displayEmpty
           >
-            <MenuItem value="">
-              <em>Unassigned</em>
-            </MenuItem>
+            <option value="">Unassigned</option>
             {members.map((member) => (
-              <MenuItem key={member.id} value={member.id}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Avatar
-                    src={member.avatar_url ?? undefined}
-                    sx={{ width: 20, height: 20, fontSize: '0.65rem' }}
-                  >
-                    {member.display_name.charAt(0)}
-                  </Avatar>
-                  {member.display_name}
-                </Box>
-              </MenuItem>
+              <option key={member.id} value={member.id}>
+                {member.display_name}
+              </option>
             ))}
-          </Select>
+          </select>
         }
       />
 
@@ -198,45 +184,31 @@ export default function IssueFieldsPanel({
         onStartEdit={handleStartEdit}
         onCancel={handleCancel}
         value={
-          <Chip
-            label={issue.priority}
-            size="small"
-            sx={{
-              bgcolor: PRIORITY_COLORS[issue.priority] ?? '#9e9e9e',
-              color: '#fff',
-              fontWeight: 500,
-              textTransform: 'capitalize',
-              fontSize: '0.75rem',
-            }}
-          />
+          <span
+            className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize text-white"
+            style={{ backgroundColor: PRIORITY_COLORS[issue.priority] ?? '#9e9e9e' }}
+          >
+            {issue.priority}
+          </span>
         }
         editContent={
-          <Select
-            size="small"
-            fullWidth
+          <select
+            className={cn(
+              'w-full rounded-[--radius-sm] border border-surface-200 bg-white px-2 py-1.5 text-sm',
+              'focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500',
+              'dark:border-surface-300 dark:bg-surface-100',
+            )}
             value={issue.priority}
             onChange={(e) => saveField('priority', e.target.value)}
             autoFocus
             onBlur={handleCancel}
           >
             {PRIORITIES.map((p) => (
-              <MenuItem key={p} value={p}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box
-                    sx={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: '50%',
-                      bgcolor: PRIORITY_COLORS[p],
-                    }}
-                  />
-                  <Typography variant="body2" sx={{ textTransform: 'capitalize' }}>
-                    {p}
-                  </Typography>
-                </Box>
-              </MenuItem>
+              <option key={p} value={p}>
+                {p.charAt(0).toUpperCase() + p.slice(1)}
+              </option>
             ))}
-          </Select>
+          </select>
         }
       />
 
@@ -249,56 +221,77 @@ export default function IssueFieldsPanel({
         onCancel={handleCancel}
         value={
           issueLabels.length > 0 ? (
-            <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+            <div className="flex flex-wrap gap-1">
               {issueLabels.map((label) => (
-                <Chip
+                <span
                   key={label.id}
-                  label={label.name}
-                  size="small"
-                  sx={{
-                    bgcolor: label.color,
-                    color: '#fff',
-                    fontSize: '0.7rem',
-                    height: 22,
-                  }}
-                />
+                  className="inline-flex items-center rounded-full px-2 py-0.5 text-[0.65rem] font-medium text-white"
+                  style={{ backgroundColor: label.color }}
+                >
+                  {label.name}
+                </span>
               ))}
-            </Stack>
+            </div>
           ) : (
-            <Typography variant="body2" color="text.secondary">
-              None
-            </Typography>
+            <span className="text-sm text-text-secondary">None</span>
           )
         }
         editContent={
-          <Autocomplete
-            multiple
-            size="small"
-            options={labels}
-            getOptionLabel={(option) => option.name}
-            defaultValue={issueLabels}
-            onChange={(_e, newValue) => {
-              saveField(
-                'label_ids',
-                newValue.map((l) => l.id),
-              )
-            }}
-            renderTags={(value, getTagProps) =>
-              value.map((option, index) => {
-                const { key, ...tagProps } = getTagProps({ index })
+          <div className="space-y-1">
+            <div className="max-h-40 space-y-0.5 overflow-y-auto rounded-[--radius-sm] border border-surface-200 bg-white p-1 dark:border-surface-300 dark:bg-surface-100">
+              {labels.map((label) => {
+                const isChecked = selectedLabels.some((l) => l.id === label.id)
                 return (
-                  <Chip
-                    key={key}
-                    label={option.name}
-                    size="small"
-                    sx={{ bgcolor: option.color, color: '#fff', fontSize: '0.7rem' }}
-                    {...tagProps}
-                  />
+                  <label
+                    key={label.id}
+                    className={cn(
+                      'flex cursor-pointer items-center gap-2 rounded-[--radius-sm] px-2 py-1 text-sm',
+                      'hover:bg-surface-50 dark:hover:bg-surface-200',
+                      isChecked && 'bg-surface-50 dark:bg-surface-200',
+                    )}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => {
+                        const next = isChecked
+                          ? selectedLabels.filter((l) => l.id !== label.id)
+                          : [...selectedLabels, label]
+                        setSelectedLabels(next)
+                      }}
+                      className="h-3.5 w-3.5 rounded border-surface-300 text-primary-500 focus:ring-primary-500"
+                    />
+                    <span
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: label.color }}
+                    />
+                    <span className="text-text-primary">{label.name}</span>
+                  </label>
                 )
-              })
-            }
-            renderInput={(params) => <TextField {...params} placeholder="Select labels" />}
-          />
+              })}
+              {labels.length === 0 && (
+                <span className="block px-2 py-1 text-xs text-text-secondary">
+                  No labels available
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                saveField(
+                  'label_ids',
+                  selectedLabels.map((l) => l.id),
+                )
+              }
+              className={cn(
+                'w-full rounded-[--radius-sm] bg-primary-500 px-3 py-1 text-xs font-medium text-white',
+                'hover:bg-primary-600 transition-colors duration-150',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
+              )}
+            >
+              Apply
+            </button>
+          </div>
         }
       />
 
@@ -310,7 +303,7 @@ export default function IssueFieldsPanel({
         onStartEdit={handleStartEdit}
         onCancel={handleCancel}
         value={
-          <Typography variant="body2" color={issue.due_date ? 'text.primary' : 'text.secondary'}>
+          <span className={cn('text-sm', issue.due_date ? 'text-text-primary' : 'text-text-secondary')}>
             {issue.due_date
               ? new Date(issue.due_date).toLocaleDateString('en-US', {
                   month: 'short',
@@ -318,17 +311,19 @@ export default function IssueFieldsPanel({
                   year: 'numeric',
                 })
               : 'No date'}
-          </Typography>
+          </span>
         }
         editContent={
-          <TextField
+          <input
             type="date"
-            size="small"
-            fullWidth
+            className={cn(
+              'w-full rounded-[--radius-sm] border border-surface-200 bg-white px-2 py-1.5 text-sm',
+              'focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500',
+              'dark:border-surface-300 dark:bg-surface-100',
+            )}
             defaultValue={issue.due_date ?? ''}
             onChange={(e) => saveField('due_date', e.target.value || null)}
             autoFocus
-            slotProps={{ inputLabel: { shrink: true } }}
           />
         }
       />
@@ -341,15 +336,18 @@ export default function IssueFieldsPanel({
         onStartEdit={handleStartEdit}
         onCancel={handleCancel}
         value={
-          <Typography variant="body2" color={issue.story_points != null ? 'text.primary' : 'text.secondary'}>
+          <span className={cn('text-sm', issue.story_points != null ? 'text-text-primary' : 'text-text-secondary')}>
             {issue.story_points ?? 'Not set'}
-          </Typography>
+          </span>
         }
         editContent={
-          <TextField
+          <input
             type="number"
-            size="small"
-            fullWidth
+            className={cn(
+              'w-full rounded-[--radius-sm] border border-surface-200 bg-white px-2 py-1.5 text-sm',
+              'focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500',
+              'dark:border-surface-300 dark:bg-surface-100',
+            )}
             defaultValue={issue.story_points ?? ''}
             onBlur={(e) => {
               const val = e.target.value === '' ? null : Number(e.target.value)
@@ -363,36 +361,42 @@ export default function IssueFieldsPanel({
               }
             }}
             autoFocus
-            slotProps={{ htmlInput: { min: 0, step: 1 } }}
+            min={0}
+            step={1}
           />
         }
       />
 
       {/* Percent Complete */}
-      <Box sx={{ py: 1 }}>
-        <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 0.5, display: 'block' }}>
+      <div className="py-2">
+        <span className="mb-1 block text-xs font-semibold text-text-secondary">
           Progress
-        </Typography>
-        <Box sx={{ px: 0.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Slider
-            size="small"
+        </span>
+        <div className="flex items-center gap-3 px-1">
+          <input
+            type="range"
+            className="flex-1 accent-primary-500"
             value={issue.percent_complete}
-            onChange={(_e, val) => {
-              // Slider provides live update; we debounce via onChangeCommitted
+            onChange={() => {
+              // Live update handled by browser; commit on mouse-up
             }}
-            onChangeCommitted={(_e, val) => saveField('percent_complete', val)}
-            valueLabelDisplay="auto"
-            valueLabelFormat={(v) => `${v}%`}
+            onMouseUp={(e) => {
+              const val = Number((e.target as HTMLInputElement).value)
+              saveField('percent_complete', val)
+            }}
+            onTouchEnd={(e) => {
+              const val = Number((e.target as HTMLInputElement).value)
+              saveField('percent_complete', val)
+            }}
             min={0}
             max={100}
             step={5}
-            sx={{ flex: 1 }}
           />
-          <Typography variant="body2" fontWeight={500} sx={{ minWidth: 36 }}>
+          <span className="min-w-[36px] text-sm font-medium text-text-primary">
             {issue.percent_complete}%
-          </Typography>
-        </Box>
-      </Box>
+          </span>
+        </div>
+      </div>
 
       {/* Estimated Hours */}
       <InlineField
@@ -402,15 +406,18 @@ export default function IssueFieldsPanel({
         onStartEdit={handleStartEdit}
         onCancel={handleCancel}
         value={
-          <Typography variant="body2" color={issue.estimated_hours != null ? 'text.primary' : 'text.secondary'}>
+          <span className={cn('text-sm', issue.estimated_hours != null ? 'text-text-primary' : 'text-text-secondary')}>
             {issue.estimated_hours != null ? `${issue.estimated_hours}h` : 'Not set'}
-          </Typography>
+          </span>
         }
         editContent={
-          <TextField
+          <input
             type="number"
-            size="small"
-            fullWidth
+            className={cn(
+              'w-full rounded-[--radius-sm] border border-surface-200 bg-white px-2 py-1.5 text-sm',
+              'focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500',
+              'dark:border-surface-300 dark:bg-surface-100',
+            )}
             defaultValue={issue.estimated_hours ?? ''}
             onBlur={(e) => {
               const val = e.target.value === '' ? null : Number(e.target.value)
@@ -424,7 +431,8 @@ export default function IssueFieldsPanel({
               }
             }}
             autoFocus
-            slotProps={{ htmlInput: { min: 0, step: 0.5 } }}
+            min={0}
+            step={0.5}
           />
         }
       />
@@ -437,15 +445,18 @@ export default function IssueFieldsPanel({
         onStartEdit={handleStartEdit}
         onCancel={handleCancel}
         value={
-          <Typography variant="body2" color={issue.actual_hours != null ? 'text.primary' : 'text.secondary'}>
+          <span className={cn('text-sm', issue.actual_hours != null ? 'text-text-primary' : 'text-text-secondary')}>
             {issue.actual_hours != null ? `${issue.actual_hours}h` : 'Not set'}
-          </Typography>
+          </span>
         }
         editContent={
-          <TextField
+          <input
             type="number"
-            size="small"
-            fullWidth
+            className={cn(
+              'w-full rounded-[--radius-sm] border border-surface-200 bg-white px-2 py-1.5 text-sm',
+              'focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500',
+              'dark:border-surface-300 dark:bg-surface-100',
+            )}
             defaultValue={issue.actual_hours ?? ''}
             onBlur={(e) => {
               const val = e.target.value === '' ? null : Number(e.target.value)
@@ -459,10 +470,11 @@ export default function IssueFieldsPanel({
               }
             }}
             autoFocus
-            slotProps={{ htmlInput: { min: 0, step: 0.5 } }}
+            min={0}
+            step={0.5}
           />
         }
       />
-    </Box>
+    </div>
   )
 }

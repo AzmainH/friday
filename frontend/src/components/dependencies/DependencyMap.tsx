@@ -1,9 +1,5 @@
 import { useMemo, useRef, useCallback, useState, useEffect } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Tooltip from '@mui/material/Tooltip'
-import Switch from '@mui/material/Switch'
-import FormControlLabel from '@mui/material/FormControlLabel'
+import { cn } from '@/lib/cn'
 import type { CrossProjectDependency } from '@/hooks/usePortfolio'
 import { RAG_COLORS } from '@/utils/formatters'
 
@@ -178,53 +174,51 @@ export default function DependencyMap({ dependencies, projects }: DependencyMapP
 
   if (projects.length === 0) {
     return (
-      <Box sx={{ textAlign: 'center', py: 6 }}>
-        <Typography color="text.secondary">No projects to display.</Typography>
-      </Box>
+      <div className="text-center py-6">
+        <p className="text-[#78716c]">No projects to display.</p>
+      </div>
     )
   }
 
   return (
-    <Box>
+    <div>
       {/* Controls */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, gap: 2 }}>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={highlightCritical}
-              onChange={(e) => setHighlightCritical(e.target.checked)}
-              size="small"
+      <div className="flex items-center mb-1 gap-2">
+        <label className="inline-flex items-center gap-2 cursor-pointer">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={highlightCritical}
+            onClick={() => setHighlightCritical((v) => !v)}
+            className={cn(
+              'relative inline-flex h-5 w-9 items-center rounded-full transition-colors',
+              highlightCritical ? 'bg-primary-500' : 'bg-surface-300',
+            )}
+          >
+            <span
+              className={cn(
+                'inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform',
+                highlightCritical ? 'translate-x-[18px]' : 'translate-x-[3px]',
+              )}
             />
-          }
-          label={
-            <Typography variant="body2" color="text.secondary">
-              Highlight critical path
-            </Typography>
-          }
-        />
-        <Typography variant="caption" color="text.secondary">
+          </button>
+          <span className="text-sm text-[#78716c]">
+            Highlight critical path
+          </span>
+        </label>
+        <span className="text-xs text-[#78716c]">
           {dependencies.length} dependenc{dependencies.length === 1 ? 'y' : 'ies'} across{' '}
           {projects.length} project{projects.length !== 1 ? 's' : ''}
-        </Typography>
-      </Box>
+        </span>
+      </div>
 
       {/* SVG graph */}
-      <Box
-        sx={{
-          overflowX: 'auto',
-          overflowY: 'auto',
-          maxHeight: 560,
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
-          bgcolor: 'background.paper',
-        }}
-      >
+      <div className="overflow-x-auto overflow-y-auto max-h-[560px] border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface">
         <svg ref={svgRef} width={width} height={height} style={{ display: 'block' }}>
           <defs>
-            <ArrowMarker id="arrow-default" color="#bdbdbd" />
-            <ArrowMarker id="arrow-critical" color="#f44336" />
-            <ArrowMarker id="arrow-highlight" color="#1976d2" />
+            <ArrowMarker id="arrow-default" color="#a8a29e" />
+            <ArrowMarker id="arrow-critical" color="#ef4444" />
+            <ArrowMarker id="arrow-highlight" color="#f59e0b" />
           </defs>
 
           {/* Edges */}
@@ -233,16 +227,16 @@ export default function DependencyMap({ dependencies, projects }: DependencyMapP
             const isHighlighted = hoveredEdges.has(i)
             const isCrit = highlightCritical && edge.isCritical
 
-            let stroke = '#bdbdbd'
+            let stroke = '#a8a29e'
             let markerId = 'url(#arrow-default)'
             let strokeWidth = 1.5
             if (isCrit) {
-              stroke = '#f44336'
+              stroke = '#ef4444'
               markerId = 'url(#arrow-critical)'
               strokeWidth = 2.5
             }
             if (isHighlighted) {
-              stroke = '#1976d2'
+              stroke = '#f59e0b'
               markerId = 'url(#arrow-highlight)'
               strokeWidth = 2.5
             }
@@ -268,7 +262,7 @@ export default function DependencyMap({ dependencies, projects }: DependencyMapP
                   y={midY - 6}
                   textAnchor="middle"
                   fontSize={10}
-                  fill={isHighlighted ? '#1976d2' : '#999'}
+                  fill={isHighlighted ? '#f59e0b' : '#999'}
                   opacity={hoveredNode && !isHighlighted ? 0.2 : 1}
                 >
                   {edge.label}
@@ -284,61 +278,61 @@ export default function DependencyMap({ dependencies, projects }: DependencyMapP
             const isCrit = highlightCritical && node.isCritical
 
             return (
-              <Tooltip key={node.id} title={`${node.name} (${node.rag_status})`}>
-                <g
-                  onMouseEnter={() => setHoveredNode(node.id)}
-                  onMouseLeave={() => setHoveredNode(null)}
-                  style={{ cursor: 'pointer' }}
-                  opacity={dimmed ? 0.3 : 1}
-                >
-                  {/* Critical ring */}
-                  {isCrit && (
-                    <circle
-                      cx={node.x}
-                      cy={node.y}
-                      r={NODE_RADIUS + 4}
-                      fill="none"
-                      stroke="#f44336"
-                      strokeWidth={2}
-                      strokeDasharray="4 2"
-                    />
-                  )}
-                  {/* Node circle */}
+              <g
+                key={node.id}
+                onMouseEnter={() => setHoveredNode(node.id)}
+                onMouseLeave={() => setHoveredNode(null)}
+                style={{ cursor: 'pointer' }}
+                opacity={dimmed ? 0.3 : 1}
+              >
+                <title>{`${node.name} (${node.rag_status})`}</title>
+                {/* Critical ring */}
+                {isCrit && (
                   <circle
                     cx={node.x}
                     cy={node.y}
-                    r={NODE_RADIUS}
-                    fill={ragColor}
-                    stroke={hoveredNode === node.id ? '#1976d2' : '#fff'}
-                    strokeWidth={hoveredNode === node.id ? 3 : 2}
+                    r={NODE_RADIUS + 4}
+                    fill="none"
+                    stroke="#ef4444"
+                    strokeWidth={2}
+                    strokeDasharray="4 2"
                   />
-                  {/* Node label */}
-                  <text
-                    x={node.x}
-                    y={node.y + 4}
-                    textAnchor="middle"
-                    fontSize={11}
-                    fontWeight={600}
-                    fill="#fff"
-                  >
-                    {node.name.length > 8 ? node.name.slice(0, 7) + '\u2026' : node.name}
-                  </text>
-                  {/* Full name below node */}
-                  <text
-                    x={node.x}
-                    y={node.y + NODE_RADIUS + 14}
-                    textAnchor="middle"
-                    fontSize={10}
-                    fill="var(--mui-palette-text-secondary, #666)"
-                  >
-                    {node.name}
-                  </text>
-                </g>
-              </Tooltip>
+                )}
+                {/* Node circle */}
+                <circle
+                  cx={node.x}
+                  cy={node.y}
+                  r={NODE_RADIUS}
+                  fill={ragColor}
+                  stroke={hoveredNode === node.id ? '#f59e0b' : '#fff'}
+                  strokeWidth={hoveredNode === node.id ? 3 : 2}
+                />
+                {/* Node label */}
+                <text
+                  x={node.x}
+                  y={node.y + 4}
+                  textAnchor="middle"
+                  fontSize={11}
+                  fontWeight={600}
+                  fill="#fff"
+                >
+                  {node.name.length > 8 ? node.name.slice(0, 7) + '\u2026' : node.name}
+                </text>
+                {/* Full name below node */}
+                <text
+                  x={node.x}
+                  y={node.y + NODE_RADIUS + 14}
+                  textAnchor="middle"
+                  fontSize={10}
+                  fill="#78716c"
+                >
+                  {node.name}
+                </text>
+              </g>
             )
           })}
         </svg>
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }

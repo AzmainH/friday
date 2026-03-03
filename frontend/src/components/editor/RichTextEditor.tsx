@@ -6,19 +6,20 @@ import Highlight from '@tiptap/extension-highlight'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
 import Image from '@tiptap/extension-image'
-import Box from '@mui/material/Box'
-import Divider from '@mui/material/Divider'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
-import FormatBoldIcon from '@mui/icons-material/FormatBold'
-import FormatItalicIcon from '@mui/icons-material/FormatItalic'
-import StrikethroughSIcon from '@mui/icons-material/StrikethroughS'
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted'
-import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered'
-import ChecklistIcon from '@mui/icons-material/Checklist'
-import CodeIcon from '@mui/icons-material/Code'
-import ImageIcon from '@mui/icons-material/Image'
-import TitleIcon from '@mui/icons-material/Title'
+import {
+  Bold,
+  Italic,
+  Strikethrough,
+  List,
+  ListOrdered,
+  ListChecks,
+  Code,
+  ImageIcon,
+  Heading1,
+  Heading2,
+  Heading3,
+} from 'lucide-react'
+import { cn } from '@/lib/cn'
 
 interface RichTextEditorProps {
   content: string
@@ -43,132 +44,142 @@ function Toolbar({ editor }: ToolbarProps) {
   }, [editor])
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: 0.25,
-        px: 1,
-        py: 0.5,
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-      }}
-    >
-      <Tooltip title="Bold">
-        <IconButton
-          size="small"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          color={editor.isActive('bold') ? 'primary' : 'default'}
-        >
-          <FormatBoldIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+    <div className="flex items-center flex-wrap gap-0.5 px-2 py-1 border-b border-surface-200">
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        className={cn(
+          'p-1.5 rounded-md text-text-secondary hover:bg-surface-100 hover:text-text-primary transition-colors',
+          editor.isActive('bold') && 'bg-primary-100 text-primary-700'
+        )}
+        title="Bold"
+      >
+        <Bold className="w-4 h-4" />
+      </button>
 
-      <Tooltip title="Italic">
-        <IconButton
-          size="small"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          color={editor.isActive('italic') ? 'primary' : 'default'}
-        >
-          <FormatItalicIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        className={cn(
+          'p-1.5 rounded-md text-text-secondary hover:bg-surface-100 hover:text-text-primary transition-colors',
+          editor.isActive('italic') && 'bg-primary-100 text-primary-700'
+        )}
+        title="Italic"
+      >
+        <Italic className="w-4 h-4" />
+      </button>
 
-      <Tooltip title="Strikethrough">
-        <IconButton
-          size="small"
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          color={editor.isActive('strike') ? 'primary' : 'default'}
-        >
-          <StrikethroughSIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().toggleStrike().run()}
+        className={cn(
+          'p-1.5 rounded-md text-text-secondary hover:bg-surface-100 hover:text-text-primary transition-colors',
+          editor.isActive('strike') && 'bg-primary-100 text-primary-700'
+        )}
+        title="Strikethrough"
+      >
+        <Strikethrough className="w-4 h-4" />
+      </button>
 
-      <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+      <div className="w-px h-5 bg-surface-200 mx-1" />
 
-      <Tooltip title="Heading 1">
-        <IconButton
-          size="small"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          color={editor.isActive('heading', { level: 1 }) ? 'primary' : 'default'}
-        >
-          <TitleIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+        className={cn(
+          'p-1.5 rounded-md text-text-secondary hover:bg-surface-100 hover:text-text-primary transition-colors',
+          editor.isActive('heading', { level: 1 }) && 'bg-primary-100 text-primary-700'
+        )}
+        title="Heading 1"
+      >
+        <Heading1 className="w-4 h-4" />
+      </button>
 
-      <Tooltip title="Heading 2">
-        <IconButton
-          size="small"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          color={editor.isActive('heading', { level: 2 }) ? 'primary' : 'default'}
-          sx={{ '& .MuiSvgIcon-root': { fontSize: '1.1rem' } }}
-        >
-          <TitleIcon />
-        </IconButton>
-      </Tooltip>
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+        className={cn(
+          'p-1.5 rounded-md text-text-secondary hover:bg-surface-100 hover:text-text-primary transition-colors',
+          editor.isActive('heading', { level: 2 }) && 'bg-primary-100 text-primary-700'
+        )}
+        title="Heading 2"
+      >
+        <Heading2 className="w-[15px] h-[15px]" />
+      </button>
 
-      <Tooltip title="Heading 3">
-        <IconButton
-          size="small"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          color={editor.isActive('heading', { level: 3 }) ? 'primary' : 'default'}
-          sx={{ '& .MuiSvgIcon-root': { fontSize: '0.9rem' } }}
-        >
-          <TitleIcon />
-        </IconButton>
-      </Tooltip>
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+        className={cn(
+          'p-1.5 rounded-md text-text-secondary hover:bg-surface-100 hover:text-text-primary transition-colors',
+          editor.isActive('heading', { level: 3 }) && 'bg-primary-100 text-primary-700'
+        )}
+        title="Heading 3"
+      >
+        <Heading3 className="w-3.5 h-3.5" />
+      </button>
 
-      <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+      <div className="w-px h-5 bg-surface-200 mx-1" />
 
-      <Tooltip title="Bullet List">
-        <IconButton
-          size="small"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          color={editor.isActive('bulletList') ? 'primary' : 'default'}
-        >
-          <FormatListBulletedIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        className={cn(
+          'p-1.5 rounded-md text-text-secondary hover:bg-surface-100 hover:text-text-primary transition-colors',
+          editor.isActive('bulletList') && 'bg-primary-100 text-primary-700'
+        )}
+        title="Bullet List"
+      >
+        <List className="w-4 h-4" />
+      </button>
 
-      <Tooltip title="Ordered List">
-        <IconButton
-          size="small"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          color={editor.isActive('orderedList') ? 'primary' : 'default'}
-        >
-          <FormatListNumberedIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        className={cn(
+          'p-1.5 rounded-md text-text-secondary hover:bg-surface-100 hover:text-text-primary transition-colors',
+          editor.isActive('orderedList') && 'bg-primary-100 text-primary-700'
+        )}
+        title="Ordered List"
+      >
+        <ListOrdered className="w-4 h-4" />
+      </button>
 
-      <Tooltip title="Task List">
-        <IconButton
-          size="small"
-          onClick={() => editor.chain().focus().toggleTaskList().run()}
-          color={editor.isActive('taskList') ? 'primary' : 'default'}
-        >
-          <ChecklistIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().toggleTaskList().run()}
+        className={cn(
+          'p-1.5 rounded-md text-text-secondary hover:bg-surface-100 hover:text-text-primary transition-colors',
+          editor.isActive('taskList') && 'bg-primary-100 text-primary-700'
+        )}
+        title="Task List"
+      >
+        <ListChecks className="w-4 h-4" />
+      </button>
 
-      <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+      <div className="w-px h-5 bg-surface-200 mx-1" />
 
-      <Tooltip title="Code Block">
-        <IconButton
-          size="small"
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          color={editor.isActive('codeBlock') ? 'primary' : 'default'}
-        >
-          <CodeIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+        className={cn(
+          'p-1.5 rounded-md text-text-secondary hover:bg-surface-100 hover:text-text-primary transition-colors',
+          editor.isActive('codeBlock') && 'bg-primary-100 text-primary-700'
+        )}
+        title="Code Block"
+      >
+        <Code className="w-4 h-4" />
+      </button>
 
-      <Tooltip title="Image">
-        <IconButton size="small" onClick={addImage}>
-          <ImageIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    </Box>
+      <button
+        type="button"
+        onClick={addImage}
+        className="p-1.5 rounded-md text-text-secondary hover:bg-surface-100 hover:text-text-primary transition-colors"
+        title="Image"
+      >
+        <ImageIcon className="w-4 h-4" />
+      </button>
+    </div>
   )
 }
 
@@ -198,74 +209,16 @@ export default function RichTextEditor({
   })
 
   return (
-    <Box
-      sx={{
-        border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: 1,
-        overflow: 'hidden',
-        '&:focus-within': {
-          borderColor: 'primary.main',
-          boxShadow: (theme) => `0 0 0 1px ${theme.palette.primary.main}`,
-        },
-        '& .tiptap': {
-          minHeight,
-          px: 2,
-          py: 1.5,
-          outline: 'none',
-          '& p.is-editor-empty:first-of-type::before': {
-            content: 'attr(data-placeholder)',
-            color: 'text.disabled',
-            pointerEvents: 'none',
-            float: 'left',
-            height: 0,
-          },
-          '& h1': { fontSize: '1.75rem', fontWeight: 700, mt: 2, mb: 1 },
-          '& h2': { fontSize: '1.4rem', fontWeight: 600, mt: 1.5, mb: 0.75 },
-          '& h3': { fontSize: '1.15rem', fontWeight: 600, mt: 1, mb: 0.5 },
-          '& p': { my: 0.5 },
-          '& ul, & ol': { pl: 3 },
-          '& ul[data-type="taskList"]': {
-            listStyle: 'none',
-            pl: 0,
-            '& li': {
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 1,
-              '& label': { mt: 0.25 },
-            },
-          },
-          '& pre': {
-            bgcolor: 'action.hover',
-            borderRadius: 1,
-            p: 1.5,
-            fontFamily: 'monospace',
-            fontSize: '0.875rem',
-            overflow: 'auto',
-          },
-          '& code': {
-            bgcolor: 'action.hover',
-            borderRadius: 0.5,
-            px: 0.5,
-            py: 0.25,
-            fontFamily: 'monospace',
-            fontSize: '0.875rem',
-          },
-          '& img': {
-            maxWidth: '100%',
-            height: 'auto',
-            borderRadius: 1,
-          },
-          '& mark': {
-            bgcolor: 'warning.light',
-            borderRadius: 0.25,
-            px: 0.25,
-          },
-        },
-      }}
+    <div
+      className={cn(
+        'border border-surface-200 rounded-[--radius-sm] overflow-hidden',
+        'focus-within:border-primary-500 focus-within:ring-1 focus-within:ring-primary-500'
+      )}
     >
       {editable && <Toolbar editor={editor} />}
-      <EditorContent editor={editor} />
-    </Box>
+      <div className="prose prose-sm max-w-none px-4 py-3" style={{ minHeight }}>
+        <EditorContent editor={editor} />
+      </div>
+    </div>
   )
 }

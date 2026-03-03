@@ -1,23 +1,9 @@
 import { useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
-import Box from '@mui/material/Box'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import Chip from '@mui/material/Chip'
-import CircularProgress from '@mui/material/CircularProgress'
-import Alert from '@mui/material/Alert'
-import MenuItem from '@mui/material/MenuItem'
-import TextField from '@mui/material/TextField'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
-import AddIcon from '@mui/icons-material/Add'
-import FilterListIcon from '@mui/icons-material/FilterList'
+import { ChevronRight, ChevronLeft, Plus, Filter } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { Dialog, DialogFooter } from '@/components/ui/Dialog'
+import { Button } from '@/components/ui/Button'
 import RoadmapGantt from '@/components/roadmap/RoadmapGantt'
 import ScenarioPanel from '@/components/roadmap/ScenarioPanel'
 import {
@@ -81,109 +67,105 @@ export default function RoadmapDetailPage() {
   /* ---- Loading / Error states ---- */
   if (planLoading || timelineLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center py-8">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-surface-200 border-t-primary-500" />
+      </div>
     )
   }
 
   if (planError) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Alert severity="error">Failed to load roadmap: {planError.message}</Alert>
-      </Container>
+      <div className="mx-auto max-w-5xl px-4 py-4">
+        <div className="rounded-[--radius-sm] border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+          Failed to load roadmap: {planError.message}
+        </div>
+      </div>
     )
   }
 
   if (!plan) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Alert severity="warning">Roadmap not found.</Alert>
-      </Container>
+      <div className="mx-auto max-w-5xl px-4 py-4">
+        <div className="rounded-[--radius-sm] border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          Roadmap not found.
+        </div>
+      </div>
     )
   }
 
   return (
-    <Box sx={{ display: 'flex', height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
+    <div className="flex h-[calc(100vh-64px)] overflow-hidden">
       {/* Main content area */}
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div className="flex flex-1 flex-col overflow-hidden">
         {/* Top toolbar */}
-        <Box
-          sx={{
-            px: 3,
-            py: 2,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            flexWrap: 'wrap',
-          }}
-        >
-          <Box sx={{ flex: 1, minWidth: 200 }}>
-            <Typography variant="h5" fontWeight={700}>
+        <div className="flex flex-wrap items-center gap-2 border-b border-surface-200 px-3 py-2">
+          <div className="min-w-[200px] flex-1">
+            <h2 className="text-xl font-bold text-text-primary">
               {plan.name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
+            </h2>
+            <p className="text-sm text-text-secondary">
               {formatDate(plan.start_date)} &mdash; {formatDate(plan.end_date)}
               {plan.description && ` | ${plan.description}`}
-            </Typography>
-          </Box>
+            </p>
+          </div>
 
           {/* Project count chip */}
-          <Chip
-            label={`${timeline?.projects.length ?? 0} projects`}
-            size="small"
-            variant="outlined"
-          />
+          <span className="rounded-full border border-surface-200 px-2 py-0.5 text-xs text-text-secondary">
+            {timeline?.projects.length ?? 0} projects
+          </span>
 
           {/* Filter by project */}
-          <TextField
-            select
-            size="small"
-            label="Filter project"
-            value={filterProjectId}
-            onChange={(e) => setFilterProjectId(e.target.value)}
-            sx={{ minWidth: 180 }}
-            slotProps={{
-              input: {
-                startAdornment: <FilterListIcon fontSize="small" sx={{ mr: 0.5, color: 'text.secondary' }} />,
-              },
-            }}
-          >
-            <MenuItem value="all">All Projects</MenuItem>
-            {(timeline?.projects ?? []).map((p) => (
-              <MenuItem key={p.id} value={p.id}>
-                {p.name}
-              </MenuItem>
-            ))}
-          </TextField>
+          <div className="relative flex min-w-[180px] items-center">
+            <Filter className="pointer-events-none absolute left-2 h-4 w-4 text-text-secondary" />
+            <select
+              value={filterProjectId}
+              onChange={(e) => setFilterProjectId(e.target.value)}
+              className={cn(
+                'w-full appearance-none rounded-[--radius-sm] border border-surface-200 bg-white py-1.5 pl-8 pr-8 text-sm',
+                'text-text-primary focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500',
+                'dark:bg-surface-50'
+              )}
+            >
+              <option value="all">All Projects</option>
+              {(timeline?.projects ?? []).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Add project button */}
           <Button
-            variant="outlined"
-            size="small"
-            startIcon={<AddIcon />}
+            variant="ghost"
+            size="sm"
+            leftIcon={<Plus className="h-4 w-4" />}
             onClick={() => setAddDialogOpen(true)}
+            className="border border-surface-200"
           >
             Add Project
           </Button>
 
           {/* Toggle scenario panel */}
-          <IconButton
-            size="small"
+          <button
+            type="button"
             onClick={() => setScenarioPanelOpen((o) => !o)}
             aria-label={scenarioPanelOpen ? 'Close scenarios' : 'Open scenarios'}
+            className="rounded-[--radius-sm] p-1.5 text-text-secondary hover:bg-surface-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           >
-            {scenarioPanelOpen ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>
-        </Box>
+            {scenarioPanelOpen ? (
+              <ChevronRight className="h-5 w-5" />
+            ) : (
+              <ChevronLeft className="h-5 w-5" />
+            )}
+          </button>
+        </div>
 
         {/* Gantt chart */}
-        <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+        <div className="flex-1 overflow-auto p-2">
           <RoadmapGantt timelineData={filteredTimeline} />
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Collapsible right sidebar */}
       {scenarioPanelOpen && (
@@ -199,32 +181,42 @@ export default function RoadmapDetailPage() {
       <Dialog
         open={addDialogOpen}
         onClose={() => setAddDialogOpen(false)}
-        maxWidth="xs"
-        fullWidth
+        title="Add Project to Roadmap"
+        size="sm"
       >
-        <DialogTitle>Add Project to Roadmap</DialogTitle>
-        <DialogContent>
-          <TextField
+        <div>
+          <label htmlFor="project-id-input" className="mb-1 block text-sm font-medium text-text-primary">
+            Project ID
+          </label>
+          <input
+            id="project-id-input"
+            type="text"
             autoFocus
-            fullWidth
-            label="Project ID"
             placeholder="Enter a project ID"
             value={newProjectId}
             onChange={(e) => setNewProjectId(e.target.value)}
-            sx={{ mt: 1 }}
+            className={cn(
+              'w-full rounded-[--radius-sm] border border-surface-200 px-3 py-2 text-sm',
+              'text-text-primary placeholder:text-text-tertiary',
+              'focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500'
+            )}
           />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setAddDialogOpen(false)}>Cancel</Button>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" size="sm" onClick={() => setAddDialogOpen(false)}>
+            Cancel
+          </Button>
           <Button
-            variant="contained"
+            variant="primary"
+            size="sm"
             onClick={handleAddProject}
             disabled={!newProjectId.trim() || addProject.isPending}
+            loading={addProject.isPending}
           >
             {addProject.isPending ? 'Adding...' : 'Add'}
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </Dialog>
-    </Box>
+    </div>
   )
 }

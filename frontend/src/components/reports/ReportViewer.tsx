@@ -1,20 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
-import ToggleButton from '@mui/material/ToggleButton'
-import Button from '@mui/material/Button'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
-import BarChartIcon from '@mui/icons-material/BarChart'
-import TableChartIcon from '@mui/icons-material/TableChart'
-import FileDownloadIcon from '@mui/icons-material/FileDownload'
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
+import { BarChart3, Table2, Download, FileText } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { Button } from '@/components/ui/Button'
 import {
   BarChart,
   Bar,
@@ -46,7 +33,7 @@ type ViewMode = 'chart' | 'table'
 // Helpers
 // ---------------------------------------------------------------------------
 
-const CHART_COLORS = ['#2196f3', '#4caf50', '#ff9800', '#f44336', '#9c27b0', '#00bcd4', '#795548']
+const CHART_COLORS = ['#f59e0b', '#22c55e', '#d97706', '#ef4444', '#8b5cf6', '#14b8a6', '#78716c']
 
 function getDataColumns(dataPoints: ReportDataPoint[]): string[] {
   if (dataPoints.length === 0) return []
@@ -193,10 +180,6 @@ function renderGenericBarChart(data: ReportDataPoint[]) {
 export default function ReportViewer({ reportType, data }: ReportViewerProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('chart')
 
-  const handleViewModeChange = useCallback((_: React.MouseEvent<HTMLElement>, mode: ViewMode | null) => {
-    if (mode) setViewMode(mode)
-  }, [])
-
   const handleExportCsv = useCallback(() => {
     if (!data) return
     downloadCsv(data.data, `report-${reportType}-${Date.now()}`)
@@ -214,11 +197,11 @@ export default function ReportViewer({ reportType, data }: ReportViewerProps) {
 
   if (!data) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 8 }}>
-        <Typography variant="body1" color="text.secondary">
+      <div className="flex items-center justify-center py-16">
+        <p className="text-base text-text-secondary">
           No report data to display. Run a report to see results.
-        </Typography>
-      </Box>
+        </p>
+      </div>
     )
   }
 
@@ -242,101 +225,110 @@ export default function ReportViewer({ reportType, data }: ReportViewerProps) {
   }
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <div className="w-full">
       {/* Header: title + toggles + export */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: 1,
-          mb: 2,
-        }}
-      >
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+        <h3 className="text-lg font-semibold text-text-primary">
           {data.title}
-        </Typography>
+        </h3>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <ToggleButtonGroup
-            value={viewMode}
-            exclusive
-            onChange={handleViewModeChange}
-            size="small"
-          >
-            <ToggleButton value="chart" aria-label="Chart view">
-              <BarChartIcon fontSize="small" />
-            </ToggleButton>
-            <ToggleButton value="table" aria-label="Table view">
-              <TableChartIcon fontSize="small" />
-            </ToggleButton>
-          </ToggleButtonGroup>
+        <div className="flex items-center gap-2">
+          {/* Segmented view mode toggle */}
+          <div className="inline-flex border border-surface-200 rounded-[--radius-sm] overflow-hidden">
+            <button
+              type="button"
+              className={cn(
+                'px-3 py-1.5 text-sm flex items-center transition-colors',
+                viewMode === 'chart'
+                  ? 'bg-primary-500 text-white'
+                  : 'bg-white text-text-secondary hover:bg-surface-50',
+              )}
+              onClick={() => setViewMode('chart')}
+              aria-label="Chart view"
+            >
+              <BarChart3 className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              className={cn(
+                'px-3 py-1.5 text-sm flex items-center transition-colors',
+                viewMode === 'table'
+                  ? 'bg-primary-500 text-white'
+                  : 'bg-white text-text-secondary hover:bg-surface-50',
+              )}
+              onClick={() => setViewMode('table')}
+              aria-label="Table view"
+            >
+              <Table2 className="h-4 w-4" />
+            </button>
+          </div>
 
           <Button
-            size="small"
-            variant="outlined"
-            startIcon={<FileDownloadIcon />}
+            size="sm"
+            variant="ghost"
+            leftIcon={<Download className="h-4 w-4" />}
             onClick={handleExportCsv}
           >
             CSV
           </Button>
           <Button
-            size="small"
-            variant="outlined"
-            startIcon={<PictureAsPdfIcon />}
+            size="sm"
+            variant="ghost"
+            leftIcon={<FileText className="h-4 w-4" />}
             onClick={handleExportPdf}
           >
             PDF
           </Button>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Summary stats */}
       {data.summary && Object.keys(data.summary).length > 0 && (
-        <Box sx={{ display: 'flex', gap: 3, mb: 2, flexWrap: 'wrap' }}>
+        <div className="flex gap-6 mb-4 flex-wrap">
           {Object.entries(data.summary).map(([key, value]) => (
-            <Box key={key}>
-              <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
+            <div key={key}>
+              <span className="text-xs text-text-secondary capitalize block">
                 {key.replace(/_/g, ' ')}
-              </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              </span>
+              <span className="text-lg font-bold text-text-primary">
                 {String(value)}
-              </Typography>
-            </Box>
+              </span>
+            </div>
           ))}
-        </Box>
+        </div>
       )}
 
       {/* Chart or Table */}
       {viewMode === 'chart' ? (
-        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+        <div className="p-4 border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface">
           {chartRenderer()}
-        </Paper>
+        </div>
       ) : (
-        <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
+        <div className="border border-surface-200 rounded-[--radius-md] overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-surface-50">
+              <tr>
                 {tableColumns.map((col) => (
-                  <TableCell key={col} sx={{ fontWeight: 600, textTransform: 'capitalize' }}>
+                  <th key={col} className="px-3 py-2 text-left font-semibold capitalize text-text-primary">
                     {col.replace(/_/g, ' ')}
-                  </TableCell>
+                  </th>
                 ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
+              </tr>
+            </thead>
+            <tbody>
               {data.data.map((row, index) => (
-                <TableRow key={index} hover>
+                <tr key={index} className="hover:bg-surface-50 transition-colors">
                   {tableColumns.map((col) => (
-                    <TableCell key={col}>{String(row[col] ?? '')}</TableCell>
+                    <td key={col} className="px-3 py-2 border-t border-surface-200 text-text-primary">
+                      {String(row[col] ?? '')}
+                    </td>
                   ))}
-                </TableRow>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            </tbody>
+          </table>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }

@@ -1,13 +1,6 @@
 import { useCallback, useMemo } from 'react'
-import Box from '@mui/material/Box'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import Select, { type SelectChangeEvent } from '@mui/material/Select'
-import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import { ArrowRight, CheckCircle } from 'lucide-react'
+import { cn } from '@/lib/cn'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -127,97 +120,73 @@ export default function ColumnMapper({
   const mappedCount = Object.keys(mapping).length
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="subtitle2">
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h4 className="text-sm font-semibold text-text-primary">
           Column Mapping
-        </Typography>
-        <Chip
-          label={`${mappedCount} of ${csvColumns.length} mapped`}
-          size="small"
-          color={mappedCount > 0 ? 'primary' : 'default'}
-          variant="outlined"
-        />
-      </Box>
+        </h4>
+        <span
+          className={cn(
+            'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border',
+            mappedCount > 0
+              ? 'bg-primary-50 border-primary-200 text-primary-700'
+              : 'bg-surface-50 border-surface-200 text-text-secondary',
+          )}
+        >
+          {mappedCount} of {csvColumns.length} mapped
+        </span>
+      </div>
 
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 1.5,
-        }}
-      >
+      <div className="flex flex-col gap-3">
         {csvColumns.map((col) => {
           const isMapped = !!mapping[col]
           return (
-            <Box
+            <div
               key={col}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-                p: 1.5,
-                borderRadius: 1.5,
-                bgcolor: isMapped ? 'action.selected' : 'background.paper',
-                border: '1px solid',
-                borderColor: isMapped ? 'primary.main' : 'divider',
-                transition: 'all 0.2s',
-              }}
+              className={cn(
+                'flex items-center gap-4 p-3 rounded-lg border transition-all',
+                isMapped
+                  ? 'bg-primary-50/30 border-primary-300 dark:bg-primary-500/10'
+                  : 'bg-white border-surface-200 dark:bg-dark-surface dark:border-dark-border',
+              )}
             >
               {/* CSV column name */}
-              <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <div className="flex-1 flex items-center gap-2">
                 {isMapped && (
-                  <CheckCircleOutlineIcon
-                    sx={{ fontSize: 16, color: 'primary.main' }}
-                  />
+                  <CheckCircle className="h-4 w-4 text-primary-500 flex-shrink-0" />
                 )}
-                <Typography variant="body2" fontWeight={isMapped ? 600 : 400}>
+                <span className={cn('text-sm', isMapped ? 'font-semibold text-text-primary' : 'text-text-primary')}>
                   {col}
-                </Typography>
-              </Box>
+                </span>
+              </div>
 
               {/* Arrow */}
-              <ArrowForwardIcon
-                sx={{ fontSize: 16, color: 'text.disabled' }}
-              />
+              <ArrowRight className="h-4 w-4 text-text-secondary/40 flex-shrink-0" />
 
               {/* Issue field dropdown */}
-              <FormControl size="small" sx={{ minWidth: 200 }}>
-                <InputLabel>Issue Field</InputLabel>
-                <Select
+              <div className="min-w-[200px]">
+                <select
                   value={mapping[col] ?? ''}
-                  label="Issue Field"
-                  onChange={(e: SelectChangeEvent) => handleChange(col, e.target.value)}
+                  onChange={(e) => handleChange(col, e.target.value)}
+                  className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
                 >
-                  <MenuItem value="">
-                    <em>Skip this column</em>
-                  </MenuItem>
+                  <option value="">Skip this column</option>
                   {issueFields.map((f) => (
-                    <MenuItem
+                    <option
                       key={f.value}
                       value={f.value}
                       disabled={mappedFieldValues.has(f.value) && mapping[col] !== f.value}
                     >
-                      {f.label}
-                      {f.required && (
-                        <Typography
-                          component="span"
-                          variant="caption"
-                          color="error"
-                          sx={{ ml: 0.5 }}
-                        >
-                          *
-                        </Typography>
-                      )}
-                    </MenuItem>
+                      {f.label}{f.required ? ' *' : ''}
+                    </option>
                   ))}
-                </Select>
-              </FormControl>
-            </Box>
+                </select>
+              </div>
+            </div>
           )
         })}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

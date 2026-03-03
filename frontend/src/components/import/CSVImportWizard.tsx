@@ -1,23 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import LinearProgress from '@mui/material/LinearProgress'
-import Paper from '@mui/material/Paper'
-import Step from '@mui/material/Step'
-import StepLabel from '@mui/material/StepLabel'
-import Stepper from '@mui/material/Stepper'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import Typography from '@mui/material/Typography'
-import Alert from '@mui/material/Alert'
-import Chip from '@mui/material/Chip'
-import CloudUploadIcon from '@mui/icons-material/CloudUpload'
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import { CloudUpload, CheckCircle, AlertCircle } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { Button } from '@/components/ui/Button'
 import {
   useImportPreview,
   useStartImport,
@@ -38,6 +22,53 @@ interface CSVImportWizardProps {
 }
 
 const STEPS = ['Upload CSV', 'Map Columns', 'Preview', 'Import']
+
+// ---------------------------------------------------------------------------
+// Step indicator
+// ---------------------------------------------------------------------------
+
+function StepIndicator({ steps, activeStep }: { steps: string[]; activeStep: number }) {
+  return (
+    <div className="flex items-center gap-2 mb-6">
+      {steps.map((label, index) => (
+        <div key={label} className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <div
+              className={cn(
+                'flex items-center justify-center h-8 w-8 rounded-full text-sm font-semibold transition-colors',
+                index < activeStep && 'bg-primary-500 text-white',
+                index === activeStep && 'bg-primary-500 text-white ring-2 ring-primary-500/30',
+                index > activeStep && 'bg-surface-100 text-text-secondary',
+              )}
+            >
+              {index < activeStep ? (
+                <CheckCircle className="h-5 w-5" />
+              ) : (
+                index + 1
+              )}
+            </div>
+            <span
+              className={cn(
+                'text-sm font-medium hidden sm:block',
+                index <= activeStep ? 'text-text-primary' : 'text-text-secondary',
+              )}
+            >
+              {label}
+            </span>
+          </div>
+          {index < steps.length - 1 && (
+            <div
+              className={cn(
+                'h-px w-8 flex-shrink-0',
+                index < activeStep ? 'bg-primary-500' : 'bg-surface-200',
+              )}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Component
@@ -107,7 +138,6 @@ export default function CSVImportWizard({ projectId }: CSVImportWizardProps) {
 
   const handleStartImport = useCallback(() => {
     if (!preview) return
-    // Use file name as a proxy for file_id (backend would associate via the preview upload)
     importMutation.mutate(
       {
         project_id: projectId,
@@ -126,62 +156,63 @@ export default function CSVImportWizard({ projectId }: CSVImportWizardProps) {
   // --- Render ---
 
   return (
-    <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
-      <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-        {STEPS.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
+    <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface p-6">
+      <StepIndicator steps={STEPS} activeStep={activeStep} />
 
       {/* Step 1: Upload */}
       {activeStep === 0 && (
-        <Box sx={{ textAlign: 'center', py: 4 }}>
-          <CloudUploadIcon sx={{ fontSize: 56, color: 'text.disabled', mb: 2 }} />
-          <Typography variant="h6" gutterBottom>
+        <div className="text-center py-8">
+          <CloudUpload className="h-14 w-14 mx-auto text-text-secondary/40 mb-4" />
+          <h3 className="text-lg font-medium text-text-primary mb-2">
             Upload a CSV File
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          </h3>
+          <p className="text-sm text-text-secondary mb-6">
             Select a CSV file with issue data to import into this project.
-          </Typography>
+          </p>
 
-          <Button
-            variant="contained"
-            component="label"
-            startIcon={<CloudUploadIcon />}
-            disabled={previewMutation.isPending}
-          >
-            {previewMutation.isPending ? 'Analyzing...' : 'Choose File'}
+          <label>
+            <Button
+              variant="primary"
+              leftIcon={<CloudUpload className="h-4 w-4" />}
+              disabled={previewMutation.isPending}
+              onClick={() => {
+                // Trigger the hidden file input
+                const input = document.getElementById('csv-upload-input')
+                input?.click()
+              }}
+            >
+              {previewMutation.isPending ? 'Analyzing...' : 'Choose File'}
+            </Button>
             <input
+              id="csv-upload-input"
               type="file"
               accept=".csv"
-              hidden
+              className="hidden"
               onChange={handleFileSelect}
             />
-          </Button>
+          </label>
 
           {file && (
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+            <p className="text-xs text-text-secondary mt-2">
               {file.name} ({Math.round(file.size / 1024)} KB)
-            </Typography>
+            </p>
           )}
 
           {previewMutation.isError && (
-            <Alert severity="error" sx={{ mt: 2 }}>
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               Failed to parse CSV. Please check the file format.
-            </Alert>
+            </div>
           )}
-        </Box>
+        </div>
       )}
 
       {/* Step 2: Column Mapping */}
       {activeStep === 1 && preview && (
-        <Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <div>
+          <p className="text-sm text-text-secondary mb-4">
             Found {preview.total_rows} rows and {preview.csv_columns.length} columns.
             Map each CSV column to an issue field.
-          </Typography>
+          </p>
 
           <ColumnMapper
             csvColumns={preview.csv_columns}
@@ -190,133 +221,130 @@ export default function CSVImportWizard({ projectId }: CSVImportWizardProps) {
             onMappingChange={setMapping}
           />
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-            <Button onClick={() => setActiveStep(0)}>Back</Button>
+          <div className="flex justify-between mt-6">
+            <Button variant="ghost" onClick={() => setActiveStep(0)}>Back</Button>
             <Button
-              variant="contained"
+              variant="primary"
               onClick={handleMappingDone}
               disabled={Object.keys(mapping).length === 0}
             >
               Next: Preview
             </Button>
-          </Box>
-        </Box>
+          </div>
+        </div>
       )}
 
       {/* Step 3: Preview */}
       {activeStep === 2 && (
-        <Box>
-          <Typography variant="subtitle2" sx={{ mb: 2 }}>
+        <div>
+          <h4 className="text-sm font-semibold text-text-primary mb-3">
             Preview (first {previewRows.length} rows)
-          </Typography>
+          </h4>
 
-          <TableContainer sx={{ mb: 3, maxHeight: 320 }}>
-            <Table size="small" stickyHeader>
-              <TableHead>
-                <TableRow>
+          <div className="overflow-x-auto mb-6 max-h-80">
+            <table className="w-full text-sm">
+              <thead className="bg-surface-50 sticky top-0">
+                <tr>
                   {mappedFieldNames.map((field) => (
-                    <TableCell key={field}>
-                      <Typography variant="caption" fontWeight={600}>
-                        {field.replace(/_/g, ' ')}
-                      </Typography>
-                    </TableCell>
+                    <th key={field} className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">
+                      {field.replace(/_/g, ' ')}
+                    </th>
                   ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
+                </tr>
+              </thead>
+              <tbody>
                 {previewRows.map((row, i) => (
-                  <TableRow key={i}>
+                  <tr key={i}>
                     {mappedFieldNames.map((field) => (
-                      <TableCell key={field}>
-                        <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
-                          {row[field] ?? '—'}
-                        </Typography>
-                      </TableCell>
+                      <td key={field} className="px-4 py-2 border-t border-surface-200">
+                        <span className="block max-w-[200px] truncate text-sm">
+                          {row[field] ?? '\u2014'}
+                        </span>
+                      </td>
                     ))}
-                  </TableRow>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </tbody>
+            </table>
+          </div>
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Button onClick={() => setActiveStep(1)}>Back</Button>
+          <div className="flex justify-between">
+            <Button variant="ghost" onClick={() => setActiveStep(1)}>Back</Button>
             <Button
-              variant="contained"
+              variant="primary"
               onClick={handleStartImport}
               disabled={importMutation.isPending}
             >
               {importMutation.isPending ? 'Starting...' : 'Start Import'}
             </Button>
-          </Box>
-        </Box>
+          </div>
+        </div>
       )}
 
       {/* Step 4: Import progress */}
       {activeStep === 3 && (
-        <Box sx={{ textAlign: 'center', py: 3 }}>
+        <div className="text-center py-6">
           {isPolling && (
             <>
-              <Typography variant="h6" gutterBottom>
+              <h3 className="text-lg font-medium text-text-primary mb-4">
                 Importing...
-              </Typography>
-              <LinearProgress
-                variant={importTask?.progress ? 'determinate' : 'indeterminate'}
-                value={importTask?.progress ?? 0}
-                sx={{ mb: 2, height: 8, borderRadius: 4 }}
-              />
-              <Typography variant="body2" color="text.secondary">
+              </h3>
+              <div className="h-2 bg-surface-200 rounded-full overflow-hidden mb-4">
+                <div
+                  className="h-full bg-primary-500 rounded-full transition-all"
+                  style={{ width: importTask?.progress ? `${importTask.progress}%` : '30%' }}
+                />
+              </div>
+              <p className="text-sm text-text-secondary">
                 {importTask?.processed_rows ?? 0} of {importTask?.total_rows ?? '?'} rows processed
-              </Typography>
+              </p>
             </>
           )}
 
           {!isPolling && importTask?.status === 'completed' && (
             <>
-              <CheckCircleOutlineIcon
-                sx={{ fontSize: 56, color: 'success.main', mb: 1 }}
-              />
-              <Typography variant="h6" color="success.main" gutterBottom>
+              <CheckCircle className="h-14 w-14 mx-auto text-green-500 mb-2" />
+              <h3 className="text-lg font-medium text-green-600 mb-2">
                 Import Complete
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              </h3>
+              <p className="text-sm text-text-secondary mb-2">
                 {importTask.processed_rows} issues imported successfully.
-              </Typography>
+              </p>
               {importTask.errors.length > 0 && (
-                <Alert severity="warning" sx={{ mt: 2, textAlign: 'left' }}>
-                  <Typography variant="subtitle2">
+                <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm text-amber-700">
+                  <p className="font-semibold mb-1">
                     {importTask.errors.length} warning(s):
-                  </Typography>
+                  </p>
                   {importTask.errors.slice(0, 5).map((err, i) => (
-                    <Typography key={i} variant="caption" display="block">
+                    <p key={i} className="text-xs">
                       {err}
-                    </Typography>
+                    </p>
                   ))}
-                </Alert>
+                </div>
               )}
             </>
           )}
 
           {!isPolling && importTask?.status === 'failed' && (
             <>
-              <ErrorOutlineIcon sx={{ fontSize: 56, color: 'error.main', mb: 1 }} />
-              <Typography variant="h6" color="error" gutterBottom>
+              <AlertCircle className="h-14 w-14 mx-auto text-red-500 mb-2" />
+              <h3 className="text-lg font-medium text-red-600 mb-4">
                 Import Failed
-              </Typography>
-              {importTask.errors.map((err, i) => (
-                <Chip
-                  key={i}
-                  label={err}
-                  color="error"
-                  variant="outlined"
-                  size="small"
-                  sx={{ m: 0.5 }}
-                />
-              ))}
+              </h3>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {importTask.errors.map((err, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-red-200 bg-red-50 text-red-700"
+                  >
+                    {err}
+                  </span>
+                ))}
+              </div>
             </>
           )}
-        </Box>
+        </div>
       )}
-    </Paper>
+    </div>
   )
 }

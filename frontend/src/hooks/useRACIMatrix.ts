@@ -58,7 +58,7 @@ export function useRACIMatrix(projectId: string) {
 /** Mutation to set a single RACI cell assignment */
 export function useUpdateRACICell(projectId: string) {
   const qc = useQueryClient()
-  return useMutation<void, Error, UpdateRACICellInput>({
+  return useMutation<void, Error, UpdateRACICellInput, { previous: RACIMatrixData | undefined }>({
     mutationFn: async (body) => {
       await client.put(`/projects/${projectId}/raci`, body)
     },

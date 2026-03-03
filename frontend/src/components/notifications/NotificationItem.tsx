@@ -1,20 +1,14 @@
 import { useNavigate } from 'react-router-dom'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import Typography from '@mui/material/Typography'
-import BugReportIcon from '@mui/icons-material/BugReport'
-import CommentIcon from '@mui/icons-material/Comment'
-import AssignmentIcon from '@mui/icons-material/Assignment'
-import InfoIcon from '@mui/icons-material/Info'
+import { Bug, MessageSquare, ClipboardList, Info } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import type { Notification } from '@/types/api'
 import { formatRelativeTime } from '@/utils/formatters'
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
-  issue_assigned: <AssignmentIcon fontSize="small" color="primary" />,
-  issue_updated: <BugReportIcon fontSize="small" color="action" />,
-  comment_added: <CommentIcon fontSize="small" color="action" />,
-  mentioned: <CommentIcon fontSize="small" color="secondary" />,
+  issue_assigned: <ClipboardList className="h-4 w-4 text-primary-500" />,
+  issue_updated: <Bug className="h-4 w-4 text-text-secondary" />,
+  comment_added: <MessageSquare className="h-4 w-4 text-text-secondary" />,
+  mentioned: <MessageSquare className="h-4 w-4 text-purple-500" />,
 }
 
 function getNotificationUrl(notification: Notification): string | null {
@@ -51,53 +45,35 @@ export default function NotificationItem({ notification, onMarkRead }: Notificat
     }
   }
 
-  const icon = TYPE_ICONS[notification.type] ?? <InfoIcon fontSize="small" color="action" />
+  const icon = TYPE_ICONS[notification.type] ?? <Info className="h-4 w-4 text-text-secondary" />
 
   return (
-    <ListItemButton
+    <button
       onClick={handleClick}
-      sx={{
-        py: 1.5,
-        px: 2,
-        bgcolor: notification.is_read ? 'transparent' : 'action.hover',
-        '&:hover': { bgcolor: 'action.selected' },
-      }}
+      className={cn(
+        'w-full text-left px-4 py-3 hover:bg-surface-100 dark:hover:bg-dark-border transition-colors flex items-start gap-3',
+        !notification.is_read && 'bg-primary-50/30 dark:bg-primary-900/10',
+      )}
     >
-      <ListItemIcon sx={{ minWidth: 36 }}>{icon}</ListItemIcon>
-      <ListItemText
-        primary={
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: notification.is_read ? 400 : 600 }}
-            noWrap
-          >
-            {notification.title}
-          </Typography>
-        }
-        secondary={
-          <>
-            {notification.body && (
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                component="span"
-                sx={{
-                  display: 'block',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {notification.body}
-              </Typography>
-            )}
-            <Typography variant="caption" color="text.disabled" component="span">
-              {formatRelativeTime(notification.created_at)}
-            </Typography>
-          </>
-        }
-        secondaryTypographyProps={{ component: 'div' }}
-      />
-    </ListItemButton>
+      <span className="flex-shrink-0 mt-0.5">{icon}</span>
+      <div className="flex-1 min-w-0">
+        <p
+          className={cn(
+            'text-sm truncate text-text-primary',
+            notification.is_read ? 'font-normal' : 'font-semibold',
+          )}
+        >
+          {notification.title}
+        </p>
+        {notification.body && (
+          <span className="block text-xs text-text-secondary truncate">
+            {notification.body}
+          </span>
+        )}
+        <span className="text-xs text-text-disabled">
+          {formatRelativeTime(notification.created_at)}
+        </span>
+      </div>
+    </button>
   )
 }

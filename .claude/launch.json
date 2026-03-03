@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [".claude/start-frontend.mjs", "--port", "3000"],
+      "port": 3000
+    },
+    {
+      "name": "backend-docker",
+      "runtimeExecutable": "docker",
+      "runtimeArgs": ["compose", "up", "db", "redis", "backend", "worker"],
+      "port": 8000
+    }
+  ]
+}

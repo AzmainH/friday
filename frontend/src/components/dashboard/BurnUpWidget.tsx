@@ -1,5 +1,3 @@
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
 import {
   LineChart,
   Line,
@@ -41,16 +39,14 @@ function formatDateLabel(dateStr: string): string {
 export default function BurnUpWidget({ data }: BurnUpWidgetProps) {
   if (data.length === 0) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-        <Typography variant="body2" color="text.secondary">
-          No burn-up data available
-        </Typography>
-      </Box>
+      <div className="flex items-center justify-center h-full">
+        <p className="text-sm text-text-secondary">No burn-up data available</p>
+      </div>
     )
   }
 
   return (
-    <Box sx={{ width: '100%', height: '100%' }}>
+    <div className="w-full h-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 4, right: 8, left: -12, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -78,7 +74,7 @@ export default function BurnUpWidget({ data }: BurnUpWidgetProps) {
           <Line
             type="monotone"
             dataKey="total"
-            stroke="#7c4dff"
+            stroke="#8b5cf6"
             strokeWidth={2}
             dot={false}
             name="Total Scope"
@@ -86,13 +82,13 @@ export default function BurnUpWidget({ data }: BurnUpWidgetProps) {
           <Line
             type="monotone"
             dataKey="completed"
-            stroke="#4caf50"
+            stroke="#22c55e"
             strokeWidth={2}
             dot={false}
             name="Completed"
           />
         </LineChart>
       </ResponsiveContainer>
-    </Box>
+    </div>
   )
 }

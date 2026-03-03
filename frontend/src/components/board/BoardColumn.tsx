@@ -1,8 +1,5 @@
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
-import AddIcon from '@mui/icons-material/Add'
-import { useTheme } from '@mui/material/styles'
+import { Plus } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import { useDroppable } from '@dnd-kit/core'
 import {
   SortableContext,
@@ -46,14 +43,13 @@ function SortableCard({ issue }: { issue: Issue }) {
   }
 
   return (
-    <Box ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <BoardCard issue={issue} isDragging={isDragging} />
-    </Box>
+    </div>
   )
 }
 
 export default function BoardColumn({ status, issues, onAddIssue }: BoardColumnProps) {
-  const theme = useTheme()
   const categoryColor = STATUS_CATEGORY_COLORS[status.category] ?? status.color
 
   // Make the column body a droppable target so cards can be dragged into empty columns
@@ -66,105 +62,47 @@ export default function BoardColumn({ status, issues, onAddIssue }: BoardColumnP
   })
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        minWidth: 280,
-        maxWidth: 320,
-        width: 280,
-        flexShrink: 0,
-        bgcolor: 'background.default',
-        borderRadius: 2,
-        border: '1px solid',
-        borderColor: isOver ? 'primary.light' : 'divider',
-        transition: 'border-color 0.2s',
-        overflow: 'hidden',
-      }}
+    <div
+      className={cn(
+        'flex flex-col min-w-[280px] max-w-[320px] w-[280px] shrink-0 rounded-[--radius-md] border overflow-hidden bg-surface-50 dark:bg-surface-100 transition-colors',
+        isOver ? 'border-primary-400' : 'border-surface-200',
+      )}
     >
       {/* Column header */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          px: 1.5,
-          py: 1.25,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          bgcolor: 'background.paper',
-        }}
-      >
+      <div className="flex items-center gap-2 px-3 py-2.5 border-b border-surface-200 bg-white dark:bg-surface-100">
         {/* Status color indicator */}
-        <Box
-          sx={{
-            width: 10,
-            height: 10,
-            borderRadius: '50%',
-            bgcolor: categoryColor,
-            flexShrink: 0,
-          }}
+        <span
+          className="w-2.5 h-2.5 rounded-full shrink-0"
+          style={{ backgroundColor: categoryColor }}
         />
 
         {/* Status name */}
-        <Typography
-          variant="subtitle2"
-          sx={{
-            fontWeight: 600,
-            flex: 1,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
+        <span className="text-sm font-semibold text-text-primary flex-1 truncate">
           {status.name}
-        </Typography>
+        </span>
 
         {/* Issue count badge */}
-        <Typography
-          variant="caption"
-          sx={{
-            color: 'text.secondary',
-            fontWeight: 500,
-            minWidth: 20,
-            textAlign: 'center',
-          }}
-        >
+        <span className="text-xs text-text-secondary font-medium min-w-[20px] text-center">
           {issues.length}
-        </Typography>
+        </span>
 
         {/* Add issue button */}
-        <IconButton
-          size="small"
+        <button
           onClick={onAddIssue}
           aria-label={`Add issue to ${status.name}`}
-          sx={{
-            width: 24,
-            height: 24,
-            color: 'text.secondary',
-            '&:hover': { color: 'primary.main' },
-          }}
+          className="p-1 rounded-[--radius-sm] text-text-tertiary hover:text-primary-500 hover:bg-surface-100 transition-colors"
         >
-          <AddIcon sx={{ fontSize: 16 }} />
-        </IconButton>
-      </Box>
+          <Plus size={16} />
+        </button>
+      </div>
 
       {/* Column body — scrollable list of cards */}
-      <Box
+      <div
         ref={setNodeRef}
-        sx={{
-          flex: 1,
-          overflowY: 'auto',
-          p: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 1,
-          minHeight: 100,
-          bgcolor: isOver
-            ? theme.palette.action.hover
-            : 'transparent',
-          transition: 'background-color 0.2s',
-        }}
+        className={cn(
+          'flex-1 overflow-y-auto p-2 flex flex-col gap-2 min-h-[100px] transition-colors',
+          isOver ? 'bg-primary-50/30 dark:bg-primary-900/10' : '',
+        )}
       >
         <SortableContext
           items={issues.map((i) => i.id)}
@@ -176,19 +114,11 @@ export default function BoardColumn({ status, issues, onAddIssue }: BoardColumnP
         </SortableContext>
 
         {issues.length === 0 && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              py: 3,
-              color: 'text.disabled',
-            }}
-          >
-            <Typography variant="caption">No issues</Typography>
-          </Box>
+          <div className="flex items-center justify-center py-6">
+            <span className="text-xs text-text-tertiary">No issues</span>
+          </div>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }

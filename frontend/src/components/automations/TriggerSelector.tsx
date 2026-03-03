@@ -1,13 +1,5 @@
-import { useCallback } from 'react'
-import Box from '@mui/material/Box'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import Select, { type SelectChangeEvent } from '@mui/material/Select'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
-import BoltIcon from '@mui/icons-material/Bolt'
+import { useCallback, type ChangeEvent } from 'react'
+import { Zap } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -39,12 +31,19 @@ const TRIGGER_TYPES = [
 ] as const
 
 // ---------------------------------------------------------------------------
+// Shared input class
+// ---------------------------------------------------------------------------
+
+const inputClass =
+  'w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border'
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
 export default function TriggerSelector({ value, onChange }: TriggerSelectorProps) {
   const handleTypeChange = useCallback(
-    (e: SelectChangeEvent) => {
+    (e: ChangeEvent<HTMLSelectElement>) => {
       onChange({
         trigger_type: e.target.value,
         trigger_config: {},
@@ -66,107 +65,130 @@ export default function TriggerSelector({ value, onChange }: TriggerSelectorProp
   const selectedTrigger = TRIGGER_TYPES.find((t) => t.value === value.trigger_type)
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <BoltIcon color="warning" fontSize="small" />
-        <Typography variant="subtitle2" fontWeight={600}>
-          WHEN
-        </Typography>
-        <Chip label="Trigger" size="small" color="warning" variant="outlined" />
-      </Box>
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <Zap className="h-4 w-4 text-amber-500" />
+        <span className="text-sm font-semibold text-text-primary">WHEN</span>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-amber-300 text-amber-700 dark:text-amber-400">
+          Trigger
+        </span>
+      </div>
 
-      <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-        <InputLabel>Trigger Type</InputLabel>
-        <Select
+      <div className="mb-3">
+        <label htmlFor="trigger-type" className="block text-xs font-medium text-text-secondary mb-1">
+          Trigger Type
+        </label>
+        <select
+          id="trigger-type"
           value={value.trigger_type}
-          label="Trigger Type"
           onChange={handleTypeChange}
+          className={inputClass}
         >
+          <option value="">Select a trigger...</option>
           {TRIGGER_TYPES.map((t) => (
-            <MenuItem key={t.value} value={t.value}>
-              <Box>
-                <Typography variant="body2">{t.label}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {t.description}
-                </Typography>
-              </Box>
-            </MenuItem>
+            <option key={t.value} value={t.value}>
+              {t.label}
+            </option>
           ))}
-        </Select>
-      </FormControl>
+        </select>
+      </div>
 
       {selectedTrigger && (
-        <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+        <p className="text-xs text-text-secondary mb-3">
           {selectedTrigger.description}
-        </Typography>
+        </p>
       )}
 
       {/* Trigger-specific config fields */}
       {value.trigger_type === 'status_changed' && (
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField
-            size="small"
-            label="From Status (optional)"
-            placeholder="Any"
-            value={(value.trigger_config.from_status as string) ?? ''}
-            onChange={(e) => handleConfigChange('from_status', e.target.value || null)}
-            fullWidth
-          />
-          <TextField
-            size="small"
-            label="To Status (optional)"
-            placeholder="Any"
-            value={(value.trigger_config.to_status as string) ?? ''}
-            onChange={(e) => handleConfigChange('to_status', e.target.value || null)}
-            fullWidth
-          />
-        </Box>
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <label className="block text-xs font-medium text-text-secondary mb-1">
+              From Status (optional)
+            </label>
+            <input
+              type="text"
+              placeholder="Any"
+              value={(value.trigger_config.from_status as string) ?? ''}
+              onChange={(e) => handleConfigChange('from_status', e.target.value || null)}
+              className={inputClass}
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-xs font-medium text-text-secondary mb-1">
+              To Status (optional)
+            </label>
+            <input
+              type="text"
+              placeholder="Any"
+              value={(value.trigger_config.to_status as string) ?? ''}
+              onChange={(e) => handleConfigChange('to_status', e.target.value || null)}
+              className={inputClass}
+            />
+          </div>
+        </div>
       )}
 
       {value.trigger_type === 'priority_changed' && (
-        <TextField
-          size="small"
-          label="New Priority (optional)"
-          placeholder="e.g. high, critical"
-          value={(value.trigger_config.new_priority as string) ?? ''}
-          onChange={(e) => handleConfigChange('new_priority', e.target.value || null)}
-          fullWidth
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">
+            New Priority (optional)
+          </label>
+          <input
+            type="text"
+            placeholder="e.g. high, critical"
+            value={(value.trigger_config.new_priority as string) ?? ''}
+            onChange={(e) => handleConfigChange('new_priority', e.target.value || null)}
+            className={inputClass}
+          />
+        </div>
       )}
 
       {value.trigger_type === 'label_added' && (
-        <TextField
-          size="small"
-          label="Label Name (optional)"
-          placeholder="Any label"
-          value={(value.trigger_config.label_name as string) ?? ''}
-          onChange={(e) => handleConfigChange('label_name', e.target.value || null)}
-          fullWidth
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">
+            Label Name (optional)
+          </label>
+          <input
+            type="text"
+            placeholder="Any label"
+            value={(value.trigger_config.label_name as string) ?? ''}
+            onChange={(e) => handleConfigChange('label_name', e.target.value || null)}
+            className={inputClass}
+          />
+        </div>
       )}
 
       {value.trigger_type === 'due_date_approaching' && (
-        <TextField
-          size="small"
-          label="Days Before Due"
-          type="number"
-          value={(value.trigger_config.days_before as number) ?? 3}
-          onChange={(e) => handleConfigChange('days_before', Number(e.target.value))}
-          fullWidth
-          slotProps={{ htmlInput: { min: 1, max: 30 } }}
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">
+            Days Before Due
+          </label>
+          <input
+            type="number"
+            min={1}
+            max={30}
+            value={(value.trigger_config.days_before as number) ?? 3}
+            onChange={(e) => handleConfigChange('days_before', Number(e.target.value))}
+            className={inputClass}
+          />
+        </div>
       )}
 
       {value.trigger_type === 'field_changed' && (
-        <TextField
-          size="small"
-          label="Field Name"
-          placeholder="e.g. estimated_hours"
-          value={(value.trigger_config.field_name as string) ?? ''}
-          onChange={(e) => handleConfigChange('field_name', e.target.value)}
-          fullWidth
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">
+            Field Name
+          </label>
+          <input
+            type="text"
+            placeholder="e.g. estimated_hours"
+            value={(value.trigger_config.field_name as string) ?? ''}
+            onChange={(e) => handleConfigChange('field_name', e.target.value)}
+            className={inputClass}
+          />
+        </div>
       )}
-    </Box>
+    </div>
   )
 }

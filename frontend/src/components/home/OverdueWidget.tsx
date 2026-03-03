@@ -1,14 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemText from '@mui/material/ListItemText'
-import Chip from '@mui/material/Chip'
-import Skeleton from '@mui/material/Skeleton'
-import WarningAmberIcon from '@mui/icons-material/WarningAmber'
+import { AlertTriangle } from 'lucide-react'
 import client from '@/api/client'
 import type { Issue } from '@/types/api'
 import { useAuthStore } from '@/stores/authStore'
@@ -49,86 +40,64 @@ export default function OverdueWidget() {
   )
 
   return (
-    <Card
-      sx={{
-        height: '100%',
-        borderLeft: '4px solid',
-        borderColor: 'error.main',
-      }}
-    >
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <WarningAmberIcon color="error" />
-          <Typography variant="h6">Overdue</Typography>
-        </Box>
+    <div className="h-full bg-white dark:bg-surface-100 rounded-[--radius-lg] shadow-sm border border-surface-200 border-l-4 border-l-error p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <AlertTriangle className="w-5 h-5 text-error" />
+        <h2 className="text-lg font-semibold text-text-primary">Overdue</h2>
+      </div>
 
-        {isLoading ? (
-          <Box>
-            <Skeleton variant="rectangular" height={64} sx={{ borderRadius: 1, mb: 1 }} />
-            <Skeleton variant="text" height={24} />
-            <Skeleton variant="text" height={24} />
-          </Box>
-        ) : overdueIssues.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 2 }}>
-            <Typography variant="h3" color="success.main" fontWeight={700}>
-              0
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              No overdue issues
-            </Typography>
-          </Box>
-        ) : (
-          <>
-            <Box sx={{ textAlign: 'center', mb: 2 }}>
-              <Typography variant="h3" color="error.main" fontWeight={700}>
-                {overdueIssues.length}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                overdue {overdueIssues.length === 1 ? 'issue' : 'issues'}
-              </Typography>
-            </Box>
+      {isLoading ? (
+        <div className="space-y-2">
+          <div className="h-16 skeleton-shimmer rounded-[--radius-sm]" />
+          <div className="h-5 skeleton-shimmer rounded-[--radius-xs]" />
+          <div className="h-5 skeleton-shimmer rounded-[--radius-xs]" />
+        </div>
+      ) : overdueIssues.length === 0 ? (
+        <div className="text-center py-4">
+          <p className="text-5xl font-bold text-success mb-1">0</p>
+          <p className="text-sm text-text-secondary">No overdue issues</p>
+        </div>
+      ) : (
+        <>
+          <div className="text-center mb-4">
+            <p className="text-5xl font-bold text-error mb-1">
+              {overdueIssues.length}
+            </p>
+            <p className="text-sm text-text-secondary">
+              overdue {overdueIssues.length === 1 ? 'issue' : 'issues'}
+            </p>
+          </div>
 
-            <List dense disablePadding>
-              {overdueIssues.slice(0, 5).map((issue) => {
-                const days = getDaysOverdue(issue.due_date!)
-                return (
-                  <ListItem key={issue.id} disableGutters sx={{ py: 0.5 }}>
-                    <ListItemText
-                      primary={
-                        <Typography variant="body2" noWrap>
-                          <Typography
-                            component="span"
-                            variant="body2"
-                            fontWeight={600}
-                            color="primary"
-                          >
-                            {issue.issue_key}
-                          </Typography>
-                          {' '}
-                          {issue.summary}
-                        </Typography>
-                      }
-                    />
-                    <Chip
-                      label={`${days}d`}
-                      size="small"
-                      color="error"
-                      variant="outlined"
-                      sx={{ ml: 1, fontWeight: 600, minWidth: 40 }}
-                    />
-                  </ListItem>
-                )
-              })}
-            </List>
+          <div className="space-y-1">
+            {overdueIssues.slice(0, 5).map((issue) => {
+              const days = getDaysOverdue(issue.due_date!)
+              return (
+                <div
+                  key={issue.id}
+                  className="flex items-center justify-between py-1.5"
+                >
+                  <p className="text-sm truncate mr-2 flex-1 text-text-primary">
+                    <span className="font-semibold text-primary-600">
+                      {issue.issue_key}
+                    </span>
+                    {' '}
+                    {issue.summary}
+                  </p>
+                  <span className="shrink-0 inline-flex items-center justify-center min-w-[40px] px-2 py-0.5 rounded-full text-xs font-semibold border border-error text-error">
+                    {days}d
+                  </span>
+                </div>
+              )
+            })}
+          </div>
 
-            {overdueIssues.length > 5 && (
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                +{overdueIssues.length - 5} more
-              </Typography>
-            )}
-          </>
-        )}
-      </CardContent>
-    </Card>
+          {overdueIssues.length > 5 && (
+            <p className="text-xs text-text-secondary mt-2">
+              +{overdueIssues.length - 5} more
+            </p>
+          )}
+        </>
+      )}
+    </div>
   )
 }

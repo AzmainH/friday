@@ -1,14 +1,10 @@
 import { useState, useCallback, useMemo, type MouseEvent } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { RowSelectionState, SortingState } from '@tanstack/react-table'
-import Box from '@mui/material/Box'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
-import Typography from '@mui/material/Typography'
-import ViewColumnIcon from '@mui/icons-material/ViewColumn'
+import { Columns3 } from 'lucide-react'
 import { listIssues, updateIssue, deleteIssue } from '@/api/issues'
 import { useProjectStore } from '@/stores/projectStore'
-import { useTableColumns, DEFAULT_COLUMNS } from '@/hooks/useTableColumns'
+import { useTableColumns } from '@/hooks/useTableColumns'
 import { useColumnPreferences } from '@/hooks/useColumnPreferences'
 import IssueTable from '@/components/table/IssueTable'
 import BulkActionToolbar, { type BulkActionKind } from '@/components/table/BulkActionToolbar'
@@ -125,23 +121,25 @@ export default function TableView() {
 
   if (!projectId) {
     return (
-      <Box sx={{ p: 4, textAlign: 'center' }}>
-        <Typography color="text.secondary">Select a project to view issues.</Typography>
-      </Box>
+      <div className="p-8 text-center">
+        <p className="text-text-secondary">Select a project to view issues.</p>
+      </div>
     )
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: 2 }}>
+    <div className="flex flex-col h-full p-4">
       {/* Top bar */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-        <Typography variant="h6">Issues</Typography>
-        <Tooltip title="Configure columns">
-          <IconButton size="small" onClick={openConfig}>
-            <ViewColumnIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-lg font-semibold text-text-primary">Issues</h2>
+        <button
+          onClick={openConfig}
+          className="p-1.5 rounded-[--radius-sm] text-text-tertiary hover:bg-surface-100 hover:text-text-secondary transition-colors"
+          title="Configure columns"
+        >
+          <Columns3 size={20} />
+        </button>
+      </div>
 
       {/* Bulk action toolbar (visible when rows are selected) */}
       <BulkActionToolbar
@@ -172,6 +170,6 @@ export default function TableView() {
         onReorder={reorderColumns}
         onReset={resetToDefaults}
       />
-    </Box>
+    </div>
   )
 }

@@ -2,12 +2,7 @@ import { useCallback, useMemo } from 'react'
 import GridLayout, { type Layout } from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
-import Box from '@mui/material/Box'
-import Paper from '@mui/material/Paper'
-import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
-import CloseIcon from '@mui/icons-material/Close'
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
+import { GripVertical, X } from 'lucide-react'
 import IssuesByStatusWidget from '@/components/dashboard/IssuesByStatusWidget'
 import ProgressDonutWidget from '@/components/dashboard/ProgressDonutWidget'
 import MilestoneTimelineWidget from '@/components/dashboard/MilestoneTimelineWidget'
@@ -86,11 +81,11 @@ function renderWidget(widget: DashboardWidget) {
       return <WorkloadWidget data={(config.data as { user: string; hours: number; capacity: number }[]) ?? []} />
     default:
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-          <Typography variant="body2" color="text.secondary">
+        <div className="flex items-center justify-center h-full">
+          <span className="text-sm text-text-secondary">
             Unknown widget type: {type}
-          </Typography>
-        </Box>
+          </span>
+        </div>
       )
   }
 }
@@ -138,78 +133,66 @@ export default function DashboardGrid({
   }))
 
   return (
-    <Box sx={{ '.react-grid-item.react-grid-placeholder': { bgcolor: 'primary.light', opacity: 0.2, borderRadius: 2 } }}>
-      <GridLayout
-        className="layout"
-        layout={gridLayout}
-        cols={12}
-        rowHeight={80}
-        width={width}
-        onLayoutChange={handleLayoutChange}
-        isDraggable={editable}
-        isResizable={editable}
-        draggableHandle=".dashboard-drag-handle"
-        compactType="vertical"
-        margin={[16, 16]}
-      >
-        {layout.map((item) => {
-          const widget = widgetMap.get(item.i)
-          if (!widget) return <div key={item.i} />
+    <>
+      <style>{`
+        .react-grid-item.react-grid-placeholder {
+          background-color: var(--color-primary-100) !important;
+          opacity: 0.3 !important;
+          border-radius: var(--radius-md) !important;
+        }
+      `}</style>
+      <div>
+        <GridLayout
+          className="layout"
+          layout={gridLayout}
+          cols={12}
+          rowHeight={80}
+          width={width}
+          onLayoutChange={handleLayoutChange}
+          isDraggable={editable}
+          isResizable={editable}
+          draggableHandle=".dashboard-drag-handle"
+          compactType="vertical"
+          margin={[16, 16]}
+        >
+          {layout.map((item) => {
+            const widget = widgetMap.get(item.i)
+            if (!widget) return <div key={item.i} />
 
-          return (
-            <div key={item.i}>
-              <Paper
-                variant="outlined"
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  overflow: 'hidden',
-                  borderRadius: 2,
-                }}
-              >
-                {/* Widget header */}
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    px: 1.5,
-                    py: 0.75,
-                    borderBottom: '1px solid',
-                    borderColor: 'divider',
-                    minHeight: 36,
-                  }}
-                >
-                  {editable && (
-                    <DragIndicatorIcon
-                      className="dashboard-drag-handle"
-                      fontSize="small"
-                      sx={{ cursor: 'grab', color: 'text.disabled', mr: 0.5 }}
-                    />
-                  )}
-                  <Typography variant="subtitle2" sx={{ flex: 1, fontWeight: 600 }} noWrap>
-                    {widget.title}
-                  </Typography>
-                  {editable && onRemoveWidget && (
-                    <IconButton
-                      size="small"
-                      onClick={() => onRemoveWidget(widget.id)}
-                      aria-label={`Remove ${widget.title}`}
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  )}
-                </Box>
+            return (
+              <div key={item.i}>
+                <div className="h-full flex flex-col overflow-hidden border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface">
+                  {/* Widget header */}
+                  <div className="flex items-center px-3 py-1.5 border-b border-surface-200 min-h-[36px]">
+                    {editable && (
+                      <GripVertical
+                        className="dashboard-drag-handle cursor-grab text-text-tertiary mr-1 h-4 w-4"
+                      />
+                    )}
+                    <span className="flex-1 text-sm font-semibold text-text-primary truncate">
+                      {widget.title}
+                    </span>
+                    {editable && onRemoveWidget && (
+                      <button
+                        className="p-1 rounded text-text-tertiary hover:text-red-500 hover:bg-surface-50 transition-colors"
+                        onClick={() => onRemoveWidget(widget.id)}
+                        aria-label={`Remove ${widget.title}`}
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
 
-                {/* Widget body */}
-                <Box sx={{ flex: 1, overflow: 'auto', p: 1.5 }}>
-                  {renderWidget(widget)}
-                </Box>
-              </Paper>
-            </div>
-          )
-        })}
-      </GridLayout>
-    </Box>
+                  {/* Widget body */}
+                  <div className="flex-1 overflow-auto p-3">
+                    {renderWidget(widget)}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </GridLayout>
+      </div>
+    </>
   )
 }

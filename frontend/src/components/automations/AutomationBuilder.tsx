@@ -1,14 +1,7 @@
 import { useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Divider from '@mui/material/Divider'
-import Paper from '@mui/material/Paper'
-import Switch from '@mui/material/Switch'
-import TextField from '@mui/material/TextField'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
-import SaveIcon from '@mui/icons-material/Save'
-import CancelIcon from '@mui/icons-material/Cancel'
+import { ArrowDown, Save, X } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { Button } from '@/components/ui/Button'
 import type { AutomationRule } from '@/types/api'
 import TriggerSelector, { type TriggerConfig } from '@/components/automations/TriggerSelector'
 import ConditionBuilder, { type Condition } from '@/components/automations/ConditionBuilder'
@@ -93,83 +86,90 @@ export default function AutomationBuilder({ rule, onSave, onCancel }: Automation
   }, [isValid, name, isEnabled, trigger, conditions, action, onSave])
 
   return (
-    <Paper
-      variant="outlined"
-      sx={{
-        p: 3,
-        borderRadius: 2,
-      }}
-    >
+    <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface dark:border-dark-border p-6">
       {/* Header: name + enable toggle */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-        <TextField
-          size="small"
-          label="Automation Name"
-          placeholder="e.g. Auto-assign high priority bugs"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          sx={{ flex: 1 }}
-        />
-        <FormControlLabel
-          control={
-            <Switch
-              checked={isEnabled}
-              onChange={(e) => setIsEnabled(e.target.checked)}
-              color="primary"
+      <div className="flex items-center gap-4 mb-6">
+        <div className="flex-1">
+          <label htmlFor="automation-name" className="block text-xs font-medium text-text-secondary mb-1">
+            Automation Name
+          </label>
+          <input
+            id="automation-name"
+            type="text"
+            placeholder="e.g. Auto-assign high priority bugs"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
+          />
+        </div>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <button
+            role="switch"
+            type="button"
+            aria-checked={isEnabled}
+            onClick={() => setIsEnabled(!isEnabled)}
+            className={cn(
+              'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+              isEnabled ? 'bg-primary-500' : 'bg-surface-300',
+            )}
+          >
+            <span
+              className={cn(
+                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                isEnabled ? 'translate-x-6' : 'translate-x-1',
+              )}
             />
-          }
-          label={isEnabled ? 'Enabled' : 'Disabled'}
-        />
-      </Box>
+          </button>
+          <span className="text-sm text-text-secondary">{isEnabled ? 'Enabled' : 'Disabled'}</span>
+        </label>
+      </div>
 
-      <Divider sx={{ mb: 3 }} />
+      <hr className="border-surface-200 mb-6" />
 
-      {/* Step 1: WHEN — Trigger */}
-      <Box sx={{ mb: 2 }}>
+      {/* Step 1: WHEN -- Trigger */}
+      <div className="mb-4">
         <TriggerSelector value={trigger} onChange={setTrigger} />
-      </Box>
+      </div>
 
       {/* Arrow connector */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', my: 1 }}>
-        <ArrowDownwardIcon color="action" />
-      </Box>
+      <div className="flex justify-center my-2">
+        <ArrowDown className="h-5 w-5 text-text-tertiary" />
+      </div>
 
-      {/* Step 2: IF — Conditions (optional) */}
-      <Box sx={{ mb: 2 }}>
+      {/* Step 2: IF -- Conditions (optional) */}
+      <div className="mb-4">
         <ConditionBuilder conditions={conditions} onChange={setConditions} />
-      </Box>
+      </div>
 
       {/* Arrow connector */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', my: 1 }}>
-        <ArrowDownwardIcon color="action" />
-      </Box>
+      <div className="flex justify-center my-2">
+        <ArrowDown className="h-5 w-5 text-text-tertiary" />
+      </div>
 
-      {/* Step 3: THEN — Action */}
-      <Box sx={{ mb: 3 }}>
+      {/* Step 3: THEN -- Action */}
+      <div className="mb-6">
         <ActionSelector value={action} onChange={setAction} />
-      </Box>
+      </div>
 
-      <Divider sx={{ mb: 2 }} />
+      <hr className="border-surface-200 mb-4" />
 
       {/* Footer buttons */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
+      <div className="flex justify-end gap-3">
         <Button
-          variant="outlined"
-          color="inherit"
-          startIcon={<CancelIcon />}
+          variant="ghost"
+          leftIcon={<X className="h-4 w-4" />}
           onClick={onCancel}
         >
           Cancel
         </Button>
         <Button
-          variant="contained"
-          startIcon={<SaveIcon />}
+          leftIcon={<Save className="h-4 w-4" />}
           onClick={handleSave}
           disabled={!isValid}
         >
           {rule ? 'Update Rule' : 'Create Rule'}
         </Button>
-      </Box>
-    </Paper>
+      </div>
+    </div>
   )
 }

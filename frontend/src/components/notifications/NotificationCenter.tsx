@@ -1,36 +1,17 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import IconButton from '@mui/material/IconButton'
-import Badge from '@mui/material/Badge'
-import Popover from '@mui/material/Popover'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
-import Divider from '@mui/material/Divider'
-import List from '@mui/material/List'
-import Tooltip from '@mui/material/Tooltip'
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
-import DoneAllIcon from '@mui/icons-material/DoneAll'
+import { Popover, PopoverButton, PopoverPanel, Transition } from '@headlessui/react'
+import { Bell, CheckCheck } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 import NotificationItem from '@/components/notifications/NotificationItem'
 import { useNotifications, useMarkRead, useMarkAllRead } from '@/hooks/useNotifications'
+import { Fragment } from 'react'
 
 export default function NotificationCenter() {
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const navigate = useNavigate()
 
   const { data: notifications, unreadCount } = useNotifications()
   const markRead = useMarkRead()
   const markAllRead = useMarkAllRead()
-
-  const open = Boolean(anchorEl)
-
-  const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
 
   const handleMarkRead = (id: string) => {
     markRead.mutate(id)
@@ -40,94 +21,93 @@ export default function NotificationCenter() {
     markAllRead.mutate()
   }
 
-  const handleViewAll = () => {
-    handleClose()
-    navigate('/notifications')
-  }
-
   return (
-    <>
-      <Tooltip title="Notifications">
-        <IconButton color="inherit" size="small" onClick={handleOpen}>
-          <Badge badgeContent={unreadCount} color="error" max={99}>
-            <NotificationsNoneIcon />
-          </Badge>
-        </IconButton>
-      </Tooltip>
+    <Popover className="relative">
+      {({ close }) => (
+        <>
+          <PopoverButton
+            className="relative inline-flex items-center justify-center rounded-md p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface-100 dark:hover:bg-dark-border transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+            title="Notifications"
+          >
+            <Bell className="h-5 w-5" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[0.65rem] font-medium min-w-[18px] h-[18px] px-1">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </PopoverButton>
 
-      <Popover
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{
-          paper: {
-            sx: {
-              width: 380,
-              maxHeight: 480,
-              display: 'flex',
-              flexDirection: 'column',
-              mt: 1,
-            },
-          },
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            px: 2,
-            py: 1.5,
-          }}
-        >
-          <Typography variant="subtitle1" fontWeight={600}>
-            Notifications
-          </Typography>
-          {unreadCount > 0 && (
-            <Button
-              size="small"
-              startIcon={<DoneAllIcon />}
-              onClick={handleMarkAllRead}
-              disabled={markAllRead.isPending}
-            >
-              Mark all read
-            </Button>
-          )}
-        </Box>
+          <Transition
+            as={Fragment}
+            enter="transition ease-out duration-150"
+            enterFrom="opacity-0 translate-y-1"
+            enterTo="opacity-100 translate-y-0"
+            leave="transition ease-in duration-100"
+            leaveFrom="opacity-100 translate-y-0"
+            leaveTo="opacity-0 translate-y-1"
+          >
+            <PopoverPanel className="absolute right-0 z-50 mt-2 w-[380px] max-h-[480px] flex flex-col rounded-xl border border-surface-200 bg-white shadow-lg dark:bg-dark-surface dark:border-dark-border overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-3">
+                <span className="text-sm font-semibold text-text-primary">
+                  Notifications
+                </span>
+                {unreadCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    leftIcon={<CheckCheck className="h-4 w-4" />}
+                    onClick={handleMarkAllRead}
+                    loading={markAllRead.isPending}
+                  >
+                    Mark all read
+                  </Button>
+                )}
+              </div>
 
-        <Divider />
+              <hr className="border-surface-200 dark:border-dark-border" />
 
-        <Box sx={{ flex: 1, overflow: 'auto' }}>
-          {(!notifications || notifications.length === 0) ? (
-            <Box sx={{ p: 4, textAlign: 'center' }}>
-              <NotificationsNoneIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
-              <Typography variant="body2" color="text.secondary">
-                No notifications
-              </Typography>
-            </Box>
-          ) : (
-            <List disablePadding>
-              {notifications.map((notification) => (
-                <NotificationItem
-                  key={notification.id}
-                  notification={notification}
-                  onMarkRead={handleMarkRead}
-                />
-              ))}
-            </List>
-          )}
-        </Box>
+              {/* Notification list */}
+              <div className="flex-1 overflow-auto">
+                {(!notifications || notifications.length === 0) ? (
+                  <div className="p-8 text-center">
+                    <Bell className="h-12 w-12 text-text-disabled mx-auto mb-2" />
+                    <p className="text-sm text-text-secondary">
+                      No notifications
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    {notifications.map((notification) => (
+                      <NotificationItem
+                        key={notification.id}
+                        notification={notification}
+                        onMarkRead={handleMarkRead}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
 
-        <Divider />
+              <hr className="border-surface-200 dark:border-dark-border" />
 
-        <Box sx={{ p: 1, textAlign: 'center' }}>
-          <Button size="small" onClick={handleViewAll}>
-            View all
-          </Button>
-        </Box>
-      </Popover>
-    </>
+              {/* Footer */}
+              <div className="p-2 text-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    close()
+                    navigate('/notifications')
+                  }}
+                >
+                  View all
+                </Button>
+              </div>
+            </PopoverPanel>
+          </Transition>
+        </>
+      )}
+    </Popover>
   )
 }

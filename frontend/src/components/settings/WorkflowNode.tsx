@@ -1,8 +1,6 @@
 import { memo } from 'react'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
+import { cn } from '@/lib/cn'
 
 export interface WorkflowNodeData {
   label: string
@@ -40,45 +38,37 @@ function WorkflowNode({ data, selected }: NodeProps) {
         }}
       />
 
-      <Box
-        sx={{
-          minWidth: 160,
-          borderRadius: 2,
-          border: selected ? '2px solid' : '1px solid',
-          borderColor: selected ? 'primary.main' : 'divider',
-          bgcolor: 'background.paper',
-          overflow: 'hidden',
-          boxShadow: selected ? 3 : 1,
-          transition: 'box-shadow 0.2s, border-color 0.2s',
-        }}
+      <div
+        className={cn(
+          'min-w-[160px] rounded-lg overflow-hidden bg-white dark:bg-dark-surface',
+          'transition-shadow duration-200 transition-[border-color] duration-200',
+          selected
+            ? 'border-2 border-primary-500 shadow-lg'
+            : 'border border-surface-200 shadow-sm'
+        )}
       >
         {/* Color indicator bar at top */}
-        <Box
-          sx={{
-            height: 4,
-            bgcolor: nodeData.color || '#9e9e9e',
-          }}
+        <div
+          className="h-1"
+          style={{ backgroundColor: nodeData.color || '#9e9e9e' }}
         />
 
-        <Box sx={{ px: 2, py: 1.5 }}>
-          <Typography variant="subtitle2" fontWeight={600} noWrap>
+        <div className="px-3 py-2">
+          <span className="text-sm font-semibold text-text-primary block truncate">
             {nodeData.label}
-          </Typography>
+          </span>
 
-          <Chip
-            label={categoryLabels[nodeData.category] ?? nodeData.category}
-            size="small"
-            sx={{
-              mt: 0.5,
-              height: 20,
-              fontSize: '0.7rem',
-              bgcolor: catStyle.bg,
+          <span
+            className="inline-block text-xs px-2 py-0.5 rounded-full mt-1 font-semibold"
+            style={{
+              backgroundColor: catStyle.bg,
               color: catStyle.text,
-              fontWeight: 600,
             }}
-          />
-        </Box>
-      </Box>
+          >
+            {categoryLabels[nodeData.category] ?? nodeData.category}
+          </span>
+        </div>
+      </div>
 
       <Handle
         type="source"

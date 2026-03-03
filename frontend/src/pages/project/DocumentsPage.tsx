@@ -1,26 +1,9 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Paper from '@mui/material/Paper'
-import Button from '@mui/material/Button'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import IconButton from '@mui/material/IconButton'
-import Chip from '@mui/material/Chip'
-import TextField from '@mui/material/TextField'
-import InputAdornment from '@mui/material/InputAdornment'
-import CircularProgress from '@mui/material/CircularProgress'
-import UploadFileIcon from '@mui/icons-material/UploadFile'
-import SearchIcon from '@mui/icons-material/Search'
-import DownloadIcon from '@mui/icons-material/Download'
-import DeleteIcon from '@mui/icons-material/Delete'
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
+import { Upload, Search, Download, Trash2, FileText } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
+import { Button } from '@/components/ui/Button'
+import { cn } from '@/lib/cn'
 import client from '@/api/client'
 import { formatDateTime, formatFileSize } from '@/utils/formatters'
 
@@ -32,6 +15,20 @@ interface ProjectDocument {
   uploaded_by_name: string
   created_at: string
   issue_key?: string
+}
+
+const FILE_TYPE_CHIP: Record<string, string> = {
+  image: 'bg-blue-100 text-blue-700 border-blue-200',
+  pdf: 'bg-red-100 text-red-700 border-red-200',
+  spreadsheet: 'bg-green-100 text-green-700 border-green-200',
+  csv: 'bg-green-100 text-green-700 border-green-200',
+}
+
+function getFileTypeChipClass(ct: string): string {
+  if (ct.startsWith('image/')) return FILE_TYPE_CHIP.image
+  if (ct.includes('pdf')) return FILE_TYPE_CHIP.pdf
+  if (ct.includes('spreadsheet') || ct.includes('csv')) return FILE_TYPE_CHIP.spreadsheet
+  return 'bg-surface-100 text-text-secondary border-surface-200'
 }
 
 export default function DocumentsPage() {
@@ -53,114 +50,94 @@ export default function DocumentsPage() {
     u.filename.toLowerCase().includes(search.toLowerCase()),
   )
 
-  const getFileTypeColor = (ct: string) => {
-    if (ct.startsWith('image/')) return 'info'
-    if (ct.includes('pdf')) return 'error'
-    if (ct.includes('spreadsheet') || ct.includes('csv')) return 'success'
-    return 'default'
-  }
-
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h5" fontWeight={600}>
-          Documents
-        </Typography>
-        <Button variant="contained" startIcon={<UploadFileIcon />}>
-          Upload
-        </Button>
-      </Box>
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-xl font-semibold text-text-primary">Documents</h1>
+        <Button leftIcon={<Upload className="h-4 w-4" />}>Upload</Button>
+      </div>
 
-      <TextField
-        size="small"
-        placeholder="Search documents..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        sx={{ mb: 2, width: 320 }}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
+      {/* Search */}
+      <div className="relative w-80 mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
+        <input
+          placeholder="Search documents..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full rounded-lg border border-surface-200 bg-white pl-9 pr-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
+        />
+      </div>
 
       {isLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-          <CircularProgress />
-        </Box>
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-surface-200 border-t-primary-500" />
+        </div>
       ) : (
-        <TableContainer component={Paper} variant="outlined">
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>File</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Size</TableCell>
-                <TableCell>Uploaded By</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Issue</TableCell>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+        <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-surface-50">
+              <tr>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">File</th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Type</th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Size</th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Uploaded By</th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Date</th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Issue</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-text-secondary uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
               {filtered.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
-                    <InsertDriveFileIcon
-                      sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }}
-                    />
-                    <Typography color="text.secondary">
-                      No documents found
-                    </Typography>
-                  </TableCell>
-                </TableRow>
+                <tr>
+                  <td colSpan={7} className="px-4 py-12 text-center border-t border-surface-200">
+                    <FileText className="h-12 w-12 text-surface-300 mx-auto mb-2" />
+                    <p className="text-text-secondary">No documents found</p>
+                  </td>
+                </tr>
               ) : (
                 filtered.map((doc) => (
-                  <TableRow key={doc.id} hover>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <InsertDriveFileIcon
-                          fontSize="small"
-                          color="action"
-                        />
-                        {doc.filename}
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={doc.content_type.split('/').pop()}
-                        size="small"
-                        color={getFileTypeColor(doc.content_type) as any}
-                        variant="outlined"
-                      />
-                    </TableCell>
-                    <TableCell>{formatFileSize(doc.size)}</TableCell>
-                    <TableCell>{doc.uploaded_by_name}</TableCell>
-                    <TableCell>{formatDateTime(doc.created_at)}</TableCell>
-                    <TableCell>
+                  <tr key={doc.id} className="hover:bg-surface-50 transition-colors">
+                    <td className="px-4 py-2 border-t border-surface-200">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-text-secondary flex-shrink-0" />
+                        <span>{doc.filename}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 border-t border-surface-200">
+                      <span
+                        className={cn(
+                          'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border',
+                          getFileTypeChipClass(doc.content_type),
+                        )}
+                      >
+                        {doc.content_type.split('/').pop()}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2 border-t border-surface-200">{formatFileSize(doc.size)}</td>
+                    <td className="px-4 py-2 border-t border-surface-200">{doc.uploaded_by_name}</td>
+                    <td className="px-4 py-2 border-t border-surface-200">{formatDateTime(doc.created_at)}</td>
+                    <td className="px-4 py-2 border-t border-surface-200">
                       {doc.issue_key && (
-                        <Chip label={doc.issue_key} size="small" />
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-surface-100 text-text-secondary">
+                          {doc.issue_key}
+                        </span>
                       )}
-                    </TableCell>
-                    <TableCell align="right">
-                      <IconButton size="small" title="Download">
-                        <DownloadIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton size="small" title="Delete" color="error">
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                    <td className="px-4 py-2 border-t border-surface-200 text-right">
+                      <button type="button" className="p-1 rounded hover:bg-surface-100 transition-colors text-text-secondary" title="Download">
+                        <Download className="h-4 w-4" />
+                      </button>
+                      <button type="button" className="p-1 rounded hover:bg-red-50 transition-colors text-red-500 ml-1" title="Delete">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
                 ))
               )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            </tbody>
+          </table>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }

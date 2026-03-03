@@ -1,12 +1,7 @@
-import { useState } from 'react'
-import Button from '@mui/material/Button'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import Typography from '@mui/material/Typography'
-import CircleIcon from '@mui/icons-material/Circle'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import { Menu, MenuItems, MenuItem } from '@/components/ui/Menu'
+import { MenuButton as HeadlessMenuButton } from '@headlessui/react'
+import { ChevronDown } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import type { WorkflowStatus } from '@/types/api'
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -26,23 +21,7 @@ export default function StatusTransitionDropdown({
   statuses,
   onChange,
 }: StatusTransitionDropdownProps) {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
-
   const currentStatus = statuses.find((s) => s.id === currentStatusId)
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
-
-  const handleSelect = (statusId: string) => {
-    onChange(statusId)
-    handleClose()
-  }
 
   const statusColor = currentStatus
     ? CATEGORY_COLORS[currentStatus.category] ?? currentStatus.color
@@ -51,46 +30,28 @@ export default function StatusTransitionDropdown({
   const sortedStatuses = [...statuses].sort((a, b) => a.sort_order - b.sort_order)
 
   return (
-    <>
-      <Button
-        variant="outlined"
-        size="small"
-        onClick={handleClick}
-        endIcon={<ArrowDropDownIcon />}
-        startIcon={
-          <CircleIcon sx={{ fontSize: '12px !important', color: statusColor }} />
-        }
-        sx={{
-          borderColor: statusColor,
-          color: 'text.primary',
-          textTransform: 'none',
-          fontWeight: 500,
-          '&:hover': {
-            borderColor: statusColor,
-            bgcolor: 'action.hover',
-          },
-        }}
+    <Menu>
+      <HeadlessMenuButton
+        className={cn(
+          'inline-flex items-center gap-2 rounded-[--radius-sm] border px-3 py-1.5',
+          'text-sm font-medium text-text-primary',
+          'hover:bg-surface-50 transition-colors duration-150',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
+        )}
+        style={{ borderColor: statusColor }}
       >
+        <span
+          className="h-3 w-3 shrink-0 rounded-full"
+          style={{ backgroundColor: statusColor }}
+        />
         {currentStatus?.name ?? 'Unknown'}
-      </Button>
+        <ChevronDown className="h-4 w-4 text-text-secondary" />
+      </HeadlessMenuButton>
 
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        slotProps={{
-          paper: { sx: { minWidth: 200, mt: 0.5 } },
-        }}
-      >
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ px: 2, py: 0.5, display: 'block', fontWeight: 600 }}
-        >
+      <MenuItems anchor="bottom start" className="min-w-[200px]">
+        <span className="block px-3 py-1.5 text-xs font-semibold text-text-secondary">
           Change status
-        </Typography>
+        </span>
 
         {sortedStatuses.map((status) => {
           const color = CATEGORY_COLORS[status.category] ?? status.color
@@ -99,24 +60,20 @@ export default function StatusTransitionDropdown({
           return (
             <MenuItem
               key={status.id}
-              onClick={() => handleSelect(status.id)}
-              selected={isActive}
-              sx={{ py: 1 }}
+              onClick={() => onChange(status.id)}
+              icon={
+                <span
+                  className="h-3 w-3 rounded-full"
+                  style={{ backgroundColor: color }}
+                />
+              }
+              className={cn(isActive && 'font-semibold')}
             >
-              <ListItemIcon sx={{ minWidth: 28 }}>
-                <CircleIcon sx={{ fontSize: 12, color }} />
-              </ListItemIcon>
-              <ListItemText
-                primary={status.name}
-                primaryTypographyProps={{
-                  variant: 'body2',
-                  fontWeight: isActive ? 600 : 400,
-                }}
-              />
+              {status.name}
             </MenuItem>
           )
         })}
-      </Menu>
-    </>
+      </MenuItems>
+    </Menu>
   )
 }

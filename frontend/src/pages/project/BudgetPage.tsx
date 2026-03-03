@@ -1,28 +1,8 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Stack from '@mui/material/Stack'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import TableSortLabel from '@mui/material/TableSortLabel'
-import Paper from '@mui/material/Paper'
-import MenuItem from '@mui/material/MenuItem'
-import TextField from '@mui/material/TextField'
-import CircularProgress from '@mui/material/CircularProgress'
-import Alert from '@mui/material/Alert'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import AddIcon from '@mui/icons-material/Add'
-import EditIcon from '@mui/icons-material/Edit'
+import { Plus, Pencil, ChevronUp, ChevronDown } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import { Dialog, DialogFooter } from '@/components/ui/Dialog'
 import BudgetSummaryCards from '@/components/budget/BudgetSummaryCards'
 import BurnChart from '@/components/budget/BurnChart'
 import CostEntryForm from '@/components/budget/CostEntryForm'
@@ -71,6 +51,37 @@ function buildMonthlyBurn(entries: CostEntry[]): { month: string; amount: number
 }
 
 // ---------------------------------------------------------------------------
+// Sort button component
+// ---------------------------------------------------------------------------
+
+function SortButton({
+  label,
+  field,
+  activeField,
+  dir,
+  onSort,
+}: {
+  label: string
+  field: SortField
+  activeField: SortField
+  dir: SortDir
+  onSort: (field: SortField) => void
+}) {
+  const isActive = field === activeField
+  return (
+    <button
+      className="flex items-center gap-1 text-xs font-semibold text-text-secondary uppercase hover:text-text-primary transition-colors"
+      onClick={() => onSort(field)}
+    >
+      {label}
+      {isActive && (
+        dir === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
+      )}
+    </button>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Edit Budget Dialog
 // ---------------------------------------------------------------------------
 
@@ -92,30 +103,32 @@ function EditBudgetDialog({ open, onClose, budgetId, currentBudget }: EditBudget
     onClose()
   }, [value, budgetId, updateBudget, onClose])
 
+  const inputClass =
+    'w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border'
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Edit Budget</DialogTitle>
-      <DialogContent>
-        <TextField
-          label="Total Budget"
+    <Dialog open={open} onClose={() => onClose()} title="Edit Budget" size="sm">
+      <div>
+        <label className="block text-sm font-medium text-text-primary mb-1">Total Budget</label>
+        <input
           type="number"
-          fullWidth
+          className={inputClass}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          inputProps={{ min: 0, step: '0.01' }}
-          sx={{ mt: 1 }}
+          min={0}
+          step="0.01"
         />
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} color="inherit">Cancel</Button>
+      </div>
+      <DialogFooter className="mt-6 border-t-0 px-0">
+        <Button variant="ghost" onClick={onClose}>Cancel</Button>
         <Button
           onClick={handleSave}
-          variant="contained"
           disabled={updateBudget.isPending}
+          loading={updateBudget.isPending}
         >
           Save
         </Button>
-      </DialogActions>
+      </DialogFooter>
     </Dialog>
   )
 }
@@ -171,134 +184,108 @@ export default function BudgetPage() {
 
   if (isLoading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
-        <CircularProgress />
-      </Container>
+      <div className="max-w-6xl mx-auto px-6 py-8 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-surface-200 border-t-primary-500 mx-auto" />
+      </div>
     )
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div className="max-w-6xl mx-auto px-6 py-8">
       {/* Header */}
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4">Budget</Typography>
-        <Stack direction="row" spacing={1}>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-text-primary">Budget</h1>
+        <div className="flex gap-2">
           <Button
-            variant="outlined"
-            startIcon={<EditIcon />}
+            variant="secondary"
+            leftIcon={<Pencil className="h-4 w-4" />}
             onClick={() => setEditBudgetOpen(true)}
             disabled={!budget}
           >
             Edit Budget
           </Button>
           <Button
-            variant="contained"
-            startIcon={<AddIcon />}
+            leftIcon={<Plus className="h-4 w-4" />}
             onClick={() => setCostDialogOpen(true)}
           >
             Add Cost
           </Button>
-        </Stack>
-      </Stack>
+        </div>
+      </div>
 
       {/* Summary cards */}
       {summary && <BudgetSummaryCards summary={summary} />}
 
       {/* Burn chart */}
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" gutterBottom>
-          Burn Chart
-        </Typography>
-        <Paper variant="outlined" sx={{ p: 2 }}>
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-text-primary mb-3">Burn Chart</h2>
+        <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface p-4">
           <BurnChart
             monthlyBurn={monthlyBurn}
             totalBudget={summary?.total_budget ?? 0}
           />
-        </Paper>
-      </Box>
+        </div>
+      </div>
 
       {/* Cost entries table */}
-      <Box sx={{ mt: 4 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h6">Cost Entries</Typography>
-          <TextField
-            select
-            size="small"
-            label="Category"
+      <div className="mt-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-text-primary">Cost Entries</h2>
+          <select
+            className="rounded-lg border border-surface-200 bg-white px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border min-w-[160px]"
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            sx={{ minWidth: 160 }}
           >
-            <MenuItem value="all">All Categories</MenuItem>
+            <option value="all">All Categories</option>
             {categories.map((cat) => (
-              <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+              <option key={cat} value={cat}>{cat}</option>
             ))}
-          </TextField>
-        </Stack>
+          </select>
+        </div>
 
         {costsError && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm mb-4">
             Failed to load cost entries.
-          </Alert>
+          </div>
         )}
 
-        <TableContainer component={Paper} variant="outlined">
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>
-                  <TableSortLabel
-                    active={sortField === 'date'}
-                    direction={sortField === 'date' ? sortDir : 'asc'}
-                    onClick={() => handleSort('date')}
-                  >
-                    Date
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell>
-                  <TableSortLabel
-                    active={sortField === 'category'}
-                    direction={sortField === 'category' ? sortDir : 'asc'}
-                    onClick={() => handleSort('category')}
-                  >
-                    Category
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell align="right">
-                  <TableSortLabel
-                    active={sortField === 'amount'}
-                    direction={sortField === 'amount' ? sortDir : 'asc'}
-                    onClick={() => handleSort('amount')}
-                  >
-                    Amount
-                  </TableSortLabel>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+        <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-surface-50">
+              <tr>
+                <th className="px-4 py-2 text-left">
+                  <SortButton label="Date" field="date" activeField={sortField} dir={sortDir} onSort={handleSort} />
+                </th>
+                <th className="px-4 py-2 text-left">
+                  <SortButton label="Category" field="category" activeField={sortField} dir={sortDir} onSort={handleSort} />
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Description</th>
+                <th className="px-4 py-2 text-right">
+                  <SortButton label="Amount" field="amount" activeField={sortField} dir={sortDir} onSort={handleSort} />
+                </th>
+              </tr>
+            </thead>
+            <tbody>
               {filteredCosts.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} align="center">
-                    <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
-                      No cost entries found.
-                    </Typography>
-                  </TableCell>
-                </TableRow>
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-text-secondary">
+                    No cost entries found.
+                  </td>
+                </tr>
               ) : (
                 filteredCosts.map((entry) => (
-                  <TableRow key={entry.id} hover>
-                    <TableCell>{formatDate(entry.date)}</TableCell>
-                    <TableCell>{entry.category}</TableCell>
-                    <TableCell>{entry.description ?? '--'}</TableCell>
-                    <TableCell align="right">{formatCurrency(entry.amount)}</TableCell>
-                  </TableRow>
+                  <tr key={entry.id} className="hover:bg-surface-50 transition-colors">
+                    <td className="px-4 py-2 border-t border-surface-200">{formatDate(entry.date)}</td>
+                    <td className="px-4 py-2 border-t border-surface-200">{entry.category}</td>
+                    <td className="px-4 py-2 border-t border-surface-200">{entry.description ?? '--'}</td>
+                    <td className="px-4 py-2 border-t border-surface-200 text-right">{formatCurrency(entry.amount)}</td>
+                  </tr>
                 ))
               )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Dialogs */}
       <CostEntryForm
@@ -315,6 +302,6 @@ export default function BudgetPage() {
           currentBudget={budget.total_budget}
         />
       )}
-    </Container>
+    </div>
   )
 }

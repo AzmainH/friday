@@ -1,18 +1,5 @@
 import { useMemo } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Table from '@mui/material/Table'
-import TableHead from '@mui/material/TableHead'
-import TableBody from '@mui/material/TableBody'
-import TableRow from '@mui/material/TableRow'
-import TableCell from '@mui/material/TableCell'
-import Paper from '@mui/material/Paper'
-import Chip from '@mui/material/Chip'
-import Alert from '@mui/material/Alert'
-import Skeleton from '@mui/material/Skeleton'
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
-import RemoveIcon from '@mui/icons-material/Remove'
+import { ArrowUp, ArrowDown, Minus } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import client from '@/api/client'
 import { formatDate } from '@/utils/formatters'
@@ -96,152 +83,119 @@ export default function BaselineCompare({ baselineId }: BaselineCompareProps) {
 
   if (isError) {
     return (
-      <Alert severity="error" sx={{ m: 2 }}>
+      <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm m-2">
         Failed to load baseline comparison. Please try again.
-      </Alert>
+      </div>
     )
   }
 
   if (isLoading) {
     return (
-      <Box sx={{ p: 2 }}>
-        <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 2 }} />
-      </Box>
+      <div className="p-2">
+        <div className="skeleton-shimmer h-[300px] rounded-lg" />
+      </div>
     )
   }
 
   if (!data || data.entries.length === 0) {
     return (
-      <Box sx={{ py: 4, textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary">
+      <div className="py-4 text-center">
+        <p className="text-sm text-[#78716c]">
           No baseline data available for comparison.
-        </Typography>
-      </Box>
+        </p>
+      </div>
     )
   }
 
   return (
-    <Box>
+    <div>
       {/* Header with baseline info */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Box>
-          <Typography variant="subtitle1" fontWeight={600}>
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <p className="text-base font-semibold">
             Baseline: {data.baseline_name}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
+          </p>
+          <span className="text-xs text-[#78716c]">
             Created {formatDate(data.created_at)}
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Chip
-            label={`${summary.slipped} slipped`}
-            size="small"
-            sx={{
-              bgcolor: summary.slipped > 0 ? '#f4433620' : 'grey.100',
-              color: summary.slipped > 0 ? '#f44336' : 'text.secondary',
-              fontWeight: 600,
+          </span>
+        </div>
+        <div className="flex gap-1">
+          <span
+            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+            style={{
+              backgroundColor: summary.slipped > 0 ? '#ef444420' : '#f5f5f4',
+              color: summary.slipped > 0 ? '#ef4444' : '#78716c',
             }}
-          />
-          <Chip
-            label={`${summary.onTrack} on track`}
-            size="small"
-            sx={{
-              bgcolor: '#4caf5020',
-              color: '#4caf50',
-              fontWeight: 600,
+          >
+            {summary.slipped} slipped
+          </span>
+          <span
+            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+            style={{
+              backgroundColor: '#22c55e20',
+              color: '#22c55e',
             }}
-          />
-          <Chip
-            label={`${summary.total} total`}
-            size="small"
-            variant="outlined"
-          />
-        </Box>
-      </Box>
+          >
+            {summary.onTrack} on track
+          </span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-surface-200 text-[#78716c]">
+            {summary.total} total
+          </span>
+        </div>
+      </div>
 
       {/* Comparison table */}
-      <Paper
-        sx={{
-          borderRadius: 3,
-          border: '1px solid',
-          borderColor: 'divider',
-          overflow: 'auto',
-        }}
-      >
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Issue</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Baseline Start</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Current Start</TableCell>
-              <TableCell sx={{ fontWeight: 700 }} align="center">
-                Start Variance
-              </TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Baseline End</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Current End</TableCell>
-              <TableCell sx={{ fontWeight: 700 }} align="center">
-                End Variance
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+      <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface overflow-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-surface-200">
+              <th className="px-3 py-2 text-left font-bold">Issue</th>
+              <th className="px-3 py-2 text-left font-bold">Baseline Start</th>
+              <th className="px-3 py-2 text-left font-bold">Current Start</th>
+              <th className="px-3 py-2 text-center font-bold">Start Variance</th>
+              <th className="px-3 py-2 text-left font-bold">Baseline End</th>
+              <th className="px-3 py-2 text-left font-bold">Current End</th>
+              <th className="px-3 py-2 text-center font-bold">End Variance</th>
+            </tr>
+          </thead>
+          <tbody>
             {rows.map((row) => (
-              <TableRow key={row.issue_id} hover>
+              <tr key={row.issue_id} className="border-b border-surface-200 last:border-b-0 hover:bg-surface-50 transition-colors">
                 {/* Issue key + summary */}
-                <TableCell>
-                  <Typography variant="body2" fontWeight={600}>
-                    {row.issue_key}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{
-                      display: 'block',
-                      maxWidth: 200,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
+                <td className="px-3 py-2">
+                  <span className="text-sm font-semibold block">{row.issue_key}</span>
+                  <span className="text-xs text-[#78716c] block max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap">
                     {row.issue_summary}
-                  </Typography>
-                </TableCell>
+                  </span>
+                </td>
 
                 {/* Baseline start */}
-                <TableCell>
-                  <Typography variant="body2">{formatDate(row.baseline_start)}</Typography>
-                </TableCell>
+                <td className="px-3 py-2 text-sm">{formatDate(row.baseline_start)}</td>
 
                 {/* Current start */}
-                <TableCell>
-                  <Typography variant="body2">{formatDate(row.current_start)}</Typography>
-                </TableCell>
+                <td className="px-3 py-2 text-sm">{formatDate(row.current_start)}</td>
 
                 {/* Start variance */}
-                <TableCell align="center">
+                <td className="px-3 py-2 text-center">
                   <VarianceBadge days={row.startVariance} />
-                </TableCell>
+                </td>
 
                 {/* Baseline end */}
-                <TableCell>
-                  <Typography variant="body2">{formatDate(row.baseline_end)}</Typography>
-                </TableCell>
+                <td className="px-3 py-2 text-sm">{formatDate(row.baseline_end)}</td>
 
                 {/* Current end */}
-                <TableCell>
-                  <Typography variant="body2">{formatDate(row.current_end)}</Typography>
-                </TableCell>
+                <td className="px-3 py-2 text-sm">{formatDate(row.current_end)}</td>
 
                 {/* End variance */}
-                <TableCell align="center">
+                <td className="px-3 py-2 text-center">
                   <VarianceBadge days={row.endVariance} />
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
-      </Paper>
-    </Box>
+          </tbody>
+        </table>
+      </div>
+    </div>
   )
 }
 
@@ -250,50 +204,36 @@ export default function BaselineCompare({ baselineId }: BaselineCompareProps) {
 function VarianceBadge({ days }: { days: number | null }) {
   if (days === null) {
     return (
-      <Typography variant="caption" color="text.disabled">
+      <span className="text-xs text-surface-400">
         --
-      </Typography>
+      </span>
     )
   }
 
   if (days === 0) {
     return (
-      <Chip
-        icon={<RemoveIcon sx={{ fontSize: 14 }} />}
-        label="On time"
-        size="small"
-        sx={{
-          bgcolor: '#4caf5015',
-          color: '#4caf50',
-          fontWeight: 600,
-          fontSize: '0.7rem',
-          height: 22,
-        }}
-      />
+      <span
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.7rem] font-semibold"
+        style={{ backgroundColor: '#22c55e15', color: '#22c55e' }}
+      >
+        <Minus size={14} />
+        On time
+      </span>
     )
   }
 
   const isSlipped = days > 0
-  const color = isSlipped ? '#f44336' : '#4caf50'
-  const icon = isSlipped ? (
-    <ArrowDownwardIcon sx={{ fontSize: 14 }} />
-  ) : (
-    <ArrowUpwardIcon sx={{ fontSize: 14 }} />
-  )
+  const color = isSlipped ? '#ef4444' : '#22c55e'
+  const Icon = isSlipped ? ArrowDown : ArrowUp
   const label = isSlipped ? `+${days}d late` : `${Math.abs(days)}d early`
 
   return (
-    <Chip
-      icon={icon}
-      label={label}
-      size="small"
-      sx={{
-        bgcolor: `${color}15`,
-        color,
-        fontWeight: 600,
-        fontSize: '0.7rem',
-        height: 22,
-      }}
-    />
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.7rem] font-semibold"
+      style={{ backgroundColor: `${color}15`, color }}
+    >
+      <Icon size={14} />
+      {label}
+    </span>
   )
 }

@@ -1,21 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import CardActionArea from '@mui/material/CardActionArea'
-import Grid from '@mui/material/Grid2'
-import Chip from '@mui/material/Chip'
-import LinearProgress from '@mui/material/LinearProgress'
-import Skeleton from '@mui/material/Skeleton'
-import Alert from '@mui/material/Alert'
-import AddIcon from '@mui/icons-material/Add'
-import FolderIcon from '@mui/icons-material/Folder'
+import { Plus, FolderKanban } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { Button } from '@/components/ui/Button'
+import { SkeletonCard } from '@/components/ui/Skeleton'
+import { EmptyState } from '@/components/ui/EmptyState'
 import client from '@/api/client'
-import { RAG_COLORS, formatDate, formatPercent } from '@/utils/formatters'
+import { RAG_COLORS, formatDate } from '@/utils/formatters'
 
 interface Project {
   id: string
@@ -28,12 +19,6 @@ interface Project {
   start_date: string | null
   target_end_date: string | null
   created_at: string
-}
-
-const STATUS_COLORS: Record<string, 'primary' | 'success' | 'warning' | 'default'> = {
-  active: 'primary',
-  planning: 'warning',
-  completed: 'success',
 }
 
 export default function ProjectsPage() {
@@ -53,142 +38,119 @@ export default function ProjectsPage() {
   const projects: Project[] = data ?? []
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h4" fontWeight={700}>
-          Projects
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => navigate('/projects/new')}
-        >
+    <div className="max-w-7xl mx-auto px-6 py-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-text-primary">Projects</h1>
+        <Button onClick={() => navigate('/projects/new')}>
+          <Plus size={16} className="mr-1.5" />
           Create Project
         </Button>
-      </Box>
+      </div>
 
+      {/* Error */}
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <div className="mb-4 rounded-[--radius-sm] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           Failed to load projects: {(error as Error).message}
-        </Alert>
+        </div>
       )}
 
+      {/* Loading */}
       {isLoading ? (
-        <Grid container spacing={3}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }, (_, i) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
-              <Card>
-                <CardContent>
-                  <Skeleton variant="text" width="60%" height={28} />
-                  <Skeleton variant="text" width="40%" height={20} sx={{ mb: 1 }} />
-                  <Skeleton variant="rectangular" height={6} sx={{ borderRadius: 1, mb: 1.5 }} />
-                  <Skeleton variant="text" width="80%" height={18} />
-                </CardContent>
-              </Card>
-            </Grid>
+            <SkeletonCard key={i} />
           ))}
-        </Grid>
+        </div>
       ) : projects.length === 0 ? (
-        <Box
-          sx={{
-            textAlign: 'center',
-            py: 8,
-            px: 4,
-            borderRadius: 3,
-            bgcolor: 'background.paper',
-            border: '1px solid',
-            borderColor: 'divider',
-          }}
-        >
-          <FolderIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-          <Typography variant="h6" gutterBottom>
-            No projects yet
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Create your first project to start tracking issues, sprints, and milestones.
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            startIcon={<AddIcon />}
-            onClick={() => navigate('/projects/new')}
-          >
-            Create Your First Project
-          </Button>
-        </Box>
+        /* Empty state */
+        <EmptyState
+          icon={FolderKanban}
+          title="No projects yet"
+          description="Create your first project to start tracking issues, sprints, and milestones."
+          action={
+            <Button onClick={() => navigate('/projects/new')}>
+              <Plus size={16} className="mr-1.5" />
+              Create Your First Project
+            </Button>
+          }
+        />
       ) : (
-        <Grid container spacing={3}>
+        /* Project cards */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => {
             const ragColor = RAG_COLORS[project.rag_status] ?? RAG_COLORS.none
             return (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={project.id}>
-                <Card
-                  sx={{
-                    height: '100%',
-                    borderLeft: '4px solid',
-                    borderColor: ragColor,
-                    transition: 'box-shadow 0.2s, transform 0.15s',
-                    '&:hover': { boxShadow: 6, transform: 'translateY(-2px)' },
-                  }}
-                >
-                  <CardActionArea
-                    onClick={() => navigate(`/projects/${project.id}/board`)}
-                    sx={{ height: '100%' }}
+              <div
+                key={project.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate(`/projects/${project.id}/board`)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    navigate(`/projects/${project.id}/board`)
+                  }
+                }}
+                className={cn(
+                  'bg-white dark:bg-surface-100',
+                  'rounded-[--radius-md] shadow-[--shadow-sm]',
+                  'border border-surface-200 border-l-4',
+                  'p-5 cursor-pointer',
+                  'hover:shadow-[--shadow-md] hover:-translate-y-0.5',
+                  'transition-all duration-200',
+                )}
+                style={{ borderLeftColor: ragColor }}
+              >
+                {/* Title + status */}
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="flex-1 text-sm font-semibold text-text-primary truncate">
+                    {project.name}
+                  </span>
+                  <span
+                    className={cn(
+                      'inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full capitalize',
+                      project.status === 'active' && 'bg-primary-50 text-primary-700',
+                      project.status === 'completed' && 'bg-green-50 text-green-700',
+                      project.status === 'planning' && 'bg-amber-50 text-amber-700',
+                      !['active', 'completed', 'planning'].includes(project.status) &&
+                        'bg-surface-50 text-text-secondary',
+                    )}
                   >
-                    <CardContent>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                        <Typography variant="subtitle1" fontWeight={600} noWrap sx={{ flex: 1 }}>
-                          {project.name}
-                        </Typography>
-                        <Chip
-                          label={project.status}
-                          size="small"
-                          color={STATUS_COLORS[project.status] ?? 'default'}
-                          variant="outlined"
-                          sx={{ textTransform: 'capitalize' }}
-                        />
-                      </Box>
+                    {project.status}
+                  </span>
+                </div>
 
-                      <Typography variant="caption" color="primary" fontWeight={600}>
-                        {project.key_prefix}
-                      </Typography>
+                {/* Key prefix */}
+                <span className="text-xs font-semibold text-primary-500">
+                  {project.key_prefix}
+                </span>
 
-                      {project.description && (
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{
-                            mt: 1,
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                          }}
-                        >
-                          {project.description}
-                        </Typography>
-                      )}
+                {/* Description */}
+                {project.description && (
+                  <p className="mt-2 text-sm text-text-secondary line-clamp-2">
+                    {project.description}
+                  </p>
+                )}
 
-                      <Box sx={{ mt: 1.5, display: 'flex', gap: 2 }}>
-                        {project.start_date && (
-                          <Typography variant="caption" color="text.secondary">
-                            Start: {formatDate(project.start_date)}
-                          </Typography>
-                        )}
-                        {project.target_end_date && (
-                          <Typography variant="caption" color="text.secondary">
-                            Target: {formatDate(project.target_end_date)}
-                          </Typography>
-                        )}
-                      </Box>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              </Grid>
+                {/* Dates */}
+                <div className="mt-3 flex gap-4">
+                  {project.start_date && (
+                    <span className="text-xs text-text-tertiary">
+                      Start: {formatDate(project.start_date)}
+                    </span>
+                  )}
+                  {project.target_end_date && (
+                    <span className="text-xs text-text-tertiary">
+                      Target: {formatDate(project.target_end_date)}
+                    </span>
+                  )}
+                </div>
+              </div>
             )
           })}
-        </Grid>
+        </div>
       )}
-    </Container>
+    </div>
   )
 }

@@ -1,12 +1,6 @@
 import { useState, useEffect } from 'react'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
+import { cn } from '@/lib/cn'
 
 type Severity = 'info' | 'warning' | 'danger'
 
@@ -22,10 +16,16 @@ interface ConfirmDialogProps {
   confirmValue?: string
 }
 
-const severityColors: Record<Severity, { bg: string; border: string; btn: string }> = {
-  info: { bg: 'transparent', border: 'divider', btn: 'primary' },
-  warning: { bg: 'rgba(255, 167, 38, 0.08)', border: 'warning.main', btn: 'warning' },
-  danger: { bg: 'rgba(244, 67, 54, 0.08)', border: 'error.main', btn: 'error' },
+const severityStyles: Record<Severity, { box: string; btn: string }> = {
+  info: { box: '', btn: 'bg-primary-500 hover:bg-primary-600 text-white' },
+  warning: {
+    box: 'bg-warning-light border border-warning',
+    btn: 'bg-warning hover:bg-amber-600 text-white',
+  },
+  danger: {
+    box: 'bg-error-light border border-error',
+    btn: 'bg-error hover:bg-red-600 text-white',
+  },
 }
 
 export default function ConfirmDialog({
@@ -40,7 +40,7 @@ export default function ConfirmDialog({
   confirmValue,
 }: ConfirmDialogProps) {
   const [inputValue, setInputValue] = useState('')
-  const colors = severityColors[severity]
+  const styles = severityStyles[severity]
   const needsTyping = !!confirmValue
   const isConfirmEnabled = !needsTyping || inputValue === confirmValue
 
@@ -52,45 +52,49 @@ export default function ConfirmDialog({
   }, [open])
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
-        <Box
-          sx={{
-            p: 2,
-            borderRadius: 2,
-            bgcolor: colors.bg,
-            border: severity !== 'info' ? '1px solid' : 'none',
-            borderColor: colors.border,
-            mb: needsTyping ? 2 : 0,
-          }}
-        >
-          <Typography variant="body2">{message}</Typography>
-        </Box>
-        {needsTyping && (
-          <TextField
-            fullWidth
-            size="small"
-            placeholder={`Type "${confirmValue}" to confirm`}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            autoFocus
-          />
-        )}
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} color="inherit">
-          {cancelText}
-        </Button>
-        <Button
-          onClick={onConfirm}
-          variant="contained"
-          color={colors.btn as 'primary' | 'warning' | 'error'}
-          disabled={!isConfirmEnabled}
-        >
-          {defaultConfirmText}
-        </Button>
-      </DialogActions>
+    <Dialog open={open} onClose={onClose} className="relative z-[--z-modal]">
+      <DialogBackdrop className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <DialogPanel className="w-full max-w-md bg-white dark:bg-surface-100 rounded-[--radius-xl] shadow-2xl">
+          <DialogTitle className="text-lg font-semibold text-text-primary px-6 pt-5 pb-2">
+            {title}
+          </DialogTitle>
+          <div className="px-6 pb-4">
+            <div className={cn('p-3 rounded-[--radius-sm]', styles.box, needsTyping && 'mb-3')}>
+              <p className="text-sm text-text-secondary">{message}</p>
+            </div>
+            {needsTyping && (
+              <input
+                type="text"
+                className="w-full rounded-[--radius-sm] border border-surface-200 bg-white dark:bg-surface-100 px-3 py-2 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none"
+                placeholder={`Type "${confirmValue}" to confirm`}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                autoFocus
+              />
+            )}
+          </div>
+          <div className="flex justify-end gap-2 px-6 pb-5">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-100 rounded-[--radius-sm] transition-colors"
+            >
+              {cancelText}
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={!isConfirmEnabled}
+              className={cn(
+                'px-4 py-2 text-sm font-semibold rounded-[--radius-sm] transition-colors',
+                styles.btn,
+                !isConfirmEnabled && 'opacity-50 cursor-not-allowed',
+              )}
+            >
+              {defaultConfirmText}
+            </button>
+          </div>
+        </DialogPanel>
+      </div>
     </Dialog>
   )
 }

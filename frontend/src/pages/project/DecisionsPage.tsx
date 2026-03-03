@@ -1,20 +1,9 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Stack from '@mui/material/Stack'
-import TextField from '@mui/material/TextField'
-import MenuItem from '@mui/material/MenuItem'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import CircularProgress from '@mui/material/CircularProgress'
-import Alert from '@mui/material/Alert'
-import AddIcon from '@mui/icons-material/Add'
+import { Plus } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
+import { Button } from '@/components/ui/Button'
+import { Dialog, DialogFooter } from '@/components/ui/Dialog'
 import DecisionDetail from '@/components/decisions/DecisionDetail'
 import { useDecisions, useCreateDecision } from '@/hooks/useDecisions'
 import type { DecisionDetail as DecisionDetailType } from '@/hooks/useDecisions'
@@ -71,59 +60,67 @@ function CreateDecisionDialog({ open, onClose, projectId }: CreateDecisionDialog
   )
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={() => handleClose()} title="New Decision" size="sm">
       <form onSubmit={handleSubmit(onSubmit)}>
-        <DialogTitle>New Decision</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2.5} sx={{ mt: 1 }}>
-            <Controller
-              name="title"
-              control={control}
-              rules={{ required: 'Title is required' }}
-              render={({ field }) => (
-                <TextField
+        <div className="flex flex-col gap-5">
+          <Controller
+            name="title"
+            control={control}
+            rules={{ required: 'Title is required' }}
+            render={({ field }) => (
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Title</label>
+                <input
                   {...field}
-                  label="Title"
-                  fullWidth
-                  error={!!errors.title}
-                  helperText={errors.title?.message}
+                  className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
                 />
-              )}
-            />
+                {errors.title && (
+                  <p className="mt-1 text-xs text-red-500">{errors.title.message}</p>
+                )}
+              </div>
+            )}
+          />
 
-            <Controller
-              name="status"
-              control={control}
-              render={({ field }) => (
-                <TextField {...field} select label="Status" fullWidth>
+          <Controller
+            name="status"
+            control={control}
+            render={({ field }) => (
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Status</label>
+                <select
+                  {...field}
+                  className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
+                >
                   {DECISION_STATUSES.map((s) => (
-                    <MenuItem key={s} value={s}>{s}</MenuItem>
+                    <option key={s} value={s}>{s}</option>
                   ))}
-                </TextField>
-              )}
-            />
+                </select>
+              </div>
+            )}
+          />
 
-            <Controller
-              name="description"
-              control={control}
-              render={({ field }) => (
-                <TextField
+          <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Description</label>
+                <textarea
                   {...field}
-                  label="Description"
-                  fullWidth
-                  multiline
-                  minRows={3}
+                  rows={3}
+                  className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
                 />
-              )}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleClose} color="inherit">Cancel</Button>
-          <Button type="submit" variant="contained" disabled={isSubmitting}>
+              </div>
+            )}
+          />
+        </div>
+
+        <DialogFooter>
+          <Button variant="ghost" type="button" onClick={handleClose}>Cancel</Button>
+          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Creating...' : 'Create'}
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </form>
     </Dialog>
   )
@@ -150,66 +147,50 @@ export default function DecisionsPage() {
 
   if (isLoading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
-        <CircularProgress />
-      </Container>
+      <div className="max-w-6xl mx-auto px-6 py-8 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-surface-200 border-t-primary-500 mx-auto" />
+      </div>
     )
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div className="max-w-6xl mx-auto px-6 py-8">
       {/* Header */}
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4">Decisions</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setCreateOpen(true)}
-        >
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-text-primary">Decisions</h1>
+        <Button leftIcon={<Plus className="h-4 w-4" />} onClick={() => setCreateOpen(true)}>
           New Decision
         </Button>
-      </Stack>
+      </div>
 
       {/* Filters */}
-      <Stack direction="row" spacing={2} mb={3}>
-        <TextField
-          select
-          size="small"
-          label="Status"
+      <div className="flex items-center gap-4 mb-6">
+        <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          sx={{ minWidth: 160 }}
+          className="min-w-[160px] rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
         >
-          <MenuItem value="all">All Statuses</MenuItem>
+          <option value="all">All Statuses</option>
           {DECISION_STATUSES.map((s) => (
-            <MenuItem key={s} value={s}>{s}</MenuItem>
+            <option key={s} value={s}>{s}</option>
           ))}
-        </TextField>
-      </Stack>
+        </select>
+      </div>
 
       {/* Error */}
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm mb-4">
           Failed to load decisions.
-        </Alert>
+        </div>
       )}
 
       {/* Decision list */}
       {filtered.length === 0 ? (
-        <Box
-          sx={{
-            p: 4,
-            borderRadius: 3,
-            bgcolor: 'background.paper',
-            border: '1px solid',
-            borderColor: 'divider',
-            textAlign: 'center',
-          }}
-        >
-          <Typography color="text.secondary">
+        <div className="p-8 rounded-xl bg-white border border-surface-200 text-center dark:bg-dark-surface dark:border-dark-border">
+          <p className="text-text-secondary">
             No decisions found. Create one to get started.
-          </Typography>
-        </Box>
+          </p>
+        </div>
       ) : (
         filtered.map((decision) => (
           <DecisionDetail
@@ -225,6 +206,6 @@ export default function DecisionsPage() {
         onClose={() => setCreateOpen(false)}
         projectId={pid}
       />
-    </Container>
+    </div>
   )
 }

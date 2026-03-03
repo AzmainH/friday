@@ -1,27 +1,14 @@
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-
 export default function SettingsPage() {
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
+    <div className="max-w-6xl mx-auto px-6 py-8">
+      <h1 className="text-2xl font-bold text-text-primary mb-4">
         Settings
-      </Typography>
-      <Box
-        sx={{
-          p: 4,
-          borderRadius: 3,
-          bgcolor: 'background.paper',
-          border: '1px solid',
-          borderColor: 'divider',
-          textAlign: 'center',
-        }}
-      >
-        <Typography variant="body1" color="text.secondary">
+      </h1>
+      <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface p-4 text-center">
+        <p className="text-sm text-text-secondary">
           Coming soon — organization, workspace, and user preferences.
-        </Typography>
-      </Box>
-    </Container>
+        </p>
+      </div>
+    </div>
   )
 }

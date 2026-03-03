@@ -1,8 +1,4 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
-import Box from '@mui/material/Box'
 
 interface Props {
   children: ReactNode
@@ -36,33 +32,38 @@ export default class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <Container maxWidth="sm" sx={{ py: 8, textAlign: 'center' }}>
-          <Typography
-            variant="h1"
-            sx={{ fontSize: '4rem', fontWeight: 800, opacity: 0.15, mb: 2 }}
-          >
-            Oops
-          </Typography>
-          <Typography variant="h5" gutterBottom>
-            Something went wrong
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            {this.state.error?.message ?? 'An unexpected error occurred.'}
-          </Typography>
-          {this.state.requestId && (
-            <Typography variant="caption" color="text.disabled" sx={{ mb: 3, display: 'block' }}>
-              Request ID: {this.state.requestId}
-            </Typography>
-          )}
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 3 }}>
-            <Button variant="contained" onClick={() => (window.location.href = '/')}>
-              Go Home
-            </Button>
-            <Button variant="outlined" onClick={this.handleReset}>
-              Try Again
-            </Button>
-          </Box>
-        </Container>
+        <div className="flex min-h-screen items-center justify-center bg-surface-50">
+          <div className="max-w-md text-center px-6">
+            <p className="text-[4rem] font-extrabold text-text-tertiary/30 mb-2">
+              Oops
+            </p>
+            <h2 className="text-xl font-semibold text-text-primary mb-2">
+              Something went wrong
+            </h2>
+            <p className="text-sm text-text-secondary mb-1">
+              {this.state.error?.message ?? 'An unexpected error occurred.'}
+            </p>
+            {this.state.requestId && (
+              <p className="text-xs text-text-tertiary mb-6">
+                Request ID: {this.state.requestId}
+              </p>
+            )}
+            <div className="flex gap-3 justify-center mt-6">
+              <a
+                href="/"
+                className="inline-flex items-center px-4 py-2 rounded-[--radius-sm] bg-primary-500 text-white font-semibold text-sm hover:bg-primary-600 transition-colors"
+              >
+                Go Home
+              </a>
+              <button
+                onClick={this.handleReset}
+                className="inline-flex items-center px-4 py-2 rounded-[--radius-sm] border border-surface-200 text-text-primary font-semibold text-sm hover:bg-surface-100 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
       )
     }
 

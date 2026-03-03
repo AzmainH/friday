@@ -1,13 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import IconButton from '@mui/material/IconButton'
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
-import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder'
-import SearchIcon from '@mui/icons-material/Search'
-import ViewKanbanIcon from '@mui/icons-material/ViewKanban'
+import { PlusCircle, FolderPlus, Search, LayoutDashboard } from 'lucide-react'
 import { useSearchStore } from '@/stores/searchStore'
 
 interface QuickAction {
@@ -15,6 +7,7 @@ interface QuickAction {
   icon: React.ReactNode
   onClick: () => void
   color: string
+  bgClass: string
 }
 
 export default function QuickActions() {
@@ -24,75 +17,57 @@ export default function QuickActions() {
   const actions: QuickAction[] = [
     {
       label: 'Create Issue',
-      icon: <AddCircleOutlineIcon sx={{ fontSize: 32 }} />,
+      icon: <PlusCircle className="w-7 h-7" />,
       onClick: () => navigate('/issues/new'),
-      color: '#2196f3',
+      color: 'text-info',
+      bgClass: 'bg-info/10 hover:bg-info/20',
     },
     {
       label: 'Create Project',
-      icon: <CreateNewFolderIcon sx={{ fontSize: 32 }} />,
+      icon: <FolderPlus className="w-7 h-7" />,
       onClick: () => navigate('/projects/new'),
-      color: '#4caf50',
+      color: 'text-success',
+      bgClass: 'bg-success/10 hover:bg-success/20',
     },
     {
       label: 'Search',
-      icon: <SearchIcon sx={{ fontSize: 32 }} />,
+      icon: <Search className="w-7 h-7" />,
       onClick: openSearch,
-      color: '#ff9800',
+      color: 'text-primary-500',
+      bgClass: 'bg-primary-500/10 hover:bg-primary-500/20',
     },
     {
       label: 'View Board',
-      icon: <ViewKanbanIcon sx={{ fontSize: 32 }} />,
+      icon: <LayoutDashboard className="w-7 h-7" />,
       onClick: () => navigate('/projects'),
-      color: '#9c27b0',
+      color: 'text-purple-600',
+      bgClass: 'bg-purple-600/10 hover:bg-purple-600/20',
     },
   ]
 
   return (
-    <Card>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Quick Actions
-        </Typography>
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: 2,
-            mt: 1,
-          }}
-        >
-          {actions.map((action) => (
-            <Box
-              key={action.label}
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 0.5,
-              }}
+    <div className="bg-white dark:bg-surface-100 rounded-[--radius-lg] shadow-sm border border-surface-200 p-5">
+      <h2 className="text-lg font-semibold text-text-primary mb-3">
+        Quick Actions
+      </h2>
+      <div className="grid grid-cols-4 gap-3">
+        {actions.map((action) => (
+          <div
+            key={action.label}
+            className="flex flex-col items-center gap-1.5"
+          >
+            <button
+              onClick={action.onClick}
+              className={`w-14 h-14 flex items-center justify-center rounded-full ${action.color} ${action.bgClass} transition-all duration-[--duration-normal] cursor-pointer hover:-translate-y-0.5 hover:shadow-md`}
             >
-              <IconButton
-                onClick={action.onClick}
-                sx={{
-                  width: 56,
-                  height: 56,
-                  bgcolor: `${action.color}14`,
-                  color: action.color,
-                  '&:hover': {
-                    bgcolor: `${action.color}28`,
-                  },
-                }}
-              >
-                {action.icon}
-              </IconButton>
-              <Typography variant="caption" color="text.secondary" textAlign="center">
-                {action.label}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-      </CardContent>
-    </Card>
+              {action.icon}
+            </button>
+            <span className="text-xs text-text-secondary text-center">
+              {action.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }

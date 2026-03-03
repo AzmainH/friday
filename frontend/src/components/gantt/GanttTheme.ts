@@ -24,27 +24,27 @@ interface GanttPalette {
 }
 
 const LIGHT_PALETTE: GanttPalette = {
-  bg: '#ffffff',
-  taskBg: '#90caf9',
-  taskProgress: '#42a5f5',
-  taskText: '#212121',
-  gridHeaderBg: '#f5f5f5',
-  gridHeaderText: '#424242',
-  gridBorder: '#e0e0e0',
-  todayHighlight: 'rgba(25, 118, 210, 0.08)',
-  linkColor: '#1976d2',
+  bg: '#fffbf5',           // surface-50
+  taskBg: '#fde4ba',       // surface-300
+  taskProgress: '#f59e0b', // primary-500
+  taskText: '#1c1917',     // text-primary
+  gridHeaderBg: '#fef7ed', // surface-100
+  gridHeaderText: '#78716c', // text-secondary
+  gridBorder: '#fef0db',   // surface-200
+  todayHighlight: 'rgba(245, 158, 11, 0.08)', // primary with alpha
+  linkColor: '#f59e0b',    // primary-500
 }
 
 const DARK_PALETTE: GanttPalette = {
-  bg: '#1e1e1e',
-  taskBg: '#42a5f5',
-  taskProgress: '#1565c0',
-  taskText: '#ffffff',
-  gridHeaderBg: '#2c2c2c',
-  gridHeaderText: '#e0e0e0',
-  gridBorder: '#424242',
-  todayHighlight: 'rgba(144, 202, 249, 0.08)',
-  linkColor: '#90caf9',
+  bg: '#1c1917',           // dark-bg
+  taskBg: '#44403c',       // warm gray
+  taskProgress: '#f59e0b', // primary-500
+  taskText: '#fef7ed',     // surface-100 (light text)
+  gridHeaderBg: '#292524', // dark-surface
+  gridHeaderText: '#a8a29e', // text-tertiary
+  gridBorder: '#44403c',   // dark-border
+  todayHighlight: 'rgba(245, 158, 11, 0.08)',
+  linkColor: '#f59e0b',    // primary-500
 }
 
 // ---------------------------------------------------------------------------
@@ -162,11 +162,11 @@ export function configureGantt(isDark: boolean): void {
     .gantt_task_line {
       background: ${palette.taskBg};
       color: ${palette.taskText};
-      border-radius: 4px;
+      border-radius: 6px;
     }
     .gantt_task_progress {
       background: ${palette.taskProgress};
-      border-radius: 4px;
+      border-radius: 6px;
     }
     .gantt_task_line.gantt-priority-critical {
       background: ${PRIORITY_COLORS.critical};

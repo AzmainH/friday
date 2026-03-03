@@ -1,13 +1,6 @@
 import { useState, useMemo, useCallback } from 'react'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Stack from '@mui/material/Stack'
-import IconButton from '@mui/material/IconButton'
-import Paper from '@mui/material/Paper'
-import LinearProgress from '@mui/material/LinearProgress'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import WeeklyTimesheet from '@/components/time/WeeklyTimesheet'
 import { useWeeklyTimesheet } from '@/hooks/useTimeTracking'
 import { formatHours, formatPercent } from '@/utils/formatters'
@@ -80,83 +73,69 @@ export default function TimeTrackingPage() {
     setWeekStart(toISODate(getMonday(new Date())))
   }, [])
 
+  const progressColor = utilization > 100
+    ? 'bg-red-500'
+    : utilization >= 80
+      ? 'bg-amber-500'
+      : 'bg-green-500'
+
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div className="max-w-6xl mx-auto px-6 py-8">
       {/* Header */}
-      <Typography variant="h4" gutterBottom>
-        Time Tracking
-      </Typography>
+      <h1 className="text-2xl font-bold text-text-primary mb-4">Time Tracking</h1>
 
       {/* Week selector */}
-      <Stack direction="row" alignItems="center" spacing={1} mb={3}>
-        <IconButton onClick={handlePrev} size="small">
-          <ChevronLeftIcon />
-        </IconButton>
-        <Typography
-          variant="subtitle1"
-          fontWeight={600}
-          sx={{ minWidth: 220, textAlign: 'center', cursor: 'pointer' }}
+      <div className="flex items-center gap-2 mb-6">
+        <button
+          type="button"
+          onClick={handlePrev}
+          className="p-1 rounded hover:bg-surface-100 transition-colors text-text-secondary"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <span
+          className="min-w-[220px] text-center text-sm font-semibold text-text-primary cursor-pointer"
           onClick={handleToday}
         >
           {formatWeekRange(weekStart)}
-        </Typography>
-        <IconButton onClick={handleNext} size="small">
-          <ChevronRightIcon />
-        </IconButton>
-      </Stack>
+        </span>
+        <button
+          type="button"
+          onClick={handleNext}
+          className="p-1 rounded hover:bg-surface-100 transition-colors text-text-secondary"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
 
       {/* Summary bar */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
-        <Stack direction="row" spacing={4} alignItems="center">
-          <Box sx={{ flex: '0 0 auto' }}>
-            <Typography variant="caption" color="text.secondary">
-              Total Hours
-            </Typography>
-            <Typography variant="h6" fontWeight={700}>
-              {formatHours(totalHours)}
-            </Typography>
-          </Box>
-          <Box sx={{ flex: '0 0 auto' }}>
-            <Typography variant="caption" color="text.secondary">
-              Capacity
-            </Typography>
-            <Typography variant="h6" fontWeight={700}>
-              {formatHours(WEEKLY_CAPACITY_HOURS)}
-            </Typography>
-          </Box>
-          <Box sx={{ flex: 1 }}>
-            <Stack direction="row" justifyContent="space-between" mb={0.5}>
-              <Typography variant="caption" color="text.secondary">
-                Utilization
-              </Typography>
-              <Typography variant="caption" fontWeight={600}>
-                {formatPercent(utilization)}
-              </Typography>
-            </Stack>
-            <LinearProgress
-              variant="determinate"
-              value={Math.min(utilization, 100)}
-              sx={{
-                height: 8,
-                borderRadius: 4,
-                bgcolor: 'grey.200',
-                '& .MuiLinearProgress-bar': {
-                  borderRadius: 4,
-                  bgcolor:
-                    utilization > 100
-                      ? 'error.main'
-                      : utilization >= 80
-                        ? 'warning.main'
-                        : 'success.main',
-                },
-              }}
-            />
-          </Box>
-        </Stack>
-      </Paper>
+      <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface p-4 mb-6">
+        <div className="flex items-center gap-8">
+          <div className="flex-shrink-0">
+            <p className="text-xs text-text-secondary">Total Hours</p>
+            <p className="text-lg font-bold text-text-primary">{formatHours(totalHours)}</p>
+          </div>
+          <div className="flex-shrink-0">
+            <p className="text-xs text-text-secondary">Capacity</p>
+            <p className="text-lg font-bold text-text-primary">{formatHours(WEEKLY_CAPACITY_HOURS)}</p>
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-text-secondary">Utilization</p>
+              <p className="text-xs font-semibold text-text-primary">{formatPercent(utilization)}</p>
+            </div>
+            <div className="h-2 w-full rounded-full bg-surface-200">
+              <div
+                className={cn('h-full rounded-full transition-all', progressColor)}
+                style={{ width: `${Math.min(utilization, 100)}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Timesheet grid */}
       <WeeklyTimesheet userId={userId} weekStart={weekStart} />
-    </Container>
+    </div>
   )
 }

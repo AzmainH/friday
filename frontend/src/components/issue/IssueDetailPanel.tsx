@@ -1,15 +1,13 @@
 import { useState, useCallback } from 'react'
-import Drawer from '@mui/material/Drawer'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
-import TextField from '@mui/material/TextField'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
-import Divider from '@mui/material/Divider'
-import Skeleton from '@mui/material/Skeleton'
-import CloseIcon from '@mui/icons-material/Close'
-import OpenInFullIcon from '@mui/icons-material/OpenInFull'
+import {
+  Dialog as HeadlessDialog,
+  DialogBackdrop,
+  DialogPanel,
+} from '@headlessui/react'
+import { X } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { Tabs, TabList, Tab, TabPanels, TabPanel } from '@/components/ui/Tabs'
+import { Divider } from '@/components/ui/Divider'
 import RichTextEditor from '@/components/editor/RichTextEditor'
 import CommentSection from '@/components/issue/CommentSection'
 import ActivityLog from '@/components/issue/ActivityLog'
@@ -20,17 +18,6 @@ interface IssueDetailPanelProps {
   issueId: string | null
   open: boolean
   onClose: () => void
-}
-
-interface TabPanelProps {
-  children: React.ReactNode
-  value: number
-  index: number
-}
-
-function TabPanel({ children, value, index }: TabPanelProps) {
-  if (value !== index) return null
-  return <Box sx={{ py: 2 }}>{children}</Box>
 }
 
 export default function IssueDetailPanel({ issueId, open, onClose }: IssueDetailPanelProps) {
@@ -64,161 +51,155 @@ export default function IssueDetailPanel({ issueId, open, onClose }: IssueDetail
   )
 
   return (
-    <Drawer
-      anchor="right"
-      open={open}
-      onClose={onClose}
-      slotProps={{
-        paper: {
-          sx: {
-            width: { xs: '100%', md: '60%' },
-            maxWidth: 960,
-          },
-        },
-      }}
-    >
-      {/* Header */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          px: 3,
-          py: 1.5,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          minHeight: 56,
-        }}
-      >
-        {isLoading ? (
-          <Skeleton variant="text" width="40%" height={32} />
-        ) : issue ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, minWidth: 0 }}>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              fontWeight={600}
-              sx={{ flexShrink: 0 }}
-            >
-              {issue.issue_key}
-            </Typography>
+    <HeadlessDialog open={open} onClose={onClose} className="relative z-[--z-modal]">
+      {/* Backdrop */}
+      <DialogBackdrop
+        transition
+        className={cn(
+          'fixed inset-0 bg-black/30 backdrop-blur-sm',
+          'transition duration-300 ease-out',
+          'data-[closed]:opacity-0',
+        )}
+      />
 
-            {isEditingSummary ? (
-              <TextField
-                value={summaryValue}
-                onChange={(e) => setSummaryValue(e.target.value)}
-                onBlur={handleSummarySave}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSummarySave()
-                  if (e.key === 'Escape') setIsEditingSummary(false)
-                }}
-                size="small"
-                fullWidth
-                autoFocus
-                variant="standard"
-                sx={{ '& .MuiInput-input': { fontSize: '1.1rem', fontWeight: 600 } }}
-              />
-            ) : (
-              <Typography
-                variant="h6"
-                sx={{
-                  cursor: 'pointer',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  '&:hover': { color: 'primary.main' },
-                }}
-                onClick={handleSummaryClick}
+      {/* Slide-over panel from right */}
+      <div className="fixed inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full">
+            <DialogPanel
+              transition
+              className={cn(
+                'pointer-events-auto w-screen max-w-[960px] md:w-[60vw]',
+                'flex flex-col bg-white shadow-xl dark:bg-surface-100',
+                'transition duration-300 ease-out',
+                'data-[closed]:translate-x-full',
+              )}
+            >
+              {/* Header */}
+              <div
+                className={cn(
+                  'flex min-h-[56px] items-center justify-between',
+                  'border-b border-surface-200 px-6 py-3',
+                  'dark:border-surface-300',
+                )}
               >
-                {issue.summary}
-              </Typography>
-            )}
-          </Box>
-        ) : null}
+                {isLoading ? (
+                  <div className="skeleton-shimmer h-6 w-2/5 rounded" />
+                ) : issue ? (
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <span className="shrink-0 text-sm font-semibold text-text-secondary">
+                      {issue.issue_key}
+                    </span>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 1 }}>
-          <IconButton size="small" onClick={onClose}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      </Box>
+                    {isEditingSummary ? (
+                      <input
+                        value={summaryValue}
+                        onChange={(e) => setSummaryValue(e.target.value)}
+                        onBlur={handleSummarySave}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSummarySave()
+                          if (e.key === 'Escape') setIsEditingSummary(false)
+                        }}
+                        autoFocus
+                        className={cn(
+                          'flex-1 border-b border-primary-500 bg-transparent',
+                          'text-lg font-semibold text-text-primary',
+                          'focus:outline-none',
+                        )}
+                      />
+                    ) : (
+                      <h2
+                        className={cn(
+                          'cursor-pointer truncate text-lg font-semibold text-text-primary',
+                          'hover:text-primary-600 transition-colors duration-150',
+                        )}
+                        onClick={handleSummaryClick}
+                      >
+                        {issue.summary}
+                      </h2>
+                    )}
+                  </div>
+                ) : null}
 
-      {/* Body */}
-      {isLoading ? (
-        <Box sx={{ p: 3 }}>
-          <Skeleton variant="text" width="50%" height={36} sx={{ mb: 1 }} />
-          <Skeleton variant="text" width="30%" height={22} sx={{ mb: 3 }} />
-          <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 1, mb: 2 }} />
-          <Skeleton variant="text" width="100%" height={20} />
-          <Skeleton variant="text" width="80%" height={20} />
-        </Box>
-      ) : issue ? (
-        <Box
-          sx={{
-            display: 'flex',
-            flex: 1,
-            overflow: 'hidden',
-          }}
-        >
-          {/* Left column: Description + Tabs */}
-          <Box
-            sx={{
-              flex: '0 0 65%',
-              overflow: 'auto',
-              px: 3,
-              py: 2,
-              borderRight: '1px solid',
-              borderColor: 'divider',
-            }}
-          >
-            {/* Description */}
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Description
-            </Typography>
-            <RichTextEditor
-              content={issue.description ?? ''}
-              onChange={handleDescriptionChange}
-              placeholder="Add a description..."
-              minHeight={120}
-            />
+                <div className="ml-2 flex shrink-0 items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className={cn(
+                      'rounded-[--radius-sm] p-1.5 text-text-secondary',
+                      'hover:bg-surface-100 hover:text-text-primary',
+                      'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
+                      'dark:hover:bg-surface-200',
+                    )}
+                  >
+                    <X className="h-5 w-5" />
+                    <span className="sr-only">Close</span>
+                  </button>
+                </div>
+              </div>
 
-            <Divider sx={{ my: 2 }} />
+              {/* Body */}
+              {isLoading ? (
+                <div className="space-y-4 p-6">
+                  <div className="skeleton-shimmer h-8 w-1/2 rounded" />
+                  <div className="skeleton-shimmer h-5 w-1/3 rounded" />
+                  <div className="skeleton-shimmer mt-4 h-[120px] rounded-[--radius-sm]" />
+                  <div className="skeleton-shimmer h-4 w-full rounded" />
+                  <div className="skeleton-shimmer h-4 w-4/5 rounded" />
+                </div>
+              ) : issue ? (
+                <div className="flex flex-1 overflow-hidden">
+                  {/* Left column: Description + Tabs (65%) */}
+                  <div
+                    className={cn(
+                      'w-[65%] shrink-0 overflow-y-auto px-6 py-4',
+                      'border-r border-surface-200 dark:border-surface-300',
+                    )}
+                  >
+                    {/* Description */}
+                    <h3 className="mb-2 text-sm font-semibold text-text-primary">
+                      Description
+                    </h3>
+                    <RichTextEditor
+                      content={issue.description ?? ''}
+                      onChange={handleDescriptionChange}
+                      placeholder="Add a description..."
+                      minHeight={120}
+                    />
 
-            {/* Tabs: Comments / Activity */}
-            <Tabs
-              value={activeTab}
-              onChange={(_e, val) => setActiveTab(val)}
-              sx={{ minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0.5 } }}
-            >
-              <Tab label="Comments" />
-              <Tab label="Activity" />
-            </Tabs>
+                    <Divider className="my-4" />
 
-            <TabPanel value={activeTab} index={0}>
-              <CommentSection issueId={issue.id} />
-            </TabPanel>
+                    {/* Tabs: Comments / Activity */}
+                    <Tabs selectedIndex={activeTab} onChange={setActiveTab}>
+                      <TabList>
+                        <Tab>Comments</Tab>
+                        <Tab>Activity</Tab>
+                      </TabList>
+                      <TabPanels>
+                        <TabPanel>
+                          <CommentSection issueId={issue.id} />
+                        </TabPanel>
+                        <TabPanel>
+                          <ActivityLog issueId={issue.id} />
+                        </TabPanel>
+                      </TabPanels>
+                    </Tabs>
+                  </div>
 
-            <TabPanel value={activeTab} index={1}>
-              <ActivityLog issueId={issue.id} />
-            </TabPanel>
-          </Box>
-
-          {/* Right column: Fields */}
-          <Box
-            sx={{
-              flex: '0 0 35%',
-              overflow: 'auto',
-              py: 1,
-            }}
-          >
-            <IssueFieldsPanel issue={issue} />
-          </Box>
-        </Box>
-      ) : (
-        <Box sx={{ p: 3 }}>
-          <Typography color="text.secondary">Issue not found.</Typography>
-        </Box>
-      )}
-    </Drawer>
+                  {/* Right column: Fields (35%) */}
+                  <div className="w-[35%] overflow-y-auto py-2">
+                    <IssueFieldsPanel issue={issue} />
+                  </div>
+                </div>
+              ) : (
+                <div className="p-6">
+                  <span className="text-sm text-text-secondary">Issue not found.</span>
+                </div>
+              )}
+            </DialogPanel>
+          </div>
+        </div>
+      </div>
+    </HeadlessDialog>
   )
 }

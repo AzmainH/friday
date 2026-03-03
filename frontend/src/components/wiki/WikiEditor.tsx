@@ -1,13 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import Alert from '@mui/material/Alert'
-import AlertTitle from '@mui/material/AlertTitle'
-import Typography from '@mui/material/Typography'
-import CircularProgress from '@mui/material/CircularProgress'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import SaveIcon from '@mui/icons-material/Save'
+import { CheckCircle, Save } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import RichTextEditor from '@/components/editor/RichTextEditor'
 import { useUpdatePage } from '@/hooks/useWiki'
 import type { WikiPage } from '@/types/api'
@@ -109,107 +102,88 @@ export default function WikiEditor({ page, onSave }: WikiEditorProps) {
   }, [handleSave])
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div className="flex flex-col h-full">
       {/* Version conflict alert */}
       {updatePage.conflictError && (
-        <Alert
-          severity="warning"
-          sx={{ mb: 2 }}
-          action={
-            <Button color="warning" size="small" onClick={handleReload}>
-              Reload page
-            </Button>
-          }
-        >
-          <AlertTitle>Version conflict</AlertTitle>
-          This page was modified by another user since you started editing. Your version is{' '}
-          {currentVersion}, but the server has version{' '}
-          {updatePage.conflictError.current_version}. Reload to get the latest version,
-          or copy your changes before reloading.
-        </Alert>
+        <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-[--radius-sm] mb-4 flex items-start gap-3">
+          <div className="flex-1">
+            <p className="text-sm font-semibold mb-0.5">Version conflict</p>
+            <p className="text-sm">
+              This page was modified by another user since you started editing. Your version is{' '}
+              {currentVersion}, but the server has version{' '}
+              {updatePage.conflictError.current_version}. Reload to get the latest version,
+              or copy your changes before reloading.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleReload}
+            className="text-sm font-medium text-amber-800 hover:text-amber-900 underline shrink-0"
+          >
+            Reload page
+          </button>
+        </div>
       )}
 
       {/* Title */}
-      <TextField
+      <input
+        type="text"
         value={title}
         onChange={(e) => {
           setTitle(e.target.value)
           setSaveStatus('idle')
         }}
         placeholder="Page title"
-        variant="standard"
-        fullWidth
-        InputProps={{
-          disableUnderline: true,
-          sx: {
-            fontSize: '2rem',
-            fontWeight: 700,
-            lineHeight: 1.3,
-          },
-        }}
-        sx={{ mb: 2 }}
+        className="w-full text-[2rem] font-bold leading-tight outline-none bg-transparent border-none placeholder:text-text-tertiary mb-4"
       />
 
       {/* Content editor */}
-      <Box sx={{ flex: 1, minHeight: 0 }}>
+      <div className="flex-1 min-h-0">
         <RichTextEditor
           content={content}
           onChange={handleContentChange}
           placeholder="Start writing..."
           minHeight={400}
         />
-      </Box>
+      </div>
 
       {/* Bottom bar: save button + status */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          mt: 2,
-          pt: 2,
-          borderTop: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <div className="flex items-center justify-between mt-4 pt-4 border-t border-surface-200">
+        <div className="flex items-center gap-2">
           {saveStatus === 'saving' && (
             <>
-              <CircularProgress size={16} />
-              <Typography variant="body2" color="text.secondary">
-                Saving...
-              </Typography>
+              <div className="animate-spin h-4 w-4 border-2 border-primary-500 border-t-transparent rounded-full" />
+              <span className="text-sm text-text-secondary">Saving...</span>
             </>
           )}
           {saveStatus === 'saved' && (
             <>
-              <CheckCircleIcon sx={{ fontSize: 18, color: 'success.main' }} />
-              <Typography variant="body2" color="success.main">
-                Saved
-              </Typography>
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="text-sm text-green-600">Saved</span>
             </>
           )}
           {saveStatus === 'error' && (
-            <Typography variant="body2" color="error">
-              Failed to save. Please try again.
-            </Typography>
+            <span className="text-sm text-red-600">Failed to save. Please try again.</span>
           )}
           {saveStatus === 'idle' && (
-            <Typography variant="caption" color="text.disabled">
-              Version {currentVersion}
-            </Typography>
+            <span className="text-xs text-text-tertiary">Version {currentVersion}</span>
           )}
-        </Box>
+        </div>
 
-        <Button
-          variant="contained"
-          startIcon={<SaveIcon />}
+        <button
+          type="button"
           onClick={handleSave}
           disabled={saveStatus === 'saving' || !title.trim()}
+          className={cn(
+            'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-[--radius-sm] transition-colors',
+            'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700',
+            'disabled:opacity-50 disabled:pointer-events-none',
+          )}
         >
+          <Save className="h-4 w-4" />
           Save
-        </Button>
-      </Box>
-    </Box>
+        </button>
+      </div>
+    </div>
   )
 }

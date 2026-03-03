@@ -1,24 +1,7 @@
 import { useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemText from '@mui/material/ListItemText'
-import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction'
-import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import TextField from '@mui/material/TextField'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Skeleton from '@mui/material/Skeleton'
-import Alert from '@mui/material/Alert'
-import Stack from '@mui/material/Stack'
-import Paper from '@mui/material/Paper'
-import AddIcon from '@mui/icons-material/Add'
-import EditIcon from '@mui/icons-material/Edit'
-import DeleteIcon from '@mui/icons-material/Delete'
+import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Dialog, DialogFooter } from '@/components/ui/Dialog'
+import { Button } from '@/components/ui/Button'
 import {
   useLabels,
   useCreateLabel,
@@ -98,151 +81,137 @@ export default function LabelSettings({ projectId }: LabelSettingsProps) {
 
   if (isLoading) {
     return (
-      <Stack spacing={2}>
-        <Skeleton variant="rounded" height={48} />
-        <Skeleton variant="rounded" height={200} />
-      </Stack>
+      <div className="space-y-4">
+        <div className="skeleton-shimmer h-12 rounded-lg" />
+        <div className="skeleton-shimmer h-52 rounded-lg" />
+      </div>
     )
   }
 
   if (error) {
-    return <Alert severity="error">Failed to load labels.</Alert>
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
+        Failed to load labels.
+      </div>
+    )
   }
 
   return (
-    <Stack spacing={3}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">Labels</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog}>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-text-primary">Labels</h3>
+        <Button variant="primary" leftIcon={<Plus className="h-4 w-4" />} onClick={openCreateDialog}>
           Add Label
         </Button>
-      </Box>
+      </div>
 
-      <Paper variant="outlined">
-        <List disablePadding>
-          {labels.length === 0 && (
-            <ListItem>
-              <ListItemText
-                primary="No labels defined"
-                secondary="Add labels to categorise and filter issues."
-                sx={{ textAlign: 'center', py: 3 }}
-              />
-            </ListItem>
-          )}
-          {labels.map((label, idx) => (
-            <ListItem key={label.id} divider={idx < labels.length - 1} sx={{ py: 1.5 }}>
-              <Box
-                sx={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: 1,
-                  bgcolor: label.color,
-                  mr: 2,
-                  flexShrink: 0,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                }}
-              />
-              <ListItemText
-                primary={label.name}
-                secondary={label.color}
-              />
-              <ListItemSecondaryAction>
-                <IconButton size="small" onClick={() => openEditDialog(label)} aria-label="Edit label">
-                  <EditIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => handleDelete(label.id)}
-                  aria-label="Delete label"
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-          ))}
-        </List>
-      </Paper>
-
-      {/* Add/Edit Dialog */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingId ? 'Edit Label' : 'New Label'}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={3} sx={{ mt: 1 }}>
-            <TextField
-              label="Label Name"
-              value={form.name}
-              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-              fullWidth
-              autoFocus
+      <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface divide-y divide-surface-200">
+        {labels.length === 0 && (
+          <div className="py-8 text-center">
+            <p className="text-sm text-text-primary">No labels defined</p>
+            <p className="text-xs text-text-secondary mt-1">Add labels to categorise and filter issues.</p>
+          </div>
+        )}
+        {labels.map((label) => (
+          <div key={label.id} className="flex items-center px-4 py-3">
+            {/* Color swatch */}
+            <div
+              className="w-6 h-6 rounded flex-shrink-0 mr-3 border border-surface-200"
+              style={{ backgroundColor: label.color }}
             />
 
-            <Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Color
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                {COLOR_PRESETS.map((c) => (
-                  <Box
-                    key={c}
-                    onClick={() => setForm((prev) => ({ ...prev, color: c }))}
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 1,
-                      bgcolor: c,
-                      cursor: 'pointer',
-                      border: form.color === c ? '3px solid' : '2px solid transparent',
-                      borderColor: form.color === c ? 'text.primary' : 'transparent',
-                      transition: 'border-color 0.2s',
-                      '&:hover': { opacity: 0.8 },
-                    }}
-                  />
-                ))}
-              </Box>
+            {/* Label info */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-text-primary">{label.name}</p>
+              <p className="text-xs text-text-secondary">{label.color}</p>
+            </div>
 
-              {/* Custom color input */}
-              <TextField
-                label="Custom Color"
+            {/* Actions */}
+            <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => openEditDialog(label)}
+                aria-label="Edit label"
+                className="inline-flex items-center justify-center rounded-[--radius-sm] p-1.5 text-text-secondary hover:bg-surface-100 hover:text-text-primary transition-colors"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(label.id)}
+                aria-label="Delete label"
+                className="inline-flex items-center justify-center rounded-[--radius-sm] p-1.5 text-red-500 hover:bg-red-50 hover:text-red-700 transition-colors"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} title={editingId ? 'Edit Label' : 'New Label'} size="sm">
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="label-name" className="block text-sm font-medium text-text-primary mb-1">Label Name</label>
+            <input
+              id="label-name"
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+              autoFocus
+              className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
+            />
+          </div>
+
+          <div>
+            <span className="block text-sm font-medium text-text-primary mb-1">Color</span>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {COLOR_PRESETS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setForm((prev) => ({ ...prev, color: c }))}
+                  className="w-8 h-8 rounded cursor-pointer transition-all hover:opacity-80"
+                  style={{
+                    backgroundColor: c,
+                    border: form.color === c ? '3px solid var(--color-text-primary, #111)' : '2px solid transparent',
+                  }}
+                  aria-label={`Select color ${c}`}
+                />
+              ))}
+            </div>
+
+            {/* Custom color input */}
+            <div className="flex items-center gap-2">
+              <div
+                className="w-5 h-5 rounded flex-shrink-0 border border-surface-200"
+                style={{ backgroundColor: form.color }}
+              />
+              <input
+                type="text"
                 value={form.color}
                 onChange={(e) => setForm((prev) => ({ ...prev, color: e.target.value }))}
-                size="small"
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <Box
-                        sx={{
-                          width: 20,
-                          height: 20,
-                          borderRadius: 0.5,
-                          bgcolor: form.color,
-                          mr: 1,
-                          flexShrink: 0,
-                          border: '1px solid',
-                          borderColor: 'divider',
-                        }}
-                      />
-                    ),
-                  },
-                }}
+                className="w-full rounded-lg border border-surface-200 bg-white px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
+                placeholder="#hex"
               />
-            </Box>
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setDialogOpen(false)} color="inherit">
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setDialogOpen(false)}>
             Cancel
           </Button>
           <Button
-            variant="contained"
+            variant="primary"
             onClick={handleSave}
             disabled={!form.name.trim() || createLabel.isPending || updateLabel.isPending}
           >
             {editingId ? 'Save' : 'Create'}
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </Dialog>
-    </Stack>
+    </div>
   )
 }

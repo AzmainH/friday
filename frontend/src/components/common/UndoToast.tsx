@@ -1,11 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
-import Snackbar from '@mui/material/Snackbar'
-import Button from '@mui/material/Button'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import LinearProgress from '@mui/material/LinearProgress'
-import IconButton from '@mui/material/IconButton'
-import CloseIcon from '@mui/icons-material/Close'
+import { X } from 'lucide-react'
+import { cn } from '@/lib/cn'
 
 interface UndoToastProps {
   open: boolean
@@ -51,38 +46,38 @@ export default function UndoToast({
     return cleanup
   }, [open, duration, onClose, cleanup])
 
+  if (!open) return null
+
   return (
-    <Snackbar
-      open={open}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      onClose={(_e, reason) => {
-        if (reason !== 'clickaway') onClose()
-      }}
-    >
-      <Box
-        sx={{
-          bgcolor: 'background.paper',
-          borderRadius: 2,
-          boxShadow: 8,
-          minWidth: 320,
-          overflow: 'hidden',
-          border: '1px solid',
-          borderColor: 'divider',
-        }}
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[--z-toast]">
+      <div
+        className={cn(
+          'bg-white dark:bg-surface-100 rounded-[--radius-md] shadow-xl min-w-[320px] overflow-hidden',
+          'border border-surface-200 dark:border-surface-200',
+        )}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1.5, gap: 1 }}>
-          <Typography variant="body2" sx={{ flex: 1 }}>
-            {message}
-          </Typography>
-          <Button size="small" color="primary" onClick={onUndo} sx={{ fontWeight: 700 }}>
+        <div className="flex items-center gap-2 px-4 py-3">
+          <p className="flex-1 text-sm text-text-primary">{message}</p>
+          <button
+            onClick={onUndo}
+            className="text-sm font-bold text-primary-600 hover:text-primary-700 transition-colors"
+          >
             Undo
-          </Button>
-          <IconButton size="small" onClick={onClose}>
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </Box>
-        <LinearProgress variant="determinate" value={progress} sx={{ height: 3 }} />
-      </Box>
-    </Snackbar>
+          </button>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-[--radius-xs] text-text-tertiary hover:bg-surface-100 transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
+        <div className="h-[3px] bg-surface-100 dark:bg-surface-200">
+          <div
+            className="h-full bg-primary-500 transition-[width] duration-100 ease-linear"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+    </div>
   )
 }

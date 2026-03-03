@@ -1,13 +1,5 @@
-import { useCallback } from 'react'
-import Box from '@mui/material/Box'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import Select, { type SelectChangeEvent } from '@mui/material/Select'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
-import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import { useCallback, type ChangeEvent } from 'react'
+import { Play } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -41,12 +33,21 @@ const ACTION_TYPES = [
 const PRIORITIES = ['critical', 'high', 'medium', 'low', 'none']
 
 // ---------------------------------------------------------------------------
+// Shared classes
+// ---------------------------------------------------------------------------
+
+const inputClass =
+  'w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border'
+
+const selectClass = inputClass
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
 export default function ActionSelector({ value, onChange }: ActionSelectorProps) {
   const handleTypeChange = useCallback(
-    (e: SelectChangeEvent) => {
+    (e: ChangeEvent<HTMLSelectElement>) => {
       onChange({
         action_type: e.target.value,
         action_config: {},
@@ -68,150 +69,181 @@ export default function ActionSelector({ value, onChange }: ActionSelectorProps)
   const selectedAction = ACTION_TYPES.find((a) => a.value === value.action_type)
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <PlayArrowIcon color="success" fontSize="small" />
-        <Typography variant="subtitle2" fontWeight={600}>
-          THEN
-        </Typography>
-        <Chip label="Action" size="small" color="success" variant="outlined" />
-      </Box>
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <Play className="h-4 w-4 text-green-500" />
+        <span className="text-sm font-semibold text-text-primary">THEN</span>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-green-300 text-green-700 dark:text-green-400">
+          Action
+        </span>
+      </div>
 
-      <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-        <InputLabel>Action Type</InputLabel>
-        <Select
+      <div className="mb-3">
+        <label htmlFor="action-type" className="block text-xs font-medium text-text-secondary mb-1">
+          Action Type
+        </label>
+        <select
+          id="action-type"
           value={value.action_type}
-          label="Action Type"
           onChange={handleTypeChange}
+          className={selectClass}
         >
+          <option value="">Select an action...</option>
           {ACTION_TYPES.map((a) => (
-            <MenuItem key={a.value} value={a.value}>
-              <Box>
-                <Typography variant="body2">{a.label}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {a.description}
-                </Typography>
-              </Box>
-            </MenuItem>
+            <option key={a.value} value={a.value}>
+              {a.label}
+            </option>
           ))}
-        </Select>
-      </FormControl>
+        </select>
+      </div>
 
       {selectedAction && (
-        <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+        <p className="text-xs text-text-secondary mb-3">
           {selectedAction.description}
-        </Typography>
+        </p>
       )}
 
       {/* Action-specific config fields */}
       {value.action_type === 'change_status' && (
-        <TextField
-          size="small"
-          label="Target Status"
-          placeholder="e.g. In Progress"
-          value={(value.action_config.status_name as string) ?? ''}
-          onChange={(e) => handleConfigChange('status_name', e.target.value)}
-          fullWidth
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">
+            Target Status
+          </label>
+          <input
+            type="text"
+            placeholder="e.g. In Progress"
+            value={(value.action_config.status_name as string) ?? ''}
+            onChange={(e) => handleConfigChange('status_name', e.target.value)}
+            className={inputClass}
+          />
+        </div>
       )}
 
       {value.action_type === 'change_assignee' && (
-        <TextField
-          size="small"
-          label="Assignee (user ID or email)"
-          placeholder="user@example.com"
-          value={(value.action_config.assignee as string) ?? ''}
-          onChange={(e) => handleConfigChange('assignee', e.target.value)}
-          fullWidth
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">
+            Assignee (user ID or email)
+          </label>
+          <input
+            type="text"
+            placeholder="user@example.com"
+            value={(value.action_config.assignee as string) ?? ''}
+            onChange={(e) => handleConfigChange('assignee', e.target.value)}
+            className={inputClass}
+          />
+        </div>
       )}
 
       {value.action_type === 'add_label' && (
-        <TextField
-          size="small"
-          label="Label Name"
-          placeholder="e.g. urgent"
-          value={(value.action_config.label_name as string) ?? ''}
-          onChange={(e) => handleConfigChange('label_name', e.target.value)}
-          fullWidth
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">
+            Label Name
+          </label>
+          <input
+            type="text"
+            placeholder="e.g. urgent"
+            value={(value.action_config.label_name as string) ?? ''}
+            onChange={(e) => handleConfigChange('label_name', e.target.value)}
+            className={inputClass}
+          />
+        </div>
       )}
 
       {value.action_type === 'remove_label' && (
-        <TextField
-          size="small"
-          label="Label Name"
-          placeholder="e.g. triaged"
-          value={(value.action_config.label_name as string) ?? ''}
-          onChange={(e) => handleConfigChange('label_name', e.target.value)}
-          fullWidth
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">
+            Label Name
+          </label>
+          <input
+            type="text"
+            placeholder="e.g. triaged"
+            value={(value.action_config.label_name as string) ?? ''}
+            onChange={(e) => handleConfigChange('label_name', e.target.value)}
+            className={inputClass}
+          />
+        </div>
       )}
 
       {value.action_type === 'add_comment' && (
-        <TextField
-          size="small"
-          label="Comment Text"
-          placeholder="Automated comment..."
-          value={(value.action_config.comment_text as string) ?? ''}
-          onChange={(e) => handleConfigChange('comment_text', e.target.value)}
-          multiline
-          rows={3}
-          fullWidth
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">
+            Comment Text
+          </label>
+          <textarea
+            placeholder="Automated comment..."
+            value={(value.action_config.comment_text as string) ?? ''}
+            onChange={(e) => handleConfigChange('comment_text', e.target.value)}
+            rows={3}
+            className={inputClass}
+          />
+        </div>
       )}
 
       {value.action_type === 'set_priority' && (
-        <FormControl fullWidth size="small">
-          <InputLabel>Priority</InputLabel>
-          <Select
+        <div>
+          <label htmlFor="action-priority" className="block text-xs font-medium text-text-secondary mb-1">
+            Priority
+          </label>
+          <select
+            id="action-priority"
             value={(value.action_config.priority as string) ?? ''}
-            label="Priority"
-            onChange={(e: SelectChangeEvent) => handleConfigChange('priority', e.target.value)}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) => handleConfigChange('priority', e.target.value)}
+            className={selectClass}
           >
+            <option value="">Select priority...</option>
             {PRIORITIES.map((p) => (
-              <MenuItem key={p} value={p}>
+              <option key={p} value={p}>
                 {p.charAt(0).toUpperCase() + p.slice(1)}
-              </MenuItem>
+              </option>
             ))}
-          </Select>
-        </FormControl>
+          </select>
+        </div>
       )}
 
       {value.action_type === 'send_notification' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-            size="small"
-            label="Recipients (comma-separated emails)"
-            placeholder="user1@example.com, user2@example.com"
-            value={(value.action_config.recipients as string) ?? ''}
-            onChange={(e) => handleConfigChange('recipients', e.target.value)}
-            fullWidth
-          />
-          <TextField
-            size="small"
-            label="Message"
-            placeholder="Notification message..."
-            value={(value.action_config.message as string) ?? ''}
-            onChange={(e) => handleConfigChange('message', e.target.value)}
-            multiline
-            rows={2}
-            fullWidth
-          />
-        </Box>
+        <div className="flex flex-col gap-3">
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1">
+              Recipients (comma-separated emails)
+            </label>
+            <input
+              type="text"
+              placeholder="user1@example.com, user2@example.com"
+              value={(value.action_config.recipients as string) ?? ''}
+              onChange={(e) => handleConfigChange('recipients', e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1">
+              Message
+            </label>
+            <textarea
+              placeholder="Notification message..."
+              value={(value.action_config.message as string) ?? ''}
+              onChange={(e) => handleConfigChange('message', e.target.value)}
+              rows={2}
+              className={inputClass}
+            />
+          </div>
+        </div>
       )}
 
       {value.action_type === 'set_due_date' && (
-        <TextField
-          size="small"
-          label="Days from now"
-          type="number"
-          value={(value.action_config.days_from_now as number) ?? 7}
-          onChange={(e) => handleConfigChange('days_from_now', Number(e.target.value))}
-          fullWidth
-          slotProps={{ htmlInput: { min: 1, max: 365 } }}
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">
+            Days from now
+          </label>
+          <input
+            type="number"
+            min={1}
+            max={365}
+            value={(value.action_config.days_from_now as number) ?? 7}
+            onChange={(e) => handleConfigChange('days_from_now', Number(e.target.value))}
+            className={inputClass}
+          />
+        </div>
       )}
-    </Box>
+    </div>
   )
 }

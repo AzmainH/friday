@@ -1,11 +1,9 @@
-import { useMemo } from 'react'
-import { ThemeProvider } from '@mui/material/styles'
-import CssBaseline from '@mui/material/CssBaseline'
+import { useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from 'react-router-dom'
-import { getTheme } from '@/theme/theme'
 import { useUiStore } from '@/stores/uiStore'
 import { ErrorBoundary } from '@/components/common'
+import { ToastProvider } from '@/components/ui/Toast'
 import { router } from '@/router'
 
 const queryClient = new QueryClient({
@@ -20,15 +18,22 @@ const queryClient = new QueryClient({
 
 export default function App() {
   const themeMode = useUiStore((s) => s.themeMode)
-  const theme = useMemo(() => getTheme(themeMode), [themeMode])
+
+  useEffect(() => {
+    const root = document.documentElement
+    if (themeMode === 'dark') {
+      root.classList.add('dark')
+    } else {
+      root.classList.remove('dark')
+    }
+  }, [themeMode])
 
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
+        <ToastProvider>
           <RouterProvider router={router} />
-        </ThemeProvider>
+        </ToastProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   )

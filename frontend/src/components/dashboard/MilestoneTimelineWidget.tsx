@@ -1,7 +1,4 @@
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
-import { useTheme } from '@mui/material/styles'
+import { cn } from '@/lib/cn'
 import { formatDate } from '@/utils/formatters'
 
 // ---------------------------------------------------------------------------
@@ -23,21 +20,27 @@ export interface MilestoneTimelineWidgetProps {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function statusColor(status: string): 'success' | 'warning' | 'error' | 'default' | 'info' {
+function statusChipClasses(status: string): string {
   switch (status) {
     case 'completed':
-      return 'success'
+      return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800'
     case 'in_progress':
     case 'active':
-      return 'info'
+      return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800'
     case 'at_risk':
-      return 'warning'
+      return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-400 dark:border-amber-800'
     case 'overdue':
     case 'missed':
-      return 'error'
+      return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800'
     default:
-      return 'default'
+      return 'bg-surface-50 text-text-secondary border-surface-200'
   }
+}
+
+function dotColor(status: string, overdue: boolean): string {
+  if (status === 'completed') return 'var(--color-success, #22c55e)'
+  if (overdue) return 'var(--color-error, #ef4444)'
+  return 'var(--color-primary-500, #f59e0b)'
 }
 
 function isOverdue(dueDate: string | null): boolean {
@@ -50,15 +53,11 @@ function isOverdue(dueDate: string | null): boolean {
 // ---------------------------------------------------------------------------
 
 export default function MilestoneTimelineWidget({ milestones }: MilestoneTimelineWidgetProps) {
-  const theme = useTheme()
-
   if (milestones.length === 0) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-        <Typography variant="body2" color="text.secondary">
-          No milestones to display
-        </Typography>
-      </Box>
+      <div className="flex items-center justify-center h-full">
+        <p className="text-sm text-text-secondary">No milestones to display</p>
+      </div>
     )
   }
 
@@ -71,105 +70,56 @@ export default function MilestoneTimelineWidget({ milestones }: MilestoneTimelin
   })
 
   return (
-    <Box sx={{ width: '100%', height: '100%', overflowX: 'auto', overflowY: 'hidden' }}>
+    <div className="w-full h-full overflow-x-auto overflow-y-hidden">
       {/* Horizontal timeline */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: 0,
-          minWidth: sorted.length * 160,
-          position: 'relative',
-          pt: 2,
-        }}
+      <div
+        className="flex items-start relative pt-4"
+        style={{ minWidth: sorted.length * 160 }}
       >
         {/* Connecting line */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 28,
-            left: 20,
-            right: 20,
-            height: 2,
-            bgcolor: 'divider',
-          }}
-        />
+        <div className="absolute top-[28px] left-5 right-5 h-0.5 bg-surface-200" />
 
         {sorted.map((milestone) => {
           const overdue = milestone.status !== 'completed' && isOverdue(milestone.due_date)
           return (
-            <Box
+            <div
               key={milestone.id}
-              sx={{
-                flex: '0 0 auto',
-                width: 150,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                position: 'relative',
-                px: 1,
-              }}
+              className="flex-none w-[150px] flex flex-col items-center relative px-2"
             >
               {/* Dot */}
-              <Box
-                sx={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: '50%',
-                  bgcolor:
-                    milestone.status === 'completed'
-                      ? theme.palette.success.main
-                      : overdue
-                        ? theme.palette.error.main
-                        : theme.palette.primary.main,
-                  border: '2px solid',
-                  borderColor: 'background.paper',
-                  zIndex: 1,
-                  mb: 1,
-                }}
+              <div
+                className="w-3.5 h-3.5 rounded-full border-2 border-white dark:border-dark-surface z-[1] mb-2"
+                style={{ backgroundColor: dotColor(milestone.status, overdue) }}
               />
 
               {/* Name */}
-              <Typography
-                variant="caption"
-                sx={{
-                  fontWeight: 600,
-                  textAlign: 'center',
-                  lineHeight: 1.2,
-                  mb: 0.5,
-                  maxWidth: '100%',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              <span className="text-xs font-semibold text-center leading-tight mb-1 max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
                 {milestone.name}
-              </Typography>
+              </span>
 
               {/* Due date */}
-              <Typography
-                variant="caption"
-                color={overdue ? 'error' : 'text.secondary'}
-                sx={{ mb: 0.5 }}
+              <span
+                className={cn(
+                  'text-xs mb-1',
+                  overdue ? 'text-error' : 'text-text-secondary',
+                )}
               >
                 {formatDate(milestone.due_date)}
-              </Typography>
+              </span>
 
               {/* Status chip */}
-              <Chip
-                label={milestone.status.replace(/_/g, ' ')}
-                size="small"
-                color={statusColor(milestone.status)}
-                sx={{
-                  height: 18,
-                  fontSize: '0.65rem',
-                  textTransform: 'capitalize',
-                }}
-              />
-            </Box>
+              <span
+                className={cn(
+                  'inline-block px-1.5 py-0.5 text-[0.65rem] font-medium rounded-full border capitalize',
+                  statusChipClasses(milestone.status),
+                )}
+              >
+                {milestone.status.replace(/_/g, ' ')}
+              </span>
+            </div>
           )
         })}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }

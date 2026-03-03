@@ -1,30 +1,18 @@
-import { useState, useCallback, useMemo, type DragEvent } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
-import Button from '@mui/material/Button'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import Skeleton from '@mui/material/Skeleton'
-import Collapse from '@mui/material/Collapse'
-import Tooltip from '@mui/material/Tooltip'
-import TextField from '@mui/material/TextField'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import ArticleIcon from '@mui/icons-material/Article'
-import AddIcon from '@mui/icons-material/Add'
-import PostAddIcon from '@mui/icons-material/PostAdd'
-import DeleteIcon from '@mui/icons-material/Delete'
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
+import { useState, useCallback, useMemo, useRef, type DragEvent } from 'react'
+import { Menu, MenuButton, MenuItems, MenuItem, Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
+import {
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  Plus,
+  FilePlus,
+  Trash2,
+  GripVertical,
+  ArrowUp,
+  ArrowDown,
+  MoreVertical,
+} from 'lucide-react'
+import { cn } from '@/lib/cn'
 import { useWikiTree, useCreatePage, useDeletePage, useMovePage } from '@/hooks/useWiki'
 import type { WikiTreeNode } from '@/hooks/useWiki'
 
@@ -79,155 +67,144 @@ function TreeNode({
   onMoveUp,
   onMoveDown,
 }: TreeNodeProps) {
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null)
   const hasChildren = node.children.length > 0
   const isExpanded = expanded.has(node.id)
   const isSelected = node.id === currentPageId
 
   return (
     <>
-      <Box
+      <div
         draggable
         onDragStart={(e) => onDragStart(e, node.id)}
         onDragOver={onDragOver}
         onDrop={(e) => onDrop(e, node.id)}
         onClick={() => onPageSelect(node.id)}
-        onContextMenu={(e) => {
-          e.preventDefault()
-          setMenuAnchor(e.currentTarget as HTMLElement)
-        }}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.5,
-          pl: 1 + depth * 2,
-          pr: 0.5,
-          py: 0.5,
-          cursor: 'pointer',
-          borderRadius: 1,
-          bgcolor: isSelected ? 'action.selected' : 'transparent',
-          '&:hover': {
-            bgcolor: isSelected ? 'action.selected' : 'action.hover',
-          },
-          '&:hover .tree-actions': {
-            opacity: 1,
-          },
-          userSelect: 'none',
-        }}
+        className={cn(
+          'group flex items-center gap-1 pr-1 py-1 cursor-pointer rounded-[var(--radius-sm)] select-none',
+          isSelected
+            ? 'bg-primary-50 dark:bg-primary-900/20'
+            : 'hover:bg-surface-50',
+        )}
+        style={{ paddingLeft: `${8 + depth * 24}px` }}
       >
-        <DragIndicatorIcon
-          sx={{ fontSize: 16, color: 'text.disabled', cursor: 'grab', flexShrink: 0 }}
+        <GripVertical
+          size={16}
+          className="shrink-0 cursor-grab text-text-tertiary"
         />
 
         {hasChildren ? (
-          <IconButton
-            size="small"
+          <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation()
               toggleExpand(node.id)
             }}
-            sx={{ p: 0.25 }}
+            className="p-0.5 rounded hover:bg-surface-100 transition-colors"
           >
             {isExpanded ? (
-              <ExpandMoreIcon sx={{ fontSize: 18 }} />
+              <ChevronDown size={18} className="text-text-secondary" />
             ) : (
-              <ChevronRightIcon sx={{ fontSize: 18 }} />
+              <ChevronRight size={18} className="text-text-secondary" />
             )}
-          </IconButton>
+          </button>
         ) : (
-          <Box sx={{ width: 26 }} />
+          <span className="w-[26px]" />
         )}
 
-        <ArticleIcon sx={{ fontSize: 18, color: 'text.secondary', flexShrink: 0 }} />
+        <FileText size={18} className="shrink-0 text-text-secondary" />
 
-        <Typography
-          variant="body2"
-          noWrap
-          sx={{
-            flex: 1,
-            fontWeight: isSelected ? 600 : 400,
-            color: isSelected ? 'primary.main' : 'text.primary',
-          }}
+        <span
+          className={cn(
+            'flex-1 truncate text-sm',
+            isSelected
+              ? 'font-semibold text-primary-700'
+              : 'text-text-primary',
+          )}
         >
           {node.title}
-        </Typography>
+        </span>
 
-        <Box
-          className="tree-actions"
-          sx={{ opacity: 0, display: 'flex', transition: 'opacity 0.15s' }}
-        >
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation()
-              setMenuAnchor(e.currentTarget)
-            }}
-            sx={{ p: 0.25 }}
-          >
-            <MoreVertIcon sx={{ fontSize: 16 }} />
-          </IconButton>
-        </Box>
-
-        <Menu
-          anchorEl={menuAnchor}
-          open={Boolean(menuAnchor)}
-          onClose={() => setMenuAnchor(null)}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <MenuItem
-            onClick={() => {
-              setMenuAnchor(null)
-              onCreateChild(node.id)
-            }}
-          >
-            <ListItemIcon>
-              <PostAddIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>New child page</ListItemText>
-          </MenuItem>
-          {index > 0 && (
-            <MenuItem
-              onClick={() => {
-                setMenuAnchor(null)
-                onMoveUp(node.id)
-              }}
+        <div className="flex opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+          <Menu as="div" className="relative">
+            <MenuButton
+              as="button"
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              className="p-0.5 rounded hover:bg-surface-100 transition-colors"
             >
-              <ListItemIcon>
-                <ArrowUpwardIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Move up</ListItemText>
-            </MenuItem>
-          )}
-          {index < siblings.length - 1 && (
-            <MenuItem
-              onClick={() => {
-                setMenuAnchor(null)
-                onMoveDown(node.id)
-              }}
+              <MoreVertical size={16} className="text-text-secondary" />
+            </MenuButton>
+            <MenuItems
+              anchor="bottom end"
+              className="z-50 w-48 rounded-[var(--radius-md)] bg-white dark:bg-surface-800 shadow-lg ring-1 ring-black/5 focus:outline-none py-1"
             >
-              <ListItemIcon>
-                <ArrowDownwardIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Move down</ListItemText>
-            </MenuItem>
-          )}
-          <MenuItem
-            onClick={() => {
-              setMenuAnchor(null)
-              onDelete(node.id, node.title)
-            }}
-            sx={{ color: 'error.main' }}
-          >
-            <ListItemIcon>
-              <DeleteIcon fontSize="small" color="error" />
-            </ListItemIcon>
-            <ListItemText>Delete</ListItemText>
-          </MenuItem>
-        </Menu>
-      </Box>
+              <MenuItem>
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-text-primary data-[focus]:bg-surface-50"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onCreateChild(node.id)
+                  }}
+                >
+                  <FilePlus size={16} className="text-text-secondary" />
+                  New child page
+                </button>
+              </MenuItem>
+              {index > 0 && (
+                <MenuItem>
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-text-primary data-[focus]:bg-surface-50"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onMoveUp(node.id)
+                    }}
+                  >
+                    <ArrowUp size={16} className="text-text-secondary" />
+                    Move up
+                  </button>
+                </MenuItem>
+              )}
+              {index < siblings.length - 1 && (
+                <MenuItem>
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-text-primary data-[focus]:bg-surface-50"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onMoveDown(node.id)
+                    }}
+                  >
+                    <ArrowDown size={16} className="text-text-secondary" />
+                    Move down
+                  </button>
+                </MenuItem>
+              )}
+              <MenuItem>
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-red-600 data-[focus]:bg-surface-50"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDelete(node.id, node.title)
+                  }}
+                >
+                  <Trash2 size={16} className="text-red-500" />
+                  Delete
+                </button>
+              </MenuItem>
+            </MenuItems>
+          </Menu>
+        </div>
+      </div>
 
       {hasChildren && (
-        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+        <div
+          className={cn(
+            'overflow-hidden transition-all duration-200',
+            isExpanded ? 'max-h-[9999px]' : 'max-h-0',
+          )}
+        >
           {node.children.map((child, childIndex) => (
             <TreeNode
               key={child.id}
@@ -249,7 +226,7 @@ function TreeNode({
               onMoveDown={onMoveDown}
             />
           ))}
-        </Collapse>
+        </div>
       )}
     </>
   )
@@ -273,6 +250,8 @@ export default function WikiTree({ spaceId, currentPageId, onPageSelect }: WikiT
   const [newPageTitle, setNewPageTitle] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null)
   const [draggedId, setDraggedId] = useState<string | null>(null)
+
+  const titleInputRef = useRef<HTMLInputElement>(null)
 
   const toggleExpand = useCallback((id: string) => {
     setExpanded((prev) => {
@@ -368,7 +347,7 @@ export default function WikiTree({ spaceId, currentPageId, onPageSelect }: WikiT
 
   const handleMoveUp = useCallback(
     (nodeId: string) => {
-      const { siblings, index, parentId } = findSiblingsAndIndex(nodeId)
+      const { index, parentId } = findSiblingsAndIndex(nodeId)
       if (index <= 0) return
       movePage.mutate({
         pageId: nodeId,
@@ -433,56 +412,51 @@ export default function WikiTree({ spaceId, currentPageId, onPageSelect }: WikiT
   // Loading state
   if (isLoading) {
     return (
-      <Box sx={{ p: 1 }}>
+      <div className="p-2">
         {Array.from({ length: 6 }, (_, i) => (
-          <Skeleton key={i} variant="text" width={`${70 - i * 5}%`} height={28} sx={{ ml: 1 }} />
+          <div
+            key={i}
+            className="ml-2 mb-1 h-5 animate-pulse rounded bg-surface-100"
+            style={{ width: `${70 - i * 5}%` }}
+          />
         ))}
-      </Box>
+      </div>
     )
   }
 
   const pages = tree ?? []
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          px: 1.5,
-          py: 1,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        <Typography variant="subtitle2" color="text.secondary" sx={{ textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
+      <div className="flex items-center justify-between px-3 py-2 border-b border-surface-200">
+        <span className="text-[0.7rem] font-medium uppercase tracking-wider text-text-secondary">
           Pages
-        </Typography>
-        <Tooltip title="New page">
-          <IconButton size="small" onClick={() => handleCreateChild(null)}>
-            <AddIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      </Box>
+        </span>
+        <button
+          type="button"
+          title="New page"
+          onClick={() => handleCreateChild(null)}
+          className="p-1 rounded hover:bg-surface-100 transition-colors text-text-secondary"
+        >
+          <Plus size={16} />
+        </button>
+      </div>
 
       {/* Tree */}
-      <Box sx={{ flex: 1, overflow: 'auto', py: 0.5 }}>
+      <div className="flex-1 overflow-auto py-1">
         {pages.length === 0 ? (
-          <Box sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              No pages yet
-            </Typography>
-            <Button
-              size="small"
-              variant="outlined"
-              startIcon={<AddIcon />}
+          <div className="p-4 text-center">
+            <p className="text-sm text-text-secondary mb-2">No pages yet</p>
+            <button
+              type="button"
               onClick={() => handleCreateChild(null)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border border-surface-300 rounded-[var(--radius-sm)] hover:bg-surface-50 transition-colors text-text-primary"
             >
+              <Plus size={16} />
               Create first page
-            </Button>
-          </Box>
+            </button>
+          </div>
         ) : (
           pages.map((node, index) => (
             <TreeNode
@@ -506,74 +480,93 @@ export default function WikiTree({ spaceId, currentPageId, onPageSelect }: WikiT
             />
           ))
         )}
-      </Box>
+      </div>
 
       {/* New page dialog */}
       <Dialog
         open={newPageDialog.open}
         onClose={() => setNewPageDialog({ open: false, parentId: null })}
-        maxWidth="xs"
-        fullWidth
+        className="relative z-50"
       >
-        <DialogTitle>
-          {newPageDialog.parentId ? 'New child page' : 'New page'}
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            fullWidth
-            size="small"
-            label="Page title"
-            value={newPageTitle}
-            onChange={(e) => setNewPageTitle(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleCreateSubmit()
-            }}
-            sx={{ mt: 1 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setNewPageDialog({ open: false, parentId: null })} color="inherit">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleCreateSubmit}
-            variant="contained"
-            disabled={!newPageTitle.trim() || createPage.isPending}
-          >
-            Create
-          </Button>
-        </DialogActions>
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="w-full max-w-sm rounded-[var(--radius-md)] bg-white dark:bg-surface-800 shadow-xl">
+            <DialogTitle className="text-lg font-semibold px-5 pt-5 pb-2 text-text-primary">
+              {newPageDialog.parentId ? 'New child page' : 'New page'}
+            </DialogTitle>
+            <div className="px-5 pb-4">
+              <input
+                ref={titleInputRef}
+                autoFocus
+                type="text"
+                placeholder="Page title"
+                value={newPageTitle}
+                onChange={(e) => setNewPageTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCreateSubmit()
+                }}
+                className="w-full mt-1 px-3 py-2 text-sm border border-surface-300 rounded-[var(--radius-sm)] bg-white dark:bg-surface-900 text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+            </div>
+            <div className="flex justify-end gap-2 px-5 pb-5">
+              <button
+                type="button"
+                onClick={() => setNewPageDialog({ open: false, parentId: null })}
+                className="px-3 py-1.5 text-sm rounded-[var(--radius-sm)] text-text-secondary hover:bg-surface-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleCreateSubmit}
+                disabled={!newPageTitle.trim() || createPage.isPending}
+                className="px-3 py-1.5 text-sm font-medium rounded-[var(--radius-sm)] bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Create
+              </button>
+            </div>
+          </DialogPanel>
+        </div>
       </Dialog>
 
       {/* Delete confirmation dialog */}
       <Dialog
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        maxWidth="xs"
-        fullWidth
+        className="relative z-50"
       >
-        <DialogTitle>Delete page</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2">
-            Are you sure you want to delete &quot;{deleteTarget?.title}&quot;? This will also delete
-            all child pages. This action cannot be undone.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteTarget(null)} color="inherit">
-            Cancel
-          </Button>
-          <Button
-            onClick={confirmDelete}
-            variant="contained"
-            color="error"
-            disabled={deletePage.isPending}
-          >
-            Delete
-          </Button>
-        </DialogActions>
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="w-full max-w-sm rounded-[var(--radius-md)] bg-white dark:bg-surface-800 shadow-xl">
+            <DialogTitle className="text-lg font-semibold px-5 pt-5 pb-2 text-text-primary">
+              Delete page
+            </DialogTitle>
+            <div className="px-5 pb-4">
+              <p className="text-sm text-text-secondary">
+                Are you sure you want to delete &quot;{deleteTarget?.title}&quot;? This will also delete
+                all child pages. This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 px-5 pb-5">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="px-3 py-1.5 text-sm rounded-[var(--radius-sm)] text-text-secondary hover:bg-surface-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={deletePage.isPending}
+                className="px-3 py-1.5 text-sm font-medium rounded-[var(--radius-sm)] bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </DialogPanel>
+        </div>
       </Dialog>
-    </Box>
+    </div>
   )
 }

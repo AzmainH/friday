@@ -1,15 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Avatar from '@mui/material/Avatar'
-import Skeleton from '@mui/material/Skeleton'
-import EditIcon from '@mui/icons-material/Edit'
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
-import PersonIcon from '@mui/icons-material/Person'
-import LabelIcon from '@mui/icons-material/Label'
-import PriorityHighIcon from '@mui/icons-material/PriorityHigh'
-import EventIcon from '@mui/icons-material/Event'
-import AddIcon from '@mui/icons-material/Add'
+import {
+  ArrowLeftRight,
+  User,
+  Tag,
+  AlertTriangle,
+  Calendar,
+  Plus,
+  Pencil,
+} from 'lucide-react'
 import client from '@/api/client'
 import { formatRelativeTime } from '@/utils/formatters'
 
@@ -32,17 +30,17 @@ interface ActivityLogProps {
 }
 
 const FIELD_ICONS: Record<string, React.ReactNode> = {
-  status: <SwapHorizIcon fontSize="small" />,
-  assignee: <PersonIcon fontSize="small" />,
-  priority: <PriorityHighIcon fontSize="small" />,
-  labels: <LabelIcon fontSize="small" />,
-  due_date: <EventIcon fontSize="small" />,
-  summary: <EditIcon fontSize="small" />,
-  description: <EditIcon fontSize="small" />,
+  status: <ArrowLeftRight className="w-3.5 h-3.5" />,
+  assignee: <User className="w-3.5 h-3.5" />,
+  priority: <AlertTriangle className="w-3.5 h-3.5" />,
+  labels: <Tag className="w-3.5 h-3.5" />,
+  due_date: <Calendar className="w-3.5 h-3.5" />,
+  summary: <Pencil className="w-3.5 h-3.5" />,
+  description: <Pencil className="w-3.5 h-3.5" />,
 }
 
 function getFieldIcon(field: string): React.ReactNode {
-  return FIELD_ICONS[field] ?? <EditIcon fontSize="small" />
+  return FIELD_ICONS[field] ?? <Pencil className="w-3.5 h-3.5" />
 }
 
 function formatFieldChange(entry: ActivityEntry): string {
@@ -71,109 +69,73 @@ export default function ActivityLog({ issueId }: ActivityLogProps) {
 
   if (isLoading) {
     return (
-      <Box sx={{ py: 1 }}>
+      <div className="py-2">
         {Array.from({ length: 4 }, (_, i) => (
-          <Box key={i} sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
-            <Skeleton variant="circular" width={28} height={28} />
-            <Box sx={{ flex: 1 }}>
-              <Skeleton variant="text" width="70%" height={18} />
-              <Skeleton variant="text" width="30%" height={14} />
-            </Box>
-          </Box>
+          <div key={i} className="flex gap-3 mb-4 animate-pulse">
+            <div className="w-7 h-7 rounded-full bg-surface-200 shrink-0" />
+            <div className="flex-1 space-y-1.5">
+              <div className="h-3.5 w-[70%] bg-surface-200 rounded" />
+              <div className="h-3 w-[30%] bg-surface-200 rounded" />
+            </div>
+          </div>
         ))}
-      </Box>
+      </div>
     )
   }
 
   if (activities.length === 0) {
     return (
-      <Box sx={{ py: 2 }}>
-        <Typography variant="body2" color="text.secondary">
+      <div className="py-4">
+        <p className="text-sm text-text-tertiary">
           No activity recorded yet.
-        </Typography>
-      </Box>
+        </p>
+      </div>
     )
   }
 
   return (
-    <Box>
-      <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
+    <div>
+      <h3 className="text-sm font-semibold text-text-primary mb-3">
         Activity
-      </Typography>
+      </h3>
 
-      <Box sx={{ position: 'relative' }}>
+      <div className="relative">
         {/* Vertical timeline line */}
-        <Box
-          sx={{
-            position: 'absolute',
-            left: 13,
-            top: 4,
-            bottom: 4,
-            width: 2,
-            bgcolor: 'divider',
-            borderRadius: 1,
-          }}
-        />
+        <div className="absolute left-[13px] top-1 bottom-1 w-0.5 bg-surface-200 rounded-full" />
 
         {activities.map((entry) => (
-          <Box
+          <div
             key={entry.id}
-            sx={{
-              display: 'flex',
-              gap: 1.5,
-              mb: 2,
-              position: 'relative',
-            }}
+            className="flex gap-3 mb-4 relative"
           >
-            <Avatar
-              src={entry.user?.avatar_url ?? undefined}
-              sx={{
-                width: 28,
-                height: 28,
-                bgcolor: 'action.selected',
-                color: 'text.secondary',
-                zIndex: 1,
-              }}
-            >
+            <div className="w-7 h-7 rounded-full flex items-center justify-center bg-surface-100 text-text-secondary z-10 shrink-0">
               {getFieldIcon(entry.field)}
-            </Avatar>
+            </div>
 
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="body2" sx={{ lineHeight: 1.5 }}>
-                <Typography
-                  component="span"
-                  variant="body2"
-                  fontWeight={600}
-                >
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-text-primary leading-relaxed">
+                <span className="font-semibold">
                   {entry.user?.display_name ?? 'Someone'}
-                </Typography>{' '}
+                </span>{' '}
                 {formatFieldChange(entry)}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
+              </p>
+              <p className="text-xs text-text-tertiary">
                 {formatRelativeTime(entry.created_at)}
-              </Typography>
-            </Box>
-          </Box>
+              </p>
+            </div>
+          </div>
         ))}
 
         {/* Created entry */}
-        <Box sx={{ display: 'flex', gap: 1.5, position: 'relative' }}>
-          <Avatar
-            sx={{
-              width: 28,
-              height: 28,
-              bgcolor: 'primary.main',
-              color: 'primary.contrastText',
-              zIndex: 1,
-            }}
-          >
-            <AddIcon sx={{ fontSize: 16 }} />
-          </Avatar>
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+        <div className="flex gap-3 relative">
+          <div className="w-7 h-7 rounded-full flex items-center justify-center bg-primary-500 text-white z-10 shrink-0">
+            <Plus className="w-4 h-4" />
+          </div>
+          <p className="text-xs text-text-tertiary mt-1.5">
             Issue created
-          </Typography>
-        </Box>
-      </Box>
-    </Box>
+          </p>
+        </div>
+      </div>
+    </div>
   )
 }

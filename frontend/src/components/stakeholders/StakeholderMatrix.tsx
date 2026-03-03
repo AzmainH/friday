@@ -1,6 +1,4 @@
 import { useMemo } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
 import {
   ScatterChart,
   Scatter,
@@ -46,26 +44,15 @@ function MatrixTooltip({ active, payload }: CustomTooltipProps) {
   if (!active || !payload || payload.length === 0) return null
   const point = payload[0].payload
   return (
-    <Box
-      sx={{
-        bgcolor: 'background.paper',
-        border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: 1,
-        p: 1.5,
-        boxShadow: 2,
-      }}
-    >
-      <Typography variant="subtitle2">{point.name}</Typography>
+    <div className="bg-white border border-surface-200 rounded-lg p-3 shadow-md dark:bg-dark-surface dark:border-dark-border">
+      <p className="text-sm font-semibold text-text-primary">{point.name}</p>
       {point.role && (
-        <Typography variant="caption" color="text.secondary" display="block">
-          {point.role}
-        </Typography>
+        <p className="text-xs text-text-secondary">{point.role}</p>
       )}
-      <Typography variant="caption" display="block">
+      <p className="text-xs text-text-primary">
         Interest: {point.interest} / Influence: {point.influence}
-      </Typography>
-    </Box>
+      </p>
+    </div>
   )
 }
 
@@ -83,7 +70,7 @@ function NamedDot({ cx, cy, payload }: DotProps) {
   if (cx == null || cy == null || !payload) return null
   return (
     <g>
-      <circle cx={cx} cy={cy} r={6} fill="#1976d2" stroke="#fff" strokeWidth={1.5} />
+      <circle cx={cx} cy={cy} r={6} fill="#f59e0b" stroke="#fff" strokeWidth={1.5} />
       <text
         x={cx}
         y={cy - 10}
@@ -116,24 +103,16 @@ export default function StakeholderMatrix({ stakeholders }: StakeholderMatrixPro
 
   if (data.length === 0) {
     return (
-      <Box
-        sx={{
-          p: 4,
-          textAlign: 'center',
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
-        }}
-      >
-        <Typography color="text.secondary">
+      <div className="p-8 text-center border border-surface-200 rounded-lg">
+        <p className="text-text-secondary">
           No stakeholders to display. Add stakeholders to see the matrix.
-        </Typography>
-      </Box>
+        </p>
+      </div>
     )
   }
 
   return (
-    <Box sx={{ width: '100%', height: 420 }}>
+    <div className="w-full" style={{ height: 420 }}>
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart margin={{ top: 24, right: 24, bottom: 24, left: 24 }}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -145,10 +124,10 @@ export default function StakeholderMatrix({ stakeholders }: StakeholderMatrixPro
             x2={5}
             y1={0}
             y2={5}
-            fill="#e0e0e0"
+            fill="#e7e5e4"
             fillOpacity={0.2}
           >
-            <Label value="Monitor" position="insideBottomLeft" fontSize={11} fill="#757575" />
+            <Label value="Monitor" position="insideBottomLeft" fontSize={11} fill="#78716c" />
           </ReferenceArea>
 
           {/* Bottom-right: Keep Informed (high interest, low influence) */}
@@ -157,10 +136,10 @@ export default function StakeholderMatrix({ stakeholders }: StakeholderMatrixPro
             x2={10}
             y1={0}
             y2={5}
-            fill="#bbdefb"
+            fill="#fef3c7"
             fillOpacity={0.2}
           >
-            <Label value="Keep Informed" position="insideBottomRight" fontSize={11} fill="#1565c0" />
+            <Label value="Keep Informed" position="insideBottomRight" fontSize={11} fill="#b45309" />
           </ReferenceArea>
 
           {/* Top-left: Keep Satisfied (low interest, high influence) */}
@@ -169,10 +148,10 @@ export default function StakeholderMatrix({ stakeholders }: StakeholderMatrixPro
             x2={5}
             y1={5}
             y2={10}
-            fill="#fff9c4"
+            fill="#ccfbf1"
             fillOpacity={0.3}
           >
-            <Label value="Keep Satisfied" position="insideTopLeft" fontSize={11} fill="#f57f17" />
+            <Label value="Keep Satisfied" position="insideTopLeft" fontSize={11} fill="#0f766e" />
           </ReferenceArea>
 
           {/* Top-right: Manage Closely (high interest, high influence) */}
@@ -181,10 +160,10 @@ export default function StakeholderMatrix({ stakeholders }: StakeholderMatrixPro
             x2={10}
             y1={5}
             y2={10}
-            fill="#c8e6c9"
+            fill="#dcfce7"
             fillOpacity={0.3}
           >
-            <Label value="Manage Closely" position="insideTopRight" fontSize={11} fill="#2e7d32" />
+            <Label value="Manage Closely" position="insideTopRight" fontSize={11} fill="#15803d" />
           </ReferenceArea>
 
           <XAxis
@@ -215,6 +194,6 @@ export default function StakeholderMatrix({ stakeholders }: StakeholderMatrixPro
           />
         </ScatterChart>
       </ResponsiveContainer>
-    </Box>
+    </div>
   )
 }

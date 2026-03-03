@@ -1,21 +1,15 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
-import Box from '@mui/material/Box'
-import CircularProgress from '@mui/material/CircularProgress'
 import AppShell from '@/layouts/AppShell'
 
 // Top-level pages
 const HomePage = lazy(() => import('@/pages/HomePageNew'))
 const ProjectsPage = lazy(() => import('@/pages/ProjectsPage'))
-const RoadmapsPage = lazy(() => import('@/pages/RoadmapsPageNew'))
+const PlanningPage = lazy(() => import('@/pages/PlanningPage'))
 const RoadmapDetailPage = lazy(() => import('@/pages/RoadmapDetailPage'))
-const DashboardsPage = lazy(() => import('@/pages/DashboardsPageNew'))
-const WikiPage = lazy(() => import('@/pages/WikiPageNew'))
-const WikiPageDetail = lazy(() => import('@/pages/WikiPageDetail'))
+const KnowledgePage = lazy(() => import('@/pages/KnowledgePage'))
+const KnowledgePageDetail = lazy(() => import('@/pages/KnowledgePageDetail'))
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
-const PortfolioPage = lazy(() => import('@/pages/PortfolioPage'))
-const ReleasesPage = lazy(() => import('@/pages/ReleasesPage'))
-const ReportsPage = lazy(() => import('@/pages/ReportsPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 
 // Project-scoped pages
@@ -36,16 +30,18 @@ const IntakeFormsPage = lazy(() => import('@/pages/project/IntakeFormsPage'))
 const ApprovalsPage = lazy(() => import('@/pages/project/ApprovalsPage'))
 const ImportExportPage = lazy(() => import('@/pages/project/ImportExportPage'))
 const ProjectCreationWizard = lazy(() => import('@/pages/project/ProjectCreationWizard'))
+const ProjectReportsPage = lazy(() => import('@/pages/project/ReportsPage'))
 
 function LazyFallback() {
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-      <CircularProgress />
-    </Box>
+    <div className="flex justify-center items-center py-16">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-surface-200 border-t-primary-500" />
+    </div>
   )
 }
 
-function withSuspense(Component: React.LazyExoticComponent<React.ComponentType>) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function withSuspense(Component: React.LazyExoticComponent<React.ComponentType<any>>) {
   return (
     <Suspense fallback={<LazyFallback />}>
       <Component />
@@ -58,6 +54,8 @@ export const router = createBrowserRouter([
     element: <AppShell />,
     children: [
       { index: true, element: withSuspense(HomePage) },
+
+      // Projects
       { path: 'projects', element: withSuspense(ProjectsPage) },
       { path: 'projects/new', element: withSuspense(ProjectCreationWizard) },
 
@@ -78,22 +76,15 @@ export const router = createBrowserRouter([
       { path: 'projects/:projectId/intake', element: withSuspense(IntakeFormsPage) },
       { path: 'projects/:projectId/approvals', element: withSuspense(ApprovalsPage) },
       { path: 'projects/:projectId/import-export', element: withSuspense(ImportExportPage) },
+      { path: 'projects/:projectId/reports', element: withSuspense(ProjectReportsPage) },
 
-      // Roadmaps
-      { path: 'roadmaps', element: withSuspense(RoadmapsPage) },
-      { path: 'roadmaps/:planId', element: withSuspense(RoadmapDetailPage) },
+      // Planning (combined: roadmaps + portfolio + releases)
+      { path: 'planning', element: withSuspense(PlanningPage) },
+      { path: 'planning/roadmaps/:planId', element: withSuspense(RoadmapDetailPage) },
 
-      // Portfolio & Releases
-      { path: 'portfolio', element: withSuspense(PortfolioPage) },
-      { path: 'releases', element: withSuspense(ReleasesPage) },
-
-      // Dashboards & Reports
-      { path: 'dashboards', element: withSuspense(DashboardsPage) },
-      { path: 'reports', element: withSuspense(ReportsPage) },
-
-      // Wiki
-      { path: 'wiki', element: withSuspense(WikiPage) },
-      { path: 'wiki/:pageId', element: withSuspense(WikiPageDetail) },
+      // Knowledge (wiki)
+      { path: 'knowledge', element: withSuspense(KnowledgePage) },
+      { path: 'knowledge/:pageId', element: withSuspense(KnowledgePageDetail) },
 
       // Settings
       { path: 'settings', element: withSuspense(SettingsPage) },

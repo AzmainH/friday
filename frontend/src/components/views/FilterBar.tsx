@@ -1,22 +1,9 @@
 import { useState, type FC } from 'react'
-import Box from '@mui/material/Box'
-import Chip from '@mui/material/Chip'
-import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
-import InputAdornment from '@mui/material/InputAdornment'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import Checkbox from '@mui/material/Checkbox'
-import Typography from '@mui/material/Typography'
-import Popover from '@mui/material/Popover'
-import Stack from '@mui/material/Stack'
-import IconButton from '@mui/material/IconButton'
-import SearchIcon from '@mui/icons-material/Search'
-import FilterListIcon from '@mui/icons-material/FilterList'
-import CloseIcon from '@mui/icons-material/Close'
-import ClearAllIcon from '@mui/icons-material/ClearAll'
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
+import { cn } from '@/lib/cn'
+import { Button } from '@/components/ui/Button'
+import { Menu, MenuButton, MenuItems, MenuItem } from '@/components/ui/Menu'
+import { Search, Filter, X, Trash2 } from 'lucide-react'
 import type { WorkflowStatus, IssueType } from '@/types/api'
 import type { FilterState, DateRange } from '@/hooks/useFilterState'
 import { PRIORITY_COLORS } from '@/utils/formatters'
@@ -59,9 +46,6 @@ const MultiSelectChip: FC<MultiSelectChipProps> = ({
   selected,
   onChange,
 }) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
-  const open = Boolean(anchorEl)
-
   const handleToggle = (id: string) => {
     const next = selected.includes(id)
       ? selected.filter((s) => s !== id)
@@ -73,54 +57,43 @@ const MultiSelectChip: FC<MultiSelectChipProps> = ({
     selected.length > 0 ? `${label} (${selected.length})` : label
 
   return (
-    <>
-      <Chip
-        icon={<FilterListIcon fontSize="small" />}
-        label={chipLabel}
-        variant={selected.length > 0 ? 'filled' : 'outlined'}
-        color={selected.length > 0 ? 'primary' : 'default'}
-        onClick={(e) => setAnchorEl(e.currentTarget)}
-        size="small"
-        sx={{ cursor: 'pointer' }}
-      />
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={() => setAnchorEl(null)}
-        slotProps={{ paper: { sx: { maxHeight: 320, minWidth: 200 } } }}
+    <Menu>
+      <MenuButton
+        className={cn(
+          'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border transition-colors cursor-pointer',
+          selected.length > 0
+            ? 'bg-primary-50 text-primary-700 border-primary-200'
+            : 'bg-white text-text-secondary border-surface-200 hover:border-surface-300 dark:bg-surface-100',
+        )}
       >
+        <Filter size={14} />
+        {chipLabel}
+      </MenuButton>
+      <MenuItems className="max-h-[320px] min-w-[200px] overflow-auto">
         {options.map((opt) => (
-          <MenuItem key={opt.id} dense onClick={() => handleToggle(opt.id)}>
-            <ListItemIcon sx={{ minWidth: 36 }}>
-              <Checkbox
-                size="small"
+          <MenuItem key={opt.id} onClick={() => handleToggle(opt.id)}>
+            <div className="flex items-center gap-2 w-full">
+              <input
+                type="checkbox"
                 checked={selected.includes(opt.id)}
-                disableRipple
-                tabIndex={-1}
+                readOnly
+                className="w-3.5 h-3.5 rounded border-surface-300 text-primary-500"
               />
-            </ListItemIcon>
-            {opt.color && (
-              <Box
-                sx={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: '50%',
-                  bgcolor: opt.color,
-                  mr: 1,
-                  flexShrink: 0,
-                }}
-              />
-            )}
-            <ListItemText primary={opt.label} />
+              {opt.color && (
+                <span
+                  className="w-3 h-3 rounded-full shrink-0"
+                  style={{ backgroundColor: opt.color }}
+                />
+              )}
+              <span>{opt.label}</span>
+            </div>
           </MenuItem>
         ))}
         {options.length === 0 && (
-          <MenuItem disabled>
-            <ListItemText primary="No options" />
-          </MenuItem>
+          <div className="px-3 py-2 text-sm text-text-tertiary">No options</div>
         )}
-      </Menu>
-    </>
+      </MenuItems>
+    </Menu>
   )
 }
 
@@ -137,26 +110,17 @@ const DateRangePickerChip: FC<DateRangePickerChipProps> = ({
   dateRange,
   onChange,
 }) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [from, setFrom] = useState(dateRange?.from ?? '')
   const [to, setTo] = useState(dateRange?.to ?? '')
-
-  const handleOpen = (e: React.MouseEvent<HTMLElement>) => {
-    setFrom(dateRange?.from ?? '')
-    setTo(dateRange?.to ?? '')
-    setAnchorEl(e.currentTarget)
-  }
 
   const handleApply = () => {
     if (from && to) {
       onChange({ from, to })
     }
-    setAnchorEl(null)
   }
 
   const handleClear = () => {
     onChange(null)
-    setAnchorEl(null)
   }
 
   const chipLabel = dateRange
@@ -164,56 +128,64 @@ const DateRangePickerChip: FC<DateRangePickerChipProps> = ({
     : 'Date range'
 
   return (
-    <>
-      <Chip
-        label={chipLabel}
-        variant={dateRange ? 'filled' : 'outlined'}
-        color={dateRange ? 'primary' : 'default'}
-        onClick={handleOpen}
-        size="small"
-        onDelete={dateRange ? handleClear : undefined}
-        sx={{ cursor: 'pointer' }}
-      />
-      <Popover
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={() => setAnchorEl(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+    <Popover className="relative">
+      <PopoverButton
+        className={cn(
+          'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border transition-colors cursor-pointer',
+          dateRange
+            ? 'bg-primary-50 text-primary-700 border-primary-200'
+            : 'bg-white text-text-secondary border-surface-200 hover:border-surface-300 dark:bg-surface-100',
+        )}
+        onClick={() => {
+          setFrom(dateRange?.from ?? '')
+          setTo(dateRange?.to ?? '')
+        }}
       >
-        <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5, minWidth: 240 }}>
-          <Typography variant="subtitle2">Date range</Typography>
-          <TextField
-            type="date"
-            label="From"
-            size="small"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-            slotProps={{ inputLabel: { shrink: true } }}
-          />
-          <TextField
-            type="date"
-            label="To"
-            size="small"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-            slotProps={{ inputLabel: { shrink: true } }}
-          />
-          <Stack direction="row" spacing={1} justifyContent="flex-end">
-            <Button size="small" onClick={handleClear}>
+        {chipLabel}
+        {dateRange && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onChange(null)
+            }}
+            className="ml-1"
+          >
+            <X size={12} />
+          </button>
+        )}
+      </PopoverButton>
+      <PopoverPanel className="absolute z-50 mt-2 p-4 bg-white dark:bg-surface-100 border border-surface-200 rounded-[--radius-md] shadow-lg min-w-[240px]">
+        <p className="text-sm font-semibold text-text-primary mb-3">Date range</p>
+        <div className="flex flex-col gap-3">
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1">From</label>
+            <input
+              type="date"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+              className="w-full px-3 py-2 text-sm bg-white dark:bg-surface-100 border border-surface-200 rounded-[--radius-sm] outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-text-primary"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-text-secondary mb-1">To</label>
+            <input
+              type="date"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              className="w-full px-3 py-2 text-sm bg-white dark:bg-surface-100 border border-surface-200 rounded-[--radius-sm] outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-text-primary"
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" size="sm" onClick={handleClear}>
               Clear
             </Button>
-            <Button
-              size="small"
-              variant="contained"
-              onClick={handleApply}
-              disabled={!from || !to}
-            >
+            <Button size="sm" onClick={handleApply} disabled={!from || !to}>
               Apply
             </Button>
-          </Stack>
-        </Box>
-      </Popover>
-    </>
+          </div>
+        </div>
+      </PopoverPanel>
+    </Popover>
   )
 }
 
@@ -247,43 +219,25 @@ const FilterBar: FC<FilterBarProps> = ({
   }))
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        gap: 1,
-        py: 1,
-      }}
-    >
+    <div className="flex flex-wrap items-center gap-2 py-2">
       {/* Search field */}
-      <TextField
-        size="small"
-        placeholder="Search issues..."
-        value={filters.search}
-        onChange={(e) => onFilterChange('search', e.target.value)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
-            endAdornment: filters.search ? (
-              <InputAdornment position="end">
-                <IconButton
-                  size="small"
-                  onClick={() => onFilterChange('search', '')}
-                  edge="end"
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </InputAdornment>
-            ) : null,
-          },
-        }}
-        sx={{ minWidth: 200 }}
-      />
+      <div className="relative min-w-[200px]">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
+        <input
+          placeholder="Search issues..."
+          value={filters.search}
+          onChange={(e) => onFilterChange('search', e.target.value)}
+          className="w-full pl-9 pr-8 py-2 text-sm bg-white dark:bg-surface-100 border border-surface-200 rounded-[--radius-sm] outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-text-primary placeholder:text-text-tertiary"
+        />
+        {filters.search && (
+          <button
+            onClick={() => onFilterChange('search', '')}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-text-tertiary hover:text-text-secondary"
+          >
+            <X size={14} />
+          </button>
+        )}
+      </div>
 
       {/* Status multi-select */}
       <MultiSelectChip
@@ -312,55 +266,57 @@ const FilterBar: FC<FilterBarProps> = ({
         filters.statusIds.map((id) => {
           const status = statuses.find((s) => s.id === id)
           return (
-            <Chip
+            <span
               key={`status-${id}`}
-              label={status?.name ?? id}
-              size="small"
-              onDelete={() =>
-                onFilterChange(
-                  'statusIds',
-                  filters.statusIds.filter((s) => s !== id),
-                )
-              }
-              sx={{
-                bgcolor: status?.color ?? undefined,
-                color: status?.color ? '#fff' : undefined,
-              }}
-            />
+              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full text-white"
+              style={{ backgroundColor: status?.color ?? '#6b7280' }}
+            >
+              {status?.name ?? id}
+              <button
+                onClick={() =>
+                  onFilterChange(
+                    'statusIds',
+                    filters.statusIds.filter((s) => s !== id),
+                  )
+                }
+                className="ml-0.5 hover:opacity-80"
+              >
+                <X size={12} />
+              </button>
+            </span>
           )
         })}
 
       {filters.priorities.length > 0 &&
         filters.priorities.map((p) => (
-          <Chip
+          <span
             key={`priority-${p}`}
-            label={p.charAt(0).toUpperCase() + p.slice(1)}
-            size="small"
-            onDelete={() =>
-              onFilterChange(
-                'priorities',
-                filters.priorities.filter((x) => x !== p),
-              )
-            }
-            sx={{
-              bgcolor: PRIORITY_COLORS[p],
-              color: '#fff',
-            }}
-          />
+            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full text-white"
+            style={{ backgroundColor: PRIORITY_COLORS[p] }}
+          >
+            {p.charAt(0).toUpperCase() + p.slice(1)}
+            <button
+              onClick={() =>
+                onFilterChange(
+                  'priorities',
+                  filters.priorities.filter((x) => x !== p),
+                )
+              }
+              className="ml-0.5 hover:opacity-80"
+            >
+              <X size={12} />
+            </button>
+          </span>
         ))}
 
       {/* Clear all */}
       {hasActiveFilters && (
-        <Button
-          size="small"
-          startIcon={<ClearAllIcon />}
-          onClick={onClearAll}
-          sx={{ ml: 'auto' }}
-        >
+        <Button variant="ghost" size="sm" onClick={onClearAll} className="ml-auto">
+          <Trash2 size={14} className="mr-1" />
           Clear all
         </Button>
       )}
-    </Box>
+    </div>
   )
 }
 

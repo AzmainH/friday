@@ -1,10 +1,3 @@
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Avatar from '@mui/material/Avatar'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemAvatar from '@mui/material/ListItemAvatar'
-import ListItemText from '@mui/material/ListItemText'
 import { formatRelativeTime } from '@/utils/formatters'
 
 // ---------------------------------------------------------------------------
@@ -30,11 +23,9 @@ export interface ActivityFeedWidgetProps {
 export default function ActivityFeedWidget({ activities }: ActivityFeedWidgetProps) {
   if (activities.length === 0) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-        <Typography variant="body2" color="text.secondary">
-          No recent activity
-        </Typography>
-      </Box>
+      <div className="flex items-center justify-center h-full">
+        <p className="text-sm text-text-secondary">No recent activity</p>
+      </div>
     )
   }
 
@@ -42,51 +33,37 @@ export default function ActivityFeedWidget({ activities }: ActivityFeedWidgetPro
   const items = activities.slice(0, 10)
 
   return (
-    <List dense disablePadding sx={{ width: '100%', overflow: 'auto', maxHeight: '100%' }}>
+    <div className="w-full overflow-auto max-h-full space-y-0">
       {items.map((activity) => (
-        <ListItem
+        <div
           key={activity.id}
-          disableGutters
-          sx={{
-            py: 0.5,
-            px: 0,
-            alignItems: 'flex-start',
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            '&:last-child': { borderBottom: 'none' },
-          }}
+          className="flex items-start gap-2 py-1.5 border-b border-surface-200 last:border-b-0"
         >
-          <ListItemAvatar sx={{ minWidth: 36 }}>
-            <Avatar
-              src={activity.user_avatar ?? undefined}
+          {/* Avatar */}
+          {activity.user_avatar ? (
+            <img
+              src={activity.user_avatar}
               alt={activity.user_name}
-              sx={{ width: 28, height: 28, fontSize: '0.75rem' }}
-            >
+              className="w-7 h-7 rounded-full object-cover shrink-0"
+            />
+          ) : (
+            <div className="w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-medium shrink-0">
               {activity.user_name.charAt(0).toUpperCase()}
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary={
-              <Typography variant="body2" sx={{ fontSize: '0.8rem', lineHeight: 1.3 }}>
-                <Typography
-                  component="span"
-                  variant="body2"
-                  sx={{ fontWeight: 600, fontSize: '0.8rem' }}
-                >
-                  {activity.user_name}
-                </Typography>{' '}
-                {activity.action}
-              </Typography>
-            }
-            secondary={
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-                {formatRelativeTime(activity.created_at)}
-              </Typography>
-            }
-            sx={{ m: 0 }}
-          />
-        </ListItem>
+            </div>
+          )}
+
+          {/* Text */}
+          <div className="min-w-0">
+            <p className="text-[0.8rem] leading-snug">
+              <span className="font-semibold">{activity.user_name}</span>{' '}
+              {activity.action}
+            </p>
+            <span className="text-[0.7rem] text-text-tertiary">
+              {formatRelativeTime(activity.created_at)}
+            </span>
+          </div>
+        </div>
       ))}
-    </List>
+    </div>
   )
 }

@@ -1,15 +1,5 @@
-import { useState, type MouseEvent } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-import Typography from '@mui/material/Typography'
-import CloseIcon from '@mui/icons-material/Close'
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
-import PersonIcon from '@mui/icons-material/Person'
-import FlagIcon from '@mui/icons-material/Flag'
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import { Menu, MenuButton, MenuItems, MenuItem } from '@/components/ui/Menu'
+import { X, ArrowLeftRight, User, Flag, Trash2 } from 'lucide-react'
 import { useProjectStore } from '@/stores/projectStore'
 
 export type BulkActionKind = 'status' | 'assignee' | 'priority' | 'delete'
@@ -38,122 +28,78 @@ export default function BulkActionToolbar({
 }: BulkActionToolbarProps) {
   const statuses = useProjectStore((s) => s.statuses)
 
-  // Anchor elements for the three picker menus
-  const [statusAnchor, setStatusAnchor] = useState<HTMLElement | null>(null)
-  const [priorityAnchor, setPriorityAnchor] = useState<HTMLElement | null>(null)
-
-  const openStatus = (e: MouseEvent<HTMLButtonElement>) => setStatusAnchor(e.currentTarget)
-  const closeStatus = () => setStatusAnchor(null)
-
-  const openPriority = (e: MouseEvent<HTMLButtonElement>) => setPriorityAnchor(e.currentTarget)
-  const closePriority = () => setPriorityAnchor(null)
-
   if (selectedCount === 0) return null
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1,
-        px: 2,
-        py: 1,
-        bgcolor: 'primary.main',
-        color: 'primary.contrastText',
-        borderRadius: 1,
-        mb: 1,
-      }}
-    >
-      <Typography variant="body2" fontWeight={600} sx={{ mr: 1 }}>
-        {selectedCount} selected
-      </Typography>
+    <div className="flex items-center gap-2 px-4 py-2.5 bg-primary-500 text-white rounded-[--radius-sm] mb-2">
+      <span className="text-sm font-semibold mr-2">{selectedCount} selected</span>
 
       {/* ---- Change Status ---- */}
-      <Button
-        size="small"
-        variant="outlined"
-        color="inherit"
-        startIcon={<SwapHorizIcon />}
-        onClick={openStatus}
-      >
-        Status
-      </Button>
-      <Menu anchorEl={statusAnchor} open={Boolean(statusAnchor)} onClose={closeStatus}>
-        {statuses.map((s) => (
-          <MenuItem
-            key={s.id}
-            onClick={() => {
-              onBulkAction('status', s.id)
-              closeStatus()
-            }}
-          >
-            <Box
-              component="span"
-              sx={{
-                width: 10,
-                height: 10,
-                borderRadius: '50%',
-                bgcolor: s.color,
-                mr: 1,
-                display: 'inline-block',
-              }}
-            />
-            {s.name}
-          </MenuItem>
-        ))}
+      <Menu>
+        <MenuButton className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-[--radius-sm] border border-white/30 text-white hover:bg-white/10 transition-colors">
+          <ArrowLeftRight size={16} />
+          Status
+        </MenuButton>
+        <MenuItems>
+          {statuses.map((s) => (
+            <MenuItem
+              key={s.id}
+              onClick={() => onBulkAction('status', s.id)}
+              icon={
+                <span
+                  className="w-2.5 h-2.5 rounded-full"
+                  style={{ backgroundColor: s.color }}
+                />
+              }
+            >
+              {s.name}
+            </MenuItem>
+          ))}
+        </MenuItems>
       </Menu>
 
       {/* ---- Change Assignee (placeholder -- opens action with no picker) ---- */}
-      <Button
-        size="small"
-        variant="outlined"
-        color="inherit"
-        startIcon={<PersonIcon />}
+      <button
+        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-[--radius-sm] border border-white/30 text-white hover:bg-white/10 transition-colors"
         onClick={() => onBulkAction('assignee')}
       >
+        <User size={16} />
         Assignee
-      </Button>
+      </button>
 
       {/* ---- Change Priority ---- */}
-      <Button
-        size="small"
-        variant="outlined"
-        color="inherit"
-        startIcon={<FlagIcon />}
-        onClick={openPriority}
-      >
-        Priority
-      </Button>
-      <Menu anchorEl={priorityAnchor} open={Boolean(priorityAnchor)} onClose={closePriority}>
-        {PRIORITIES.map((p) => (
-          <MenuItem
-            key={p.value}
-            onClick={() => {
-              onBulkAction('priority', p.value)
-              closePriority()
-            }}
-          >
-            {p.label}
-          </MenuItem>
-        ))}
+      <Menu>
+        <MenuButton className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-[--radius-sm] border border-white/30 text-white hover:bg-white/10 transition-colors">
+          <Flag size={16} />
+          Priority
+        </MenuButton>
+        <MenuItems>
+          {PRIORITIES.map((p) => (
+            <MenuItem key={p.value} onClick={() => onBulkAction('priority', p.value)}>
+              {p.label}
+            </MenuItem>
+          ))}
+        </MenuItems>
       </Menu>
 
       {/* ---- Delete ---- */}
-      <Button
-        size="small"
-        variant="outlined"
-        color="inherit"
-        startIcon={<DeleteOutlineIcon />}
+      <button
+        className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-[--radius-sm] border border-white/30 text-white hover:bg-white/10 transition-colors"
         onClick={() => onBulkAction('delete')}
       >
+        <Trash2 size={16} />
         Delete
-      </Button>
+      </button>
 
       {/* ---- Clear selection ---- */}
-      <Box sx={{ flex: 1 }} />
-      <IconButton size="small" color="inherit" onClick={onClearSelection} aria-label="Clear selection">
-        <CloseIcon fontSize="small" />
-      </IconButton>
-    </Box>
+      <div className="flex-1" />
+      <button
+        onClick={onClearSelection}
+        className="ml-auto p-1 rounded hover:bg-white/10 transition-colors"
+        aria-label="Clear selection"
+      >
+        <X size={16} />
+      </button>
+    </div>
   )
 }

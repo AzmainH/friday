@@ -1,7 +1,3 @@
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Grid from '@mui/material/Grid2'
 import QuickActions from '@/components/home/QuickActions'
 import MyIssuesWidget from '@/components/home/MyIssuesWidget'
 import OverdueWidget from '@/components/home/OverdueWidget'
@@ -26,39 +22,39 @@ function formatTodayDate(): string {
 
 export default function HomePageNew() {
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <div className="max-w-7xl mx-auto px-6 py-8">
       {/* Welcome Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight={700} gutterBottom>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-text-primary mb-1">
           {getGreeting()}
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
+        </h1>
+        <p className="text-base text-text-secondary">
           {formatTodayDate()}
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
-      <Grid container spacing={3}>
+      <div className="grid grid-cols-12 gap-5">
         {/* Row 1: Quick Actions - full width */}
-        <Grid size={12}>
+        <div className="col-span-12">
           <QuickActions />
-        </Grid>
+        </div>
 
         {/* Row 2: My Issues (8 cols) + Overdue (4 cols) */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <div className="col-span-12 md:col-span-8">
           <MyIssuesWidget />
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
+        </div>
+        <div className="col-span-12 md:col-span-4">
           <OverdueWidget />
-        </Grid>
+        </div>
 
         {/* Row 3: Recent Activity (6 cols) + Favorites (6 cols) */}
-        <Grid size={{ xs: 12, md: 6 }}>
+        <div className="col-span-12 md:col-span-6">
           <RecentActivityWidget />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
+        </div>
+        <div className="col-span-12 md:col-span-6">
           <FavoritesWidget />
-        </Grid>
-      </Grid>
-    </Container>
+        </div>
+      </div>
+    </div>
   )
 }

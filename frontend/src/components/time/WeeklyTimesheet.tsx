@@ -1,17 +1,4 @@
 import { useState, useMemo, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import TableFooter from '@mui/material/TableFooter'
-import Paper from '@mui/material/Paper'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
-import CircularProgress from '@mui/material/CircularProgress'
-import Alert from '@mui/material/Alert'
 import { useWeeklyTimesheet, useLogTime } from '@/hooks/useTimeTracking'
 import { formatHours } from '@/utils/formatters'
 
@@ -131,63 +118,55 @@ export default function WeeklyTimesheet({ userId, weekStart }: WeeklyTimesheetPr
 
   if (isLoading) {
     return (
-      <Box sx={{ textAlign: 'center', py: 4 }}>
-        <CircularProgress />
-      </Box>
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-surface-200 border-t-primary-500 mx-auto" />
+      </div>
     )
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
+      <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm mb-4">
         Failed to load timesheet.
-      </Alert>
+      </div>
     )
   }
 
   const rows = timesheet?.rows ?? []
 
   return (
-    <TableContainer component={Paper} variant="outlined">
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell sx={{ fontWeight: 600, minWidth: 200 }}>Issue</TableCell>
+    <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface overflow-hidden">
+      <table className="w-full text-sm">
+        <thead className="bg-surface-50">
+          <tr>
+            <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary min-w-[200px]">Issue</th>
             {dates.map((date, i) => (
-              <TableCell key={date} align="center" sx={{ fontWeight: 600, minWidth: 72 }}>
-                <Typography variant="caption" display="block">
-                  {DAY_LABELS[i]}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
+              <th key={date} className="px-2 py-2 text-center text-xs font-semibold text-text-secondary min-w-[72px]">
+                <span className="block">{DAY_LABELS[i]}</span>
+                <span className="block text-text-secondary font-normal">
                   {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                </Typography>
-              </TableCell>
+                </span>
+              </th>
             ))}
-            <TableCell align="center" sx={{ fontWeight: 600, minWidth: 72 }}>
-              Total
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
+            <th className="px-2 py-2 text-center text-xs font-semibold text-text-secondary min-w-[72px]">Total</th>
+          </tr>
+        </thead>
+        <tbody>
           {rows.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={9} align="center">
-                <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
+            <tr>
+              <td colSpan={9} className="px-4 py-8 text-center border-t border-surface-200">
+                <p className="text-sm text-text-secondary">
                   No time entries for this week.
-                </Typography>
-              </TableCell>
-            </TableRow>
+                </p>
+              </td>
+            </tr>
           ) : (
             rows.map((row) => (
-              <TableRow key={row.issue_id} hover>
-                <TableCell>
-                  <Typography variant="body2" fontWeight={500}>
-                    {row.issue_key}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" noWrap>
-                    {row.issue_summary}
-                  </Typography>
-                </TableCell>
+              <tr key={row.issue_id} className="hover:bg-surface-50 transition-colors">
+                <td className="px-4 py-2 border-t border-surface-200">
+                  <p className="text-sm font-medium text-text-primary">{row.issue_key}</p>
+                  <p className="text-xs text-text-secondary truncate">{row.issue_summary}</p>
+                </td>
                 {dates.map((date) => {
                   const key = cellKey(row.issue_id, date)
                   const localVal = localEdits[key]
@@ -195,59 +174,45 @@ export default function WeeklyTimesheet({ userId, weekStart }: WeeklyTimesheetPr
                   const displayVal = localVal !== undefined ? localVal : (serverVal > 0 ? String(serverVal) : '')
 
                   return (
-                    <TableCell key={date} align="center" sx={{ p: 0.5 }}>
-                      <TextField
+                    <td key={date} className="px-1 py-1 border-t border-surface-200 text-center">
+                      <input
+                        type="number"
                         value={displayVal}
                         onChange={(e) => handleChange(row.issue_id, date, e.target.value)}
                         onBlur={() => handleBlur(row.issue_id, date)}
-                        size="small"
-                        type="number"
-                        inputProps={{
-                          min: 0,
-                          max: 24,
-                          step: 0.25,
-                          style: { textAlign: 'center', padding: '4px 2px', width: 48 },
-                        }}
-                        variant="outlined"
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            '& fieldset': { borderColor: 'transparent' },
-                            '&:hover fieldset': { borderColor: 'divider' },
-                            '&.Mui-focused fieldset': { borderColor: 'primary.main' },
-                          },
-                        }}
+                        min={0}
+                        max={24}
+                        step={0.25}
+                        className="w-12 text-center text-sm border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-primary-500 rounded py-1"
                       />
-                    </TableCell>
+                    </td>
                   )
                 })}
-                <TableCell align="center">
-                  <Typography variant="body2" fontWeight={600}>
+                <td className="px-2 py-2 border-t border-surface-200 text-center">
+                  <span className="text-sm font-semibold text-text-primary">
                     {formatHours(rowTotals[row.issue_id] ?? 0)}
-                  </Typography>
-                </TableCell>
-              </TableRow>
+                  </span>
+                </td>
+              </tr>
             ))
           )}
-        </TableBody>
+        </tbody>
         {rows.length > 0 && (
-          <TableFooter>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 600 }}>Daily Total</TableCell>
+          <tfoot>
+            <tr className="bg-surface-50">
+              <td className="px-4 py-2 text-sm font-semibold text-text-primary border-t border-surface-200">Daily Total</td>
               {dates.map((date) => (
-                <TableCell key={date} align="center" sx={{ fontWeight: 600 }}>
+                <td key={date} className="px-2 py-2 text-center text-sm font-semibold text-text-primary border-t border-surface-200">
                   {formatHours(dailyTotals[date] ?? 0)}
-                </TableCell>
+                </td>
               ))}
-              <TableCell
-                align="center"
-                sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.875rem' }}
-              >
+              <td className="px-2 py-2 text-center text-sm font-bold text-primary-500 border-t border-surface-200">
                 {formatHours(grandTotal)}
-              </TableCell>
-            </TableRow>
-          </TableFooter>
+              </td>
+            </tr>
+          </tfoot>
         )}
-      </Table>
-    </TableContainer>
+      </table>
+    </div>
   )
 }

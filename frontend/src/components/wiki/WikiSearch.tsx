@@ -1,16 +1,5 @@
 import { useState } from 'react'
-import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField'
-import InputAdornment from '@mui/material/InputAdornment'
-import List from '@mui/material/List'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import Typography from '@mui/material/Typography'
-import CircularProgress from '@mui/material/CircularProgress'
-import Chip from '@mui/material/Chip'
-import SearchIcon from '@mui/icons-material/Search'
-import ArticleIcon from '@mui/icons-material/Article'
+import { Search, FileText } from 'lucide-react'
 import { useWikiSearch } from '@/hooks/useWiki'
 
 // ---------------------------------------------------------------------------
@@ -35,122 +24,85 @@ export default function WikiSearch({ spaceId, onPageSelect }: WikiSearchProps) {
   const showResults = hasQuery
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+    <div className="flex flex-col gap-2">
       {/* Search input */}
-      <TextField
-        fullWidth
-        size="small"
-        placeholder="Search wiki pages..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
-            </InputAdornment>
-          ),
-          endAdornment: isFetching ? (
-            <InputAdornment position="end">
-              <CircularProgress size={16} />
-            </InputAdornment>
-          ) : null,
-        }}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            bgcolor: 'background.paper',
-          },
-        }}
-      />
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary pointer-events-none" />
+        <input
+          type="text"
+          className="w-full pl-9 pr-9 py-2 text-sm bg-white dark:bg-dark-surface border border-surface-200 rounded-[--radius-sm] outline-none placeholder:text-text-tertiary focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+          placeholder="Search wiki pages..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        {isFetching && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <div className="animate-spin h-4 w-4 border-2 border-primary-500 border-t-transparent rounded-full" />
+          </div>
+        )}
+      </div>
 
       {/* Results */}
       {showResults && (
-        <Box
-          sx={{
-            bgcolor: 'background.paper',
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 1,
-            overflow: 'hidden',
-          }}
-        >
+        <div className="bg-white dark:bg-dark-surface border border-surface-200 rounded-[--radius-sm] overflow-hidden">
           {isLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-              <CircularProgress size={24} />
-            </Box>
+            <div className="flex justify-center p-6">
+              <div className="animate-spin h-5 w-5 border-2 border-primary-500 border-t-transparent rounded-full" />
+            </div>
           ) : searchResults.length === 0 ? (
-            <Box sx={{ p: 3, textAlign: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
+            <div className="p-6 text-center">
+              <p className="text-sm text-text-secondary">
                 No results found for &quot;{query}&quot;
-              </Typography>
-            </Box>
+              </p>
+            </div>
           ) : (
             <>
-              <Box sx={{ px: 2, py: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="caption" color="text.secondary">
+              <div className="px-3 py-1.5 border-b border-surface-200">
+                <span className="text-xs text-text-secondary">
                   {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} found
-                </Typography>
-              </Box>
-              <List disablePadding>
+                </span>
+              </div>
+              <div>
                 {searchResults.map((result) => (
-                  <ListItemButton
+                  <div
                     key={result.page_id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => onPageSelect?.(result.page_id)}
-                    sx={{
-                      borderBottom: '1px solid',
-                      borderColor: 'divider',
-                      '&:last-child': { borderBottom: 'none' },
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        onPageSelect?.(result.page_id)
+                      }
                     }}
+                    className="px-3 py-2 cursor-pointer hover:bg-surface-50 border-b border-surface-200 last:border-b-0 flex items-center gap-3"
                   >
-                    <ListItemIcon sx={{ minWidth: 36 }}>
-                      <ArticleIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="body2" fontWeight={600}>
-                            {result.title}
-                          </Typography>
-                          {result.relevance >= 0.8 && (
-                            <Chip
-                              label="Best match"
-                              size="small"
-                              color="primary"
-                              variant="outlined"
-                              sx={{ height: 18, fontSize: '0.65rem' }}
-                            />
-                          )}
-                        </Box>
-                      }
-                      secondary={
-                        result.snippet ? (
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            component="span"
-                            sx={{
-                              display: '-webkit-box',
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
-                              '& mark': {
-                                bgcolor: 'warning.light',
-                                borderRadius: 0.25,
-                                px: 0.25,
-                                color: 'inherit',
-                              },
-                            }}
-                            dangerouslySetInnerHTML={{ __html: result.snippet }}
-                          />
-                        ) : null
-                      }
-                    />
-                  </ListItemButton>
+                    <FileText className="h-4 w-4 text-text-secondary shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-text-primary truncate">
+                          {result.title}
+                        </span>
+                        {result.relevance >= 0.8 && (
+                          <span className="px-1.5 py-0.5 text-[10px] font-medium border border-primary-500 text-primary-600 rounded-full shrink-0">
+                            Best match
+                          </span>
+                        )}
+                      </div>
+                      {result.snippet && (
+                        <span
+                          className="text-xs text-text-secondary line-clamp-2 [&_mark]:bg-warning/30 [&_mark]:rounded-sm [&_mark]:px-0.5"
+                          dangerouslySetInnerHTML={{ __html: result.snippet }}
+                        />
+                      )}
+                    </div>
+                  </div>
                 ))}
-              </List>
+              </div>
             </>
           )}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }

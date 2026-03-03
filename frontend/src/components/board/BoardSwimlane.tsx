@@ -1,10 +1,6 @@
 import { useState } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
-import Collapse from '@mui/material/Collapse'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import type { Issue, WorkflowStatus } from '@/types/api'
 import BoardColumn from '@/components/board/BoardColumn'
 
@@ -43,56 +39,29 @@ export default function BoardSwimlane({
   }
 
   return (
-    <Box
-      sx={{
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        '&:last-child': { borderBottom: 'none' },
-      }}
-    >
+    <div className="border-b border-surface-200 last:border-b-0">
       {/* Swimlane header */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          px: 2,
-          py: 1,
-          bgcolor: 'action.hover',
-          cursor: 'pointer',
-          userSelect: 'none',
-          '&:hover': { bgcolor: 'action.selected' },
-        }}
+      <div
+        className="flex items-center gap-2 px-4 py-2 bg-surface-100 dark:bg-surface-200 cursor-pointer select-none hover:bg-surface-200 dark:hover:bg-surface-300 transition-colors"
         onClick={() => setExpanded((prev) => !prev)}
       >
-        <IconButton size="small" sx={{ width: 24, height: 24 }}>
-          {expanded ? (
-            <ExpandLessIcon sx={{ fontSize: 18 }} />
-          ) : (
-            <ExpandMoreIcon sx={{ fontSize: 18 }} />
-          )}
-        </IconButton>
-
-        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-          {label}
-        </Typography>
-
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+        <button className="p-0.5">
+          {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </button>
+        <span className="text-sm font-semibold text-text-primary">{label}</span>
+        <span className="text-xs text-text-secondary">
           ({totalIssues} {totalIssues === 1 ? 'issue' : 'issues'})
-        </Typography>
-      </Box>
+        </span>
+      </div>
 
       {/* Swimlane body: horizontally scrollable columns */}
-      <Collapse in={expanded}>
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 1.5,
-            p: 1.5,
-            overflowX: 'auto',
-            minHeight: expanded ? 120 : 0,
-          }}
-        >
+      <div
+        className={cn(
+          'overflow-hidden transition-all duration-200',
+          expanded ? 'max-h-[2000px]' : 'max-h-0',
+        )}
+      >
+        <div className="flex gap-3 p-3 overflow-x-auto min-h-[120px]">
           {statuses.map((status) => (
             <BoardColumn
               key={status.id}
@@ -101,8 +70,8 @@ export default function BoardSwimlane({
               onAddIssue={() => onAddIssue(status.id)}
             />
           ))}
-        </Box>
-      </Collapse>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }

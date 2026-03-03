@@ -1,11 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
-import Paper from '@mui/material/Paper'
-import List from '@mui/material/List'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemAvatar from '@mui/material/ListItemAvatar'
-import ListItemText from '@mui/material/ListItemText'
-import Avatar from '@mui/material/Avatar'
-import Typography from '@mui/material/Typography'
+import { cn } from '@/lib/cn'
 import type { User } from '@/types/api'
 
 interface MentionSuggestionProps {
@@ -55,43 +49,47 @@ const MentionSuggestion = forwardRef<MentionSuggestionRef, MentionSuggestionProp
 
     if (items.length === 0) {
       return (
-        <Paper elevation={4} sx={{ p: 1.5 }}>
-          <Typography variant="body2" color="text.secondary">
-            No users found
-          </Typography>
-        </Paper>
+        <div className="border border-surface-200 rounded-[--radius-md] bg-white shadow-lg dark:bg-dark-surface dark:border-dark-border p-3">
+          <p className="text-sm text-text-secondary">No users found</p>
+        </div>
       )
     }
 
     return (
-      <Paper elevation={4} sx={{ maxHeight: 240, overflow: 'auto', minWidth: 220 }}>
-        <List dense disablePadding>
-          {items.map((user, index) => (
-            <ListItemButton
-              key={user.id}
-              selected={index === selectedIndex}
-              onClick={() => selectItem(index)}
-              sx={{ py: 0.75 }}
-            >
-              <ListItemAvatar sx={{ minWidth: 36 }}>
-                <Avatar
-                  src={user.avatar_url ?? undefined}
+      <div className="border border-surface-200 rounded-[--radius-md] bg-white shadow-lg dark:bg-dark-surface dark:border-dark-border max-h-60 overflow-auto min-w-[220px]">
+        {items.map((user, index) => (
+          <button
+            key={user.id}
+            onClick={() => selectItem(index)}
+            className={cn(
+              'flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors',
+              index === selectedIndex
+                ? 'bg-primary-50 dark:bg-primary-900/20'
+                : 'hover:bg-surface-100 dark:hover:bg-dark-border',
+            )}
+          >
+            <span className="flex-shrink-0 inline-flex items-center justify-center h-7 w-7 rounded-full bg-primary-100 text-primary-700 text-xs font-medium dark:bg-primary-900/30 dark:text-primary-300 overflow-hidden">
+              {user.avatar_url ? (
+                <img
+                  src={user.avatar_url}
                   alt={user.display_name}
-                  sx={{ width: 28, height: 28, fontSize: '0.75rem' }}
-                >
-                  {user.display_name.charAt(0).toUpperCase()}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={user.display_name}
-                secondary={user.email}
-                primaryTypographyProps={{ variant: 'body2', fontWeight: 500 }}
-                secondaryTypographyProps={{ variant: 'caption' }}
-              />
-            </ListItemButton>
-          ))}
-        </List>
-      </Paper>
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                user.display_name.charAt(0).toUpperCase()
+              )}
+            </span>
+            <span className="flex-1 min-w-0">
+              <span className="block text-sm font-medium text-text-primary truncate">
+                {user.display_name}
+              </span>
+              <span className="block text-xs text-text-secondary truncate">
+                {user.email}
+              </span>
+            </span>
+          </button>
+        ))}
+      </div>
     )
   },
 )

@@ -1,8 +1,4 @@
 import { useMemo } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import LinearProgress from '@mui/material/LinearProgress'
-import { useTheme } from '@mui/material/styles'
 import {
   BarChart,
   Bar,
@@ -30,12 +26,20 @@ export interface WorkloadWidgetProps {
 }
 
 // ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const COLOR_ERROR = '#ef4444'
+const COLOR_WARNING = '#f59e0b'
+const COLOR_PRIMARY = '#f59e0b'
+const COLOR_TEXT_SECONDARY = 'var(--color-text-secondary, #78716c)'
+const COLOR_DIVIDER = 'var(--color-surface-200, #e7e5e4)'
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
 export default function WorkloadWidget({ data }: WorkloadWidgetProps) {
-  const theme = useTheme()
-
   const enrichedData = useMemo(
     () =>
       data.map((entry) => ({
@@ -47,54 +51,60 @@ export default function WorkloadWidget({ data }: WorkloadWidgetProps) {
 
   if (data.length === 0) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-        <Typography variant="body2" color="text.secondary">
-          No workload data available
-        </Typography>
-      </Box>
+      <div className="flex items-center justify-center h-full">
+        <p className="text-sm text-text-secondary">No workload data available</p>
+      </div>
     )
   }
 
   // If many users, use compact list view; otherwise use bar chart
   if (data.length > 8) {
     return (
-      <Box sx={{ width: '100%', height: '100%', overflow: 'auto' }}>
+      <div className="w-full h-full overflow-auto">
         {enrichedData.map((entry) => {
           const overloaded = entry.utilization > 100
+          const color = overloaded
+            ? COLOR_ERROR
+            : entry.utilization > 80
+              ? COLOR_WARNING
+              : COLOR_PRIMARY
           return (
-            <Box key={entry.user} sx={{ mb: 1 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
-                <Typography variant="caption" sx={{ fontWeight: 500 }} noWrap>
+            <div key={entry.user} className="mb-2">
+              <div className="flex justify-between mb-0.5">
+                <span className="text-xs font-medium truncate">
                   {entry.user}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color={overloaded ? 'error' : 'text.secondary'}
+                </span>
+                <span
+                  className="text-xs"
+                  style={{ color: overloaded ? COLOR_ERROR : COLOR_TEXT_SECONDARY }}
                 >
                   {entry.hours}h / {entry.capacity}h
-                </Typography>
-              </Box>
-              <LinearProgress
-                variant="determinate"
-                value={Math.min(entry.utilization, 100)}
-                color={overloaded ? 'error' : entry.utilization > 80 ? 'warning' : 'primary'}
-                sx={{ height: 6, borderRadius: 3 }}
-              />
-            </Box>
+                </span>
+              </div>
+              <div className="h-1.5 bg-surface-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{
+                    width: `${Math.min(entry.utilization, 100)}%`,
+                    backgroundColor: color,
+                  }}
+                />
+              </div>
+            </div>
           )
         })}
-      </Box>
+      </div>
     )
   }
 
   function barColor(utilization: number): string {
-    if (utilization > 100) return theme.palette.error.main
-    if (utilization > 80) return theme.palette.warning.main
-    return theme.palette.primary.main
+    if (utilization > 100) return COLOR_ERROR
+    if (utilization > 80) return COLOR_WARNING
+    return COLOR_PRIMARY
   }
 
   return (
-    <Box sx={{ width: '100%', height: '100%' }}>
+    <div className="w-full h-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={enrichedData} margin={{ top: 4, right: 8, left: -12, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -117,17 +127,17 @@ export default function WorkloadWidget({ data }: WorkloadWidgetProps) {
               value: 'Hours',
               angle: -90,
               position: 'insideLeft',
-              style: { fontSize: 10, fill: theme.palette.text.secondary },
+              style: { fontSize: 10, fill: COLOR_TEXT_SECONDARY },
             }}
           />
           <Tooltip
             contentStyle={{ fontSize: 12, borderRadius: 8 }}
-            formatter={(value: number, _name: string, props: { payload: { capacity: number } }) => {
-              const cap = props.payload.capacity
+            formatter={(value: number, _name: string, props: { payload?: { capacity: number } }) => {
+              const cap = props.payload?.capacity ?? 0
               return [`${value}h / ${cap}h capacity`, 'Workload']
             }}
           />
-          <ReferenceLine y={0} stroke={theme.palette.divider} />
+          <ReferenceLine y={0} stroke={COLOR_DIVIDER} />
           <Bar dataKey="hours" radius={[4, 4, 0, 0]} maxBarSize={36}>
             {enrichedData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={barColor(entry.utilization)} />
@@ -135,6 +145,6 @@ export default function WorkloadWidget({ data }: WorkloadWidgetProps) {
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-    </Box>
+    </div>
   )
 }

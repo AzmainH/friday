@@ -1,22 +1,8 @@
 import { useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Chip from '@mui/material/Chip'
-import Collapse from '@mui/material/Collapse'
-import Container from '@mui/material/Container'
-import IconButton from '@mui/material/IconButton'
-import Skeleton from '@mui/material/Skeleton'
-import Switch from '@mui/material/Switch'
-import Tooltip from '@mui/material/Tooltip'
-import Typography from '@mui/material/Typography'
-import AddIcon from '@mui/icons-material/Add'
-import BoltIcon from '@mui/icons-material/Bolt'
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
-import EditIcon from '@mui/icons-material/Edit'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import { useParams } from 'react-router-dom'
+import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, Zap } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { Button } from '@/components/ui/Button'
 import type { AutomationRule } from '@/types/api'
 import {
   useAutomations,
@@ -30,18 +16,11 @@ import AutomationBuilder, {
 import ExecutionLog from '@/components/automations/ExecutionLog'
 
 // ---------------------------------------------------------------------------
-// Props
-// ---------------------------------------------------------------------------
-
-interface AutomationsPageProps {
-  projectId: string
-}
-
-// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export default function AutomationsPage({ projectId }: AutomationsPageProps) {
+export default function AutomationsPage() {
+  const { projectId = '' } = useParams<{ projectId: string }>()
   const { data: rules, isLoading } = useAutomations(projectId)
   const createMutation = useCreateAutomation(projectId)
   const updateMutation = useUpdateAutomation(projectId)
@@ -96,25 +75,20 @@ export default function AutomationsPage({ projectId }: AutomationsPageProps) {
   )
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div className="mx-auto max-w-5xl px-4 py-8">
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <BoltIcon color="warning" />
-          <Typography variant="h5" fontWeight={600}>
-            Automations
-          </Typography>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Zap className="h-5 w-5 text-amber-500" />
+          <h2 className="text-xl font-semibold text-text-primary">Automations</h2>
           {rules && (
-            <Chip
-              label={`${rules.length} rule${rules.length !== 1 ? 's' : ''}`}
-              size="small"
-              variant="outlined"
-            />
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-surface-200 text-text-secondary">
+              {rules.length} rule{rules.length !== 1 ? 's' : ''}
+            </span>
           )}
-        </Box>
+        </div>
         <Button
-          variant="contained"
-          startIcon={<AddIcon />}
+          leftIcon={<Plus className="h-4 w-4" />}
           onClick={() => {
             setEditingRule(null)
             setShowBuilder(true)
@@ -122,60 +96,53 @@ export default function AutomationsPage({ projectId }: AutomationsPageProps) {
         >
           New Automation
         </Button>
-      </Box>
+      </div>
 
       {/* Builder for creating */}
       {showBuilder && !editingRule && (
-        <Box sx={{ mb: 3 }}>
+        <div className="mb-6">
           <AutomationBuilder
             onSave={handleCreate}
             onCancel={() => setShowBuilder(false)}
           />
-        </Box>
+        </div>
       )}
 
       {/* Loading state */}
       {isLoading && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div className="flex flex-col gap-3">
           {Array.from({ length: 3 }, (_, i) => (
-            <Skeleton key={i} variant="rectangular" height={80} sx={{ borderRadius: 2 }} />
+            <div key={i} className="skeleton-shimmer h-20 rounded-lg" />
           ))}
-        </Box>
+        </div>
       )}
 
       {/* Rule list */}
       {!isLoading && rules?.length === 0 && !showBuilder && (
-        <Box
-          sx={{
-            p: 6,
-            borderRadius: 3,
-            bgcolor: 'background.paper',
-            border: '1px solid',
-            borderColor: 'divider',
-            textAlign: 'center',
-          }}
-        >
-          <BoltIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
-          <Typography variant="h6" color="text.secondary" gutterBottom>
+        <div className="p-12 rounded-xl bg-white dark:bg-dark-surface border border-surface-200 dark:border-dark-border text-center">
+          <Zap className="h-12 w-12 text-text-tertiary mx-auto mb-2" />
+          <h3 className="text-lg font-medium text-text-secondary mb-1">
             No automations yet
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          </h3>
+          <p className="text-sm text-text-secondary mb-4">
             Create your first automation to streamline your workflow.
-          </Typography>
+          </p>
           <Button
-            variant="contained"
-            startIcon={<AddIcon />}
+            leftIcon={<Plus className="h-4 w-4" />}
             onClick={() => setShowBuilder(true)}
           >
             Create Automation
           </Button>
-        </Box>
+        </div>
       )}
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div className="flex flex-col gap-3">
         {rules?.map((rule) => (
-          <Card key={rule.id} variant="outlined" sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ pb: expandedId === rule.id ? 0 : undefined }}>
+          <div
+            key={rule.id}
+            className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface dark:border-dark-border"
+          >
+            <div className={cn('p-4', expandedId === rule.id && 'pb-0')}>
               {/* Editing view */}
               {editingRule?.id === rule.id ? (
                 <AutomationBuilder
@@ -186,91 +153,94 @@ export default function AutomationsPage({ projectId }: AutomationsPageProps) {
               ) : (
                 <>
                   {/* Summary row */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Tooltip title={rule.is_enabled ? 'Enabled' : 'Disabled'}>
-                      <Switch
-                        checked={rule.is_enabled}
-                        onChange={() => handleToggle(rule)}
-                        size="small"
-                        color="primary"
+                  <div className="flex items-center gap-3">
+                    <button
+                      role="switch"
+                      aria-checked={rule.is_enabled}
+                      title={rule.is_enabled ? 'Enabled' : 'Disabled'}
+                      onClick={() => handleToggle(rule)}
+                      className={cn(
+                        'relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0',
+                        rule.is_enabled ? 'bg-primary-500' : 'bg-surface-300',
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform',
+                          rule.is_enabled ? 'translate-x-[18px]' : 'translate-x-[3px]',
+                        )}
                       />
-                    </Tooltip>
+                    </button>
 
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="subtitle1" fontWeight={600} noWrap>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-text-primary truncate">
                         {rule.name}
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
-                        <Chip
-                          label={`When: ${rule.trigger_type.replace(/_/g, ' ')}`}
-                          size="small"
-                          color="warning"
-                          variant="outlined"
-                        />
-                        <Chip
-                          label={`Then: ${rule.action_type.replace(/_/g, ' ')}`}
-                          size="small"
-                          color="success"
-                          variant="outlined"
-                        />
+                      </p>
+                      <div className="flex gap-1.5 mt-1">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-amber-300 text-amber-700 dark:text-amber-400">
+                          When: {rule.trigger_type.replace(/_/g, ' ')}
+                        </span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-green-300 text-green-700 dark:text-green-400">
+                          Then: {rule.action_type.replace(/_/g, ' ')}
+                        </span>
                         {rule.execution_count > 0 && (
-                          <Chip
-                            label={`${rule.execution_count} execution${rule.execution_count !== 1 ? 's' : ''}`}
-                            size="small"
-                            variant="outlined"
-                          />
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-surface-200 text-text-secondary">
+                            {rule.execution_count} execution{rule.execution_count !== 1 ? 's' : ''}
+                          </span>
                         )}
-                      </Box>
-                    </Box>
+                      </div>
+                    </div>
 
-                    <Tooltip title="Edit">
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          setShowBuilder(false)
-                          setEditingRule(rule)
-                        }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <button
+                      title="Edit"
+                      className="p-1.5 rounded-md text-text-secondary hover:bg-surface-100 transition-colors"
+                      onClick={() => {
+                        setShowBuilder(false)
+                        setEditingRule(rule)
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
 
-                    <Tooltip title="Delete">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => handleDelete(rule.id)}
-                      >
-                        <DeleteOutlineIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <button
+                      title="Delete"
+                      className="p-1.5 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                      onClick={() => handleDelete(rule.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
 
-                    <Tooltip title={expandedId === rule.id ? 'Collapse' : 'Execution Log'}>
-                      <IconButton size="small" onClick={() => toggleExpand(rule.id)}>
-                        {expandedId === rule.id ? (
-                          <ExpandLessIcon fontSize="small" />
-                        ) : (
-                          <ExpandMoreIcon fontSize="small" />
-                        )}
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
+                    <button
+                      title={expandedId === rule.id ? 'Collapse' : 'Execution Log'}
+                      className="p-1.5 rounded-md text-text-secondary hover:bg-surface-100 transition-colors"
+                      onClick={() => toggleExpand(rule.id)}
+                    >
+                      {expandedId === rule.id ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
 
                   {/* Expanded: execution log */}
-                  <Collapse in={expandedId === rule.id}>
-                    <Box sx={{ mt: 2, mb: 1 }}>
-                      <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                        Execution History
-                      </Typography>
-                      <ExecutionLog ruleId={rule.id} />
-                    </Box>
-                  </Collapse>
+                  <div
+                    className={cn(
+                      'overflow-hidden transition-all duration-200',
+                      expandedId === rule.id ? 'max-h-[9999px] mt-4 mb-2' : 'max-h-0',
+                    )}
+                  >
+                    <p className="text-sm font-medium text-text-primary mb-2">
+                      Execution History
+                    </p>
+                    <ExecutionLog ruleId={rule.id} />
+                  </div>
                 </>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
-      </Box>
-    </Container>
+      </div>
+    </div>
   )
 }

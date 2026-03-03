@@ -1,16 +1,5 @@
 import { useState } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Paper from '@mui/material/Paper'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import ToggleButton from '@mui/material/ToggleButton'
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
-import CircularProgress from '@mui/material/CircularProgress'
+import { cn } from '@/lib/cn'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { useQuery } from '@tanstack/react-query'
 import client from '@/api/client'
@@ -27,6 +16,12 @@ interface TimeReportEntry {
 interface TimeReportsProps {
   projectId: string
 }
+
+const GROUP_OPTIONS: { value: GroupBy; label: string }[] = [
+  { value: 'user', label: 'By User' },
+  { value: 'issue', label: 'By Issue' },
+  { value: 'date', label: 'By Date' },
+]
 
 export default function TimeReports({ projectId }: TimeReportsProps) {
   const [groupBy, setGroupBy] = useState<GroupBy>('user')
@@ -47,30 +42,36 @@ export default function TimeReports({ projectId }: TimeReportsProps) {
   const totalBillable = (entries ?? []).reduce((s, e) => s + e.billable_hours, 0)
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6" fontWeight={600}>
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-text-primary">
           Time Reports
-        </Typography>
-        <ToggleButtonGroup
-          value={groupBy}
-          exclusive
-          onChange={(_, v) => v && setGroupBy(v)}
-          size="small"
-        >
-          <ToggleButton value="user">By User</ToggleButton>
-          <ToggleButton value="issue">By Issue</ToggleButton>
-          <ToggleButton value="date">By Date</ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
+        </h2>
+        <div className="inline-flex rounded-lg border border-surface-200 bg-surface-50">
+          {GROUP_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setGroupBy(opt.value)}
+              className={cn(
+                'px-3 py-1.5 text-sm font-medium transition-colors',
+                groupBy === opt.value
+                  ? 'bg-white text-text-primary shadow-sm rounded-lg'
+                  : 'text-text-secondary hover:text-text-primary',
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {isLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-          <CircularProgress />
-        </Box>
+        <div className="flex justify-center py-8">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-surface-300 border-t-primary-500" />
+        </div>
       ) : (
         <>
-          <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+          <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface p-4 mb-6">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={entries ?? []}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -78,44 +79,46 @@ export default function TimeReports({ projectId }: TimeReportsProps) {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="hours" fill="#2196f3" name="Total Hours" />
-                <Bar dataKey="billable_hours" fill="#4caf50" name="Billable Hours" />
+                <Bar dataKey="hours" fill="#f59e0b" name="Total Hours" />
+                <Bar dataKey="billable_hours" fill="#22c55e" name="Billable Hours" />
               </BarChart>
             </ResponsiveContainer>
-          </Paper>
+          </div>
 
-          <TableContainer component={Paper} variant="outlined">
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>{groupBy === 'user' ? 'User' : groupBy === 'issue' ? 'Issue' : 'Date'}</TableCell>
-                  <TableCell align="right">Hours</TableCell>
-                  <TableCell align="right">Billable</TableCell>
-                  <TableCell align="right">% of Total</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+          <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface overflow-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-surface-200">
+                  <th className="px-3 py-2 text-left text-sm font-semibold">
+                    {groupBy === 'user' ? 'User' : groupBy === 'issue' ? 'Issue' : 'Date'}
+                  </th>
+                  <th className="px-3 py-2 text-right text-sm font-semibold">Hours</th>
+                  <th className="px-3 py-2 text-right text-sm font-semibold">Billable</th>
+                  <th className="px-3 py-2 text-right text-sm font-semibold">% of Total</th>
+                </tr>
+              </thead>
+              <tbody>
                 {(entries ?? []).map((entry) => (
-                  <TableRow key={entry.label} hover>
-                    <TableCell>{entry.label}</TableCell>
-                    <TableCell align="right">{formatNumber(entry.hours)}h</TableCell>
-                    <TableCell align="right">{formatNumber(entry.billable_hours)}h</TableCell>
-                    <TableCell align="right">
+                  <tr key={entry.label} className="border-b border-surface-100 hover:bg-surface-50 dark:hover:bg-dark-border/30">
+                    <td className="px-3 py-2">{entry.label}</td>
+                    <td className="px-3 py-2 text-right">{formatNumber(entry.hours)}h</td>
+                    <td className="px-3 py-2 text-right">{formatNumber(entry.billable_hours)}h</td>
+                    <td className="px-3 py-2 text-right">
                       {totalHours > 0 ? formatNumber((entry.hours / totalHours) * 100) : 0}%
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ))}
-                <TableRow sx={{ '& td': { fontWeight: 600 } }}>
-                  <TableCell>Total</TableCell>
-                  <TableCell align="right">{formatNumber(totalHours)}h</TableCell>
-                  <TableCell align="right">{formatNumber(totalBillable)}h</TableCell>
-                  <TableCell align="right">100%</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
+                <tr className="[&_td]:font-semibold">
+                  <td className="px-3 py-2">Total</td>
+                  <td className="px-3 py-2 text-right">{formatNumber(totalHours)}h</td>
+                  <td className="px-3 py-2 text-right">{formatNumber(totalBillable)}h</td>
+                  <td className="px-3 py-2 text-right">100%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </>
       )}
-    </Box>
+    </div>
   )
 }

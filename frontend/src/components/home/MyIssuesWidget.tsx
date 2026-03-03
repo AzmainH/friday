@@ -1,18 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import Table from '@mui/material/Table'
-import TableHead from '@mui/material/TableHead'
-import TableBody from '@mui/material/TableBody'
-import TableRow from '@mui/material/TableRow'
-import TableCell from '@mui/material/TableCell'
-import Chip from '@mui/material/Chip'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
-import Box from '@mui/material/Box'
-import Skeleton from '@mui/material/Skeleton'
+import { cn } from '@/lib/cn'
 import client from '@/api/client'
 import type { Issue } from '@/types/api'
 import { useAuthStore } from '@/stores/authStore'
@@ -41,95 +29,115 @@ export default function MyIssuesWidget() {
 
   const issues = data?.data ?? []
 
-  return (
-    <Card sx={{ height: '100%' }}>
-      <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-        <Box sx={{ px: 2, pt: 2, pb: 0 }}>
-          <Typography variant="h6" gutterBottom>
-            My Issues
-          </Typography>
-          <Tabs
-            value={tab}
-            onChange={(_, v) => setTab(v)}
-            sx={{ minHeight: 36, mb: 1 }}
-          >
-            <Tab label="Assigned to me" sx={{ minHeight: 36, py: 0 }} />
-            <Tab label="Reported by me" sx={{ minHeight: 36, py: 0 }} />
-          </Tabs>
-        </Box>
+  const tabs = ['Assigned to me', 'Reported by me']
 
-        {isLoading ? (
-          <Box sx={{ p: 2 }}>
-            {Array.from({ length: 5 }, (_, i) => (
-              <Skeleton key={i} variant="text" height={32} sx={{ mb: 0.5 }} />
-            ))}
-          </Box>
-        ) : issues.length === 0 ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              No issues found
-            </Typography>
-          </Box>
-        ) : (
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Key</TableCell>
-                <TableCell>Summary</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Priority</TableCell>
-                <TableCell>Due Date</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+  return (
+    <div className="h-full bg-white dark:bg-surface-100 rounded-[--radius-lg] shadow-sm border border-surface-200">
+      <div className="px-5 pt-5 pb-0">
+        <h2 className="text-lg font-semibold text-text-primary mb-3">
+          My Issues
+        </h2>
+
+        {/* Custom tabs */}
+        <div className="flex border-b border-surface-200">
+          {tabs.map((label, i) => (
+            <button
+              key={label}
+              onClick={() => setTab(i)}
+              className={cn(
+                'px-4 py-2 text-sm font-medium transition-colors duration-[--duration-fast] cursor-pointer',
+                'border-b-2 -mb-px',
+                tab === i
+                  ? 'border-primary-500 text-primary-700'
+                  : 'border-transparent text-text-secondary hover:text-text-primary hover:border-surface-300',
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="p-5 space-y-2">
+          {Array.from({ length: 5 }, (_, i) => (
+            <div key={i} className="h-7 skeleton-shimmer rounded-[--radius-xs]" />
+          ))}
+        </div>
+      ) : issues.length === 0 ? (
+        <div className="p-8 text-center">
+          <p className="text-sm text-text-secondary">No issues found</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-surface-200">
+                <th className="text-left px-5 py-2.5 text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Key
+                </th>
+                <th className="text-left px-5 py-2.5 text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Summary
+                </th>
+                <th className="text-left px-5 py-2.5 text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="text-left px-5 py-2.5 text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Priority
+                </th>
+                <th className="text-left px-5 py-2.5 text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  Due Date
+                </th>
+              </tr>
+            </thead>
+            <tbody>
               {issues.map((issue) => (
-                <TableRow key={issue.id} hover sx={{ cursor: 'pointer' }}>
-                  <TableCell>
-                    <Typography variant="body2" fontWeight={500} color="primary">
+                <tr
+                  key={issue.id}
+                  className="border-b border-surface-200 last:border-b-0 hover:bg-surface-50 cursor-pointer transition-colors duration-[--duration-fast]"
+                >
+                  <td className="px-5 py-2.5">
+                    <span className="font-medium text-primary-600">
                       {issue.issue_key}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" noWrap sx={{ maxWidth: 250 }}>
+                    </span>
+                  </td>
+                  <td className="px-5 py-2.5">
+                    <span className="block max-w-[250px] truncate text-text-primary">
                       {issue.summary}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={issue.status?.name ?? 'Unknown'}
-                      size="small"
-                      sx={{
-                        bgcolor: issue.status?.color ?? '#9e9e9e',
-                        color: '#fff',
-                        fontWeight: 500,
-                        fontSize: '0.75rem',
+                    </span>
+                  </td>
+                  <td className="px-5 py-2.5">
+                    <span
+                      className="inline-block px-2 py-0.5 rounded-full text-xs font-medium text-white"
+                      style={{
+                        backgroundColor: issue.status?.color ?? '#9e9e9e',
                       }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={issue.priority}
-                      size="small"
-                      variant="outlined"
-                      sx={{
-                        borderColor: PRIORITY_COLORS[issue.priority] ?? '#9e9e9e',
-                        color: PRIORITY_COLORS[issue.priority] ?? '#9e9e9e',
-                        fontWeight: 500,
-                        fontSize: '0.75rem',
+                    >
+                      {issue.status?.name ?? 'Unknown'}
+                    </span>
+                  </td>
+                  <td className="px-5 py-2.5">
+                    <span
+                      className="inline-block px-2 py-0.5 rounded-full text-xs font-medium border"
+                      style={{
+                        borderColor:
+                          PRIORITY_COLORS[issue.priority] ?? '#9e9e9e',
+                        color:
+                          PRIORITY_COLORS[issue.priority] ?? '#9e9e9e',
                       }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" color="text.secondary">
-                      {formatDate(issue.due_date)}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
+                    >
+                      {issue.priority}
+                    </span>
+                  </td>
+                  <td className="px-5 py-2.5 text-text-secondary">
+                    {formatDate(issue.due_date)}
+                  </td>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
-        )}
-      </CardContent>
-    </Card>
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   )
 }

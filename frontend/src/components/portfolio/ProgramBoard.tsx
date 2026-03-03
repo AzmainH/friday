@@ -1,10 +1,5 @@
 import { useMemo, useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
-import ToggleButton from '@mui/material/ToggleButton'
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
-import Grid from '@mui/material/Grid2'
+import { cn } from '@/lib/cn'
 import {
   DndContext,
   closestCenter,
@@ -56,9 +51,9 @@ function SortableProjectCard({
   }
 
   return (
-    <Box ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <ProjectCard project={project} onClick={onClick} />
-    </Box>
+    </div>
   )
 }
 
@@ -132,110 +127,106 @@ export default function ProgramBoard({ overview, onProjectClick, onReorder }: Pr
   const { summary } = overview
 
   return (
-    <Box>
+    <div>
       {/* Summary bar */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2,
-          mb: 2,
-          p: 1.5,
-          borderRadius: 2,
-          bgcolor: 'background.paper',
-          border: '1px solid',
-          borderColor: 'divider',
-          flexWrap: 'wrap',
-        }}
-      >
-        <Typography variant="subtitle2">
+      <div className="mb-2 flex flex-wrap items-center gap-2 rounded-[--radius-sm] border border-surface-200 bg-white p-1.5 dark:bg-surface-50">
+        <span className="text-sm font-semibold text-text-primary">
           {summary.total_projects} project{summary.total_projects !== 1 ? 's' : ''}
-        </Typography>
+        </span>
 
         {/* RAG chips */}
         {Object.entries(summary.by_rag).map(([rag, count]) =>
           count > 0 ? (
-            <Chip
+            <span
               key={rag}
-              size="small"
-              label={`${rag}: ${count}`}
-              sx={{
-                bgcolor: `${RAG_COLORS[rag] ?? RAG_COLORS.none}22`,
+              className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
+              style={{
+                backgroundColor: `${RAG_COLORS[rag] ?? RAG_COLORS.none}22`,
                 color: RAG_COLORS[rag] ?? RAG_COLORS.none,
-                fontWeight: 600,
               }}
-            />
+            >
+              {rag}: {count}
+            </span>
           ) : null,
         )}
 
         {/* Status chips */}
         {Object.entries(summary.by_status).map(([status, count]) =>
           count > 0 ? (
-            <Chip key={status} size="small" label={`${status}: ${count}`} variant="outlined" />
+            <span
+              key={status}
+              className="inline-flex items-center rounded-full border border-surface-200 px-2 py-0.5 text-xs text-text-secondary"
+            >
+              {status}: {count}
+            </span>
           ) : null,
         )}
 
-        <Box sx={{ flex: 1 }} />
+        <div className="flex-1" />
 
         {/* Group toggle */}
-        <ToggleButtonGroup
-          size="small"
-          value={groupBy}
-          exclusive
-          onChange={(_e, val: GroupBy | null) => {
-            if (val) setGroupBy(val)
-          }}
-        >
-          <ToggleButton value="status">By Status</ToggleButton>
-          <ToggleButton value="rag">By RAG</ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
+        <div className="inline-flex rounded-[--radius-sm] border border-surface-200 bg-surface-50 p-0.5">
+          <button
+            type="button"
+            onClick={() => setGroupBy('status')}
+            className={cn(
+              'rounded px-3 py-1 text-sm transition-colors',
+              groupBy === 'status'
+                ? 'bg-white text-primary-600 shadow-sm'
+                : 'text-text-secondary hover:text-text-primary'
+            )}
+          >
+            By Status
+          </button>
+          <button
+            type="button"
+            onClick={() => setGroupBy('rag')}
+            className={cn(
+              'rounded px-3 py-1 text-sm transition-colors',
+              groupBy === 'rag'
+                ? 'bg-white text-primary-600 shadow-sm'
+                : 'text-text-secondary hover:text-text-primary'
+            )}
+          >
+            By RAG
+          </button>
+        </div>
+      </div>
 
       {/* Grouped cards with drag-and-drop */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         {Array.from(groups.entries()).map(([groupKey, projects]) => {
           if (projects.length === 0) return null
           return (
-            <Box key={groupKey} sx={{ mb: 3 }}>
-              <Typography
-                variant="overline"
-                sx={{
-                  mb: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  color: 'text.secondary',
-                }}
-              >
+            <div key={groupKey} className="mb-3">
+              <span className="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-text-secondary">
                 {groupBy === 'rag' && (
-                  <Box
-                    sx={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: '50%',
-                      bgcolor: RAG_COLORS[groupKey] ?? RAG_COLORS.none,
-                    }}
+                  <span
+                    className="inline-block h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: RAG_COLORS[groupKey] ?? RAG_COLORS.none }}
                   />
                 )}
                 {GROUP_LABELS[groupKey] ?? groupKey} ({projects.length})
-              </Typography>
+              </span>
 
               <SortableContext
                 items={projects.map((p) => p.id)}
                 strategy={rectSortingStrategy}
               >
-                <Grid container spacing={2}>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                   {projects.map((project) => (
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={project.id}>
-                      <SortableProjectCard project={project} onClick={onProjectClick} />
-                    </Grid>
+                    <SortableProjectCard
+                      key={project.id}
+                      project={project}
+                      onClick={onProjectClick}
+                    />
                   ))}
-                </Grid>
+                </div>
               </SortableContext>
-            </Box>
+            </div>
           )
         })}
       </DndContext>
-    </Box>
+    </div>
   )
 }

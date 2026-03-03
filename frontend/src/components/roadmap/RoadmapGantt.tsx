@@ -1,10 +1,5 @@
 import { useMemo, useRef, useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Tooltip from '@mui/material/Tooltip'
-import IconButton from '@mui/material/IconButton'
-import ZoomInIcon from '@mui/icons-material/ZoomIn'
-import ZoomOutIcon from '@mui/icons-material/ZoomOut'
+import { ZoomIn, ZoomOut } from 'lucide-react'
 import { RAG_COLORS } from '@/utils/formatters'
 import type {
   RoadmapTimelineProject,
@@ -149,28 +144,30 @@ export default function RoadmapGantt({ timelineData }: RoadmapGanttProps) {
   const todayX = dateToX(new Date())
 
   return (
-    <Box sx={{ position: 'relative' }}>
+    <div className="relative">
       {/* Zoom controls */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1, gap: 0.5 }}>
-        <IconButton size="small" onClick={handleZoomOut} aria-label="Zoom out">
-          <ZoomOutIcon fontSize="small" />
-        </IconButton>
-        <IconButton size="small" onClick={handleZoomIn} aria-label="Zoom in">
-          <ZoomInIcon fontSize="small" />
-        </IconButton>
-      </Box>
+      <div className="mb-1 flex justify-end gap-0.5">
+        <button
+          type="button"
+          onClick={handleZoomOut}
+          aria-label="Zoom out"
+          className="rounded-md p-1.5 text-text-secondary hover:bg-surface-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+        >
+          <ZoomOut className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={handleZoomIn}
+          aria-label="Zoom in"
+          className="rounded-md p-1.5 text-text-secondary hover:bg-surface-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+        >
+          <ZoomIn className="h-4 w-4" />
+        </button>
+      </div>
 
-      <Box
+      <div
         ref={containerRef}
-        sx={{
-          overflowX: 'auto',
-          overflowY: 'auto',
-          maxHeight: 600,
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
-          bgcolor: 'background.paper',
-        }}
+        className="max-h-[600px] overflow-x-auto overflow-y-auto rounded-[--radius-sm] border border-surface-200 bg-white dark:bg-surface-50"
       >
         <svg
           width={LEFT_LABEL_WIDTH + chartWidth}
@@ -184,7 +181,7 @@ export default function RoadmapGantt({ timelineData }: RoadmapGanttProps) {
               y={0}
               width={LEFT_LABEL_WIDTH + chartWidth}
               height={HEADER_HEIGHT}
-              fill="var(--mui-palette-action-hover, #f5f5f5)"
+              fill="var(--color-surface-100)"
             />
             {months.map((m, i) => (
               <text
@@ -193,7 +190,7 @@ export default function RoadmapGantt({ timelineData }: RoadmapGanttProps) {
                 y={HEADER_HEIGHT / 2 + 5}
                 textAnchor="middle"
                 fontSize={12}
-                fill="var(--mui-palette-text-secondary, #666)"
+                fill="var(--color-text-secondary)"
               >
                 {m.label}
               </text>
@@ -206,7 +203,7 @@ export default function RoadmapGantt({ timelineData }: RoadmapGanttProps) {
                 y1={0}
                 x2={LEFT_LABEL_WIDTH + m.offsetDays * dayWidth}
                 y2={totalHeight}
-                stroke="var(--mui-palette-divider, #e0e0e0)"
+                stroke="var(--color-surface-200)"
                 strokeWidth={1}
               />
             ))}
@@ -219,7 +216,7 @@ export default function RoadmapGantt({ timelineData }: RoadmapGanttProps) {
               y1={0}
               x2={LEFT_LABEL_WIDTH + todayX}
               y2={totalHeight}
-              stroke="#1976d2"
+              stroke="var(--color-primary-500)"
               strokeWidth={2}
               strokeDasharray="4 2"
             />
@@ -243,7 +240,7 @@ export default function RoadmapGantt({ timelineData }: RoadmapGanttProps) {
                       y={currentY}
                       width={LEFT_LABEL_WIDTH + chartWidth}
                       height={SWIMLANE_HEADER}
-                      fill="var(--mui-palette-action-selected, #ebebeb)"
+                      fill="var(--color-surface-100)"
                     />
                     {/* RAG dot */}
                     <circle cx={14} cy={currentY + SWIMLANE_HEADER / 2} r={5} fill={ragColor} />
@@ -253,7 +250,7 @@ export default function RoadmapGantt({ timelineData }: RoadmapGanttProps) {
                       y={currentY + SWIMLANE_HEADER / 2 + 4}
                       fontSize={13}
                       fontWeight={600}
-                      fill="var(--mui-palette-text-primary, #212121)"
+                      fill="var(--color-text-primary)"
                     >
                       {row.project.name}
                     </text>
@@ -287,7 +284,7 @@ export default function RoadmapGantt({ timelineData }: RoadmapGanttProps) {
                         y={currentY}
                         width={LEFT_LABEL_WIDTH + chartWidth}
                         height={ROW_HEIGHT}
-                        fill="var(--mui-palette-action-hover, rgba(0,0,0,0.02))"
+                        fill="var(--color-surface-50)"
                       />
                     )}
                     {/* Issue label */}
@@ -295,7 +292,7 @@ export default function RoadmapGantt({ timelineData }: RoadmapGanttProps) {
                       x={24}
                       y={currentY + ROW_HEIGHT / 2 + 4}
                       fontSize={12}
-                      fill="var(--mui-palette-text-secondary, #555)"
+                      fill="var(--color-text-secondary)"
                     >
                       {issue.issue_key}
                     </text>
@@ -303,7 +300,7 @@ export default function RoadmapGantt({ timelineData }: RoadmapGanttProps) {
                       x={90}
                       y={currentY + ROW_HEIGHT / 2 + 4}
                       fontSize={12}
-                      fill="var(--mui-palette-text-primary, #333)"
+                      fill="var(--color-text-primary)"
                       clipPath={`inset(0 0 0 0)`}
                     >
                       {issue.summary.length > 20
@@ -312,37 +309,33 @@ export default function RoadmapGantt({ timelineData }: RoadmapGanttProps) {
                     </text>
                     {/* Issue bar */}
                     {iStart && iEnd && (
-                      <Tooltip
-                        title={`${issue.issue_key}: ${issue.summary} (${issue.percent_complete}%)`}
-                        key={`tt-${idx}`}
-                      >
-                        <g>
-                          {/* Background bar */}
+                      <g>
+                        <title>{`${issue.issue_key}: ${issue.summary} (${issue.percent_complete}%)`}</title>
+                        {/* Background bar */}
+                        <rect
+                          x={LEFT_LABEL_WIDTH + dateToX(iStart)}
+                          y={currentY + (ROW_HEIGHT - BAR_HEIGHT) / 2}
+                          width={Math.max(daysBetween(iStart, iEnd) * dayWidth, 4)}
+                          height={BAR_HEIGHT}
+                          rx={BAR_RADIUS}
+                          fill="var(--color-primary-100)"
+                        />
+                        {/* Progress fill */}
+                        {issue.percent_complete > 0 && (
                           <rect
                             x={LEFT_LABEL_WIDTH + dateToX(iStart)}
                             y={currentY + (ROW_HEIGHT - BAR_HEIGHT) / 2}
-                            width={Math.max(daysBetween(iStart, iEnd) * dayWidth, 4)}
+                            width={Math.max(
+                              (daysBetween(iStart, iEnd) * dayWidth * issue.percent_complete) /
+                                100,
+                              2,
+                            )}
                             height={BAR_HEIGHT}
                             rx={BAR_RADIUS}
-                            fill="#90caf9"
+                            fill="var(--color-primary-500)"
                           />
-                          {/* Progress fill */}
-                          {issue.percent_complete > 0 && (
-                            <rect
-                              x={LEFT_LABEL_WIDTH + dateToX(iStart)}
-                              y={currentY + (ROW_HEIGHT - BAR_HEIGHT) / 2}
-                              width={Math.max(
-                                (daysBetween(iStart, iEnd) * dayWidth * issue.percent_complete) /
-                                  100,
-                                2,
-                              )}
-                              height={BAR_HEIGHT}
-                              rx={BAR_RADIUS}
-                              fill="#1976d2"
-                            />
-                          )}
-                        </g>
-                      </Tooltip>
+                        )}
+                      </g>
                     )}
                   </g>
                 )
@@ -360,13 +353,14 @@ export default function RoadmapGantt({ timelineData }: RoadmapGanttProps) {
                       y={currentY + ROW_HEIGHT / 2 + 4}
                       fontSize={12}
                       fontStyle="italic"
-                      fill="var(--mui-palette-warning-main, #ed6c02)"
+                      fill="var(--color-warning)"
                     >
                       {ms.name}
                     </text>
                     {/* Diamond marker */}
                     {mDate && (
-                      <Tooltip title={`Milestone: ${ms.name}`}>
+                      <g>
+                        <title>{`Milestone: ${ms.name}`}</title>
                         <polygon
                           points={`
                             ${LEFT_LABEL_WIDTH + dateToX(mDate)},${currentY + ROW_HEIGHT / 2 - MILESTONE_SIZE / 2}
@@ -374,9 +368,9 @@ export default function RoadmapGantt({ timelineData }: RoadmapGanttProps) {
                             ${LEFT_LABEL_WIDTH + dateToX(mDate)},${currentY + ROW_HEIGHT / 2 + MILESTONE_SIZE / 2}
                             ${LEFT_LABEL_WIDTH + dateToX(mDate) - MILESTONE_SIZE / 2},${currentY + ROW_HEIGHT / 2}
                           `}
-                          fill="#ed6c02"
+                          fill="var(--color-warning)"
                         />
-                      </Tooltip>
+                      </g>
                     )}
                   </g>
                 )
@@ -386,16 +380,16 @@ export default function RoadmapGantt({ timelineData }: RoadmapGanttProps) {
             })
           })()}
         </svg>
-      </Box>
+      </div>
 
       {/* Empty state */}
       {timelineData.length === 0 && (
-        <Box sx={{ textAlign: 'center', py: 6 }}>
-          <Typography color="text.secondary">
+        <div className="py-6 text-center">
+          <p className="text-text-secondary">
             No projects added to this roadmap yet.
-          </Typography>
-        </Box>
+          </p>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }

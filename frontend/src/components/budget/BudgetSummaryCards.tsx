@@ -1,7 +1,3 @@
-import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
 import { formatCurrency, formatPercent } from '@/utils/formatters'
 import type { BudgetSummary } from '@/hooks/useBudget'
 
@@ -10,9 +6,9 @@ import type { BudgetSummary } from '@/hooks/useBudget'
 // ---------------------------------------------------------------------------
 
 function usageColor(pct: number): string {
-  if (pct >= 95) return '#d32f2f' // red
-  if (pct >= 80) return '#ff9800' // amber
-  return '#4caf50' // green
+  if (pct >= 95) return '#ef4444' // red
+  if (pct >= 80) return '#f59e0b' // amber
+  return '#22c55e' // green
 }
 
 interface SummaryCardProps {
@@ -23,23 +19,15 @@ interface SummaryCardProps {
 
 function SummaryCard({ label, value, color }: SummaryCardProps) {
   return (
-    <Card
-      variant="outlined"
-      sx={{ flex: '1 1 0', minWidth: 180 }}
-    >
-      <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
-        <Typography variant="caption" color="text.secondary" gutterBottom>
-          {label}
-        </Typography>
-        <Typography
-          variant="h5"
-          fontWeight={700}
-          sx={{ color: color ?? 'text.primary', mt: 0.5 }}
-        >
-          {value}
-        </Typography>
-      </CardContent>
-    </Card>
+    <div className="flex-1 min-w-[180px] border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface p-4">
+      <span className="text-xs text-text-tertiary">{label}</span>
+      <span
+        className="block text-xl font-bold mt-1"
+        style={{ color: color ?? undefined }}
+      >
+        {value}
+      </span>
+    </div>
   )
 }
 
@@ -55,7 +43,7 @@ export default function BudgetSummaryCards({ summary }: BudgetSummaryCardsProps)
   const pctColor = usageColor(summary.percent_used)
 
   return (
-    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+    <div className="flex gap-4 flex-wrap">
       <SummaryCard label="Total Budget" value={formatCurrency(summary.total_budget)} />
       <SummaryCard label="Spent" value={formatCurrency(summary.total_spent)} />
       <SummaryCard
@@ -68,6 +56,6 @@ export default function BudgetSummaryCards({ summary }: BudgetSummaryCardsProps)
         value={formatPercent(summary.percent_used)}
         color={pctColor}
       />
-    </Box>
+    </div>
   )
 }

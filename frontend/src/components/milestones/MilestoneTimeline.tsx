@@ -1,10 +1,4 @@
 import { useState } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Tooltip from '@mui/material/Tooltip'
-import Collapse from '@mui/material/Collapse'
-import Chip from '@mui/material/Chip'
-import Paper from '@mui/material/Paper'
 import type { Milestone } from '@/types/api'
 import { formatDate } from '@/utils/formatters'
 
@@ -12,9 +6,9 @@ import { formatDate } from '@/utils/formatters'
 
 const STATUS_COLORS: Record<string, string> = {
   not_started: '#9e9e9e',
-  in_progress: '#2196f3',
-  completed: '#4caf50',
-  blocked: '#f44336',
+  in_progress: '#3b82f6',
+  completed: '#22c55e',
+  blocked: '#ef4444',
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -53,11 +47,11 @@ export default function MilestoneTimeline({ milestones }: MilestoneTimelineProps
 
   if (sorted.length === 0) {
     return (
-      <Box sx={{ py: 4, textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary">
+      <div className="py-8 text-center">
+        <span className="text-sm text-text-secondary">
           No milestones yet. Create one to get started.
-        </Typography>
-      </Box>
+        </span>
+      </div>
     )
   }
 
@@ -66,153 +60,98 @@ export default function MilestoneTimeline({ milestones }: MilestoneTimelineProps
   }
 
   return (
-    <Box sx={{ position: 'relative', py: 3 }}>
+    <div className="relative py-6">
       {/* Horizontal axis line */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 56,
-          left: 24,
-          right: 24,
-          height: 2,
-          bgcolor: 'divider',
-          zIndex: 0,
-        }}
+      <div
+        className="absolute left-6 right-6 h-0.5 bg-surface-200"
+        style={{ top: 56, zIndex: 0 }}
       />
 
       {/* Milestone markers */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          position: 'relative',
-          zIndex: 1,
-          px: 3,
-          overflowX: 'auto',
-          gap: 2,
-          minHeight: 120,
-        }}
-      >
+      <div className="flex justify-between items-start relative z-[1] px-6 overflow-x-auto gap-4 min-h-[120px]">
         {sorted.map((milestone) => {
           const color = getStatusColor(milestone.status)
           const isExpanded = expandedId === milestone.id
 
           return (
-            <Box
+            <div
               key={milestone.id}
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                minWidth: 120,
-                flex: '1 0 auto',
-                cursor: 'pointer',
-              }}
+              className="flex flex-col items-center min-w-[120px] flex-[1_0_auto] cursor-pointer"
               onClick={() => handleToggle(milestone.id)}
             >
               {/* Name above the marker */}
-              <Typography
-                variant="caption"
-                fontWeight={600}
-                sx={{
-                  mb: 0.5,
-                  textAlign: 'center',
-                  maxWidth: 140,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              <span className="text-xs font-semibold mb-1 text-center max-w-[140px] overflow-hidden text-ellipsis whitespace-nowrap">
                 {milestone.name}
-              </Typography>
+              </span>
 
               {/* Diamond / circle icon */}
-              <Tooltip
+              <div
                 title={`${getStatusLabel(milestone.status)} - ${formatDate(milestone.due_date)}`}
-                arrow
-              >
-                <Box
-                  sx={{
-                    width: 20,
-                    height: 20,
-                    bgcolor: color,
-                    borderRadius: milestone.milestone_type === 'gate' ? '2px' : '50%',
-                    transform:
-                      milestone.milestone_type === 'gate' ? 'rotate(45deg)' : 'none',
-                    border: '3px solid',
-                    borderColor: 'background.paper',
-                    boxShadow: `0 0 0 2px ${color}`,
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                      boxShadow: `0 0 0 3px ${color}`,
-                    },
-                  }}
-                />
-              </Tooltip>
-
-              {/* Date below */}
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ mt: 0.5 }}
-              >
-                {formatDate(milestone.due_date)}
-              </Typography>
-
-              {/* Status chip */}
-              <Chip
-                label={getStatusLabel(milestone.status)}
-                size="small"
-                sx={{
-                  mt: 0.5,
+                className="transition-all duration-200"
+                style={{
+                  width: 20,
                   height: 20,
-                  fontSize: '0.675rem',
-                  bgcolor: `${color}20`,
-                  color,
-                  fontWeight: 600,
+                  backgroundColor: color,
+                  borderRadius: milestone.milestone_type === 'gate' ? '2px' : '50%',
+                  transform: milestone.milestone_type === 'gate' ? 'rotate(45deg)' : 'none',
+                  border: '3px solid white',
+                  boxShadow: `0 0 0 2px ${color}`,
                 }}
               />
 
+              {/* Date below */}
+              <span className="text-xs text-text-secondary mt-1">
+                {formatDate(milestone.due_date)}
+              </span>
+
+              {/* Status chip */}
+              <span
+                className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[0.675rem] font-semibold"
+                style={{
+                  backgroundColor: `${color}20`,
+                  color,
+                }}
+              >
+                {getStatusLabel(milestone.status)}
+              </span>
+
               {/* Expandable detail panel */}
-              <Collapse in={isExpanded} unmountOnExit>
-                <Paper
-                  elevation={2}
-                  sx={{
-                    mt: 1,
-                    p: 1.5,
-                    minWidth: 200,
-                    borderLeft: `3px solid ${color}`,
-                  }}
+              <div
+                className="overflow-hidden transition-all duration-200"
+                style={{
+                  maxHeight: isExpanded ? '2000px' : '0px',
+                }}
+              >
+                <div
+                  className="mt-2 p-3 min-w-[200px] bg-white dark:bg-dark-surface border border-surface-200 rounded-[--radius-md] shadow-sm"
+                  style={{ borderLeft: `3px solid ${color}` }}
                 >
                   {milestone.description && (
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      {milestone.description}
-                    </Typography>
+                    <p className="text-sm text-text-primary mb-2">{milestone.description}</p>
                   )}
-                  <Typography variant="caption" color="text.secondary" display="block">
+                  <span className="block text-xs text-text-secondary">
                     Type: {milestone.milestone_type}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" display="block">
+                  </span>
+                  <span className="block text-xs text-text-secondary">
                     Start: {formatDate(milestone.start_date)}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" display="block">
+                  </span>
+                  <span className="block text-xs text-text-secondary">
                     Due: {formatDate(milestone.due_date)}
-                  </Typography>
+                  </span>
                   {milestone.completed_date && (
-                    <Typography variant="caption" color="text.secondary" display="block">
+                    <span className="block text-xs text-text-secondary">
                       Completed: {formatDate(milestone.completed_date)}
-                    </Typography>
+                    </span>
                   )}
-                  <Typography variant="caption" color="text.secondary" display="block">
+                  <span className="block text-xs text-text-secondary">
                     Progress: {milestone.progress_pct}%
-                  </Typography>
-                </Paper>
-              </Collapse>
-            </Box>
+                  </span>
+                </div>
+              </div>
+            </div>
           )
         })}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }

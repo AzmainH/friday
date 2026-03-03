@@ -1,28 +1,7 @@
 import { useState, useMemo } from 'react'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Chip from '@mui/material/Chip'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Collapse from '@mui/material/Collapse'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemText from '@mui/material/ListItemText'
-import IconButton from '@mui/material/IconButton'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import TextField from '@mui/material/TextField'
-import MenuItem from '@mui/material/MenuItem'
-import Alert from '@mui/material/Alert'
-import Skeleton from '@mui/material/Skeleton'
-import AddIcon from '@mui/icons-material/Add'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
-import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
+import { Plus, ChevronDown, ChevronUp, Rocket } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import { useReleases, useCreateRelease } from '@/hooks/usePortfolio'
 import type { ReleaseWithProjects } from '@/hooks/usePortfolio'
 import { formatDate } from '@/utils/formatters'
@@ -33,11 +12,11 @@ import { formatDate } from '@/utils/formatters'
 
 const WORKSPACE_ID = 'default' // Placeholder until workspace context is wired
 
-const STATUS_COLOR: Record<string, 'default' | 'warning' | 'success' | 'info' | 'error'> = {
-  planned: 'info',
-  in_progress: 'warning',
-  released: 'success',
-  cancelled: 'error',
+const STATUS_COLOR: Record<string, string> = {
+  planned: 'bg-blue-50 text-blue-700 border-blue-200',
+  in_progress: 'bg-amber-50 text-amber-700 border-amber-200',
+  released: 'bg-green-50 text-green-700 border-green-200',
+  cancelled: 'bg-red-50 text-red-700 border-red-200',
 }
 
 const STATUS_OPTIONS = ['planned', 'in_progress', 'released', 'cancelled']
@@ -70,20 +49,8 @@ function ReleaseTimeline({ releases }: { releases: ReleaseWithProjects[] }) {
   }
 
   return (
-    <Box
-      sx={{
-        overflowX: 'auto',
-        mb: 3,
-        p: 2,
-        bgcolor: 'background.paper',
-        border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: 2,
-      }}
-    >
-      <Typography variant="subtitle2" gutterBottom>
-        Release Timeline
-      </Typography>
+    <div className="overflow-x-auto mb-6 p-4 bg-white dark:bg-dark-surface border border-surface-200 rounded-[--radius-md]">
+      <h3 className="text-sm font-semibold text-text-primary mb-2">Release Timeline</h3>
       <svg width={SVG_WIDTH} height={SVG_HEIGHT} style={{ display: 'block' }}>
         {/* Baseline */}
         <line
@@ -91,7 +58,7 @@ function ReleaseTimeline({ releases }: { releases: ReleaseWithProjects[] }) {
           y1={40}
           x2={SVG_WIDTH - PADDING}
           y2={40}
-          stroke="#bdbdbd"
+          stroke="var(--color-surface-300, #fde4ba)"
           strokeWidth={2}
         />
 
@@ -102,8 +69,8 @@ function ReleaseTimeline({ releases }: { releases: ReleaseWithProjects[] }) {
             const x = dateToX(now.toISOString())
             return (
               <g>
-                <line x1={x} y1={20} x2={x} y2={60} stroke="#1976d2" strokeWidth={2} strokeDasharray="3 2" />
-                <text x={x} y={16} textAnchor="middle" fontSize={9} fill="#1976d2">
+                <line x1={x} y1={20} x2={x} y2={60} stroke="var(--color-primary-500, #f59e0b)" strokeWidth={2} strokeDasharray="3 2" />
+                <text x={x} y={16} textAnchor="middle" fontSize={9} fill="var(--color-primary-500, #f59e0b)">
                   Today
                 </text>
               </g>
@@ -122,7 +89,7 @@ function ReleaseTimeline({ releases }: { releases: ReleaseWithProjects[] }) {
                 cx={x}
                 cy={40}
                 r={8}
-                fill={isReleased ? '#4caf50' : '#ff9800'}
+                fill={isReleased ? 'var(--color-success, #22c55e)' : 'var(--color-warning, #f59e0b)'}
                 stroke="#fff"
                 strokeWidth={2}
               />
@@ -131,7 +98,7 @@ function ReleaseTimeline({ releases }: { releases: ReleaseWithProjects[] }) {
                 y={66}
                 textAnchor="middle"
                 fontSize={10}
-                fill="var(--mui-palette-text-secondary, #666)"
+                fill="var(--color-text-secondary, #666)"
               >
                 {r.name}
               </text>
@@ -140,7 +107,7 @@ function ReleaseTimeline({ releases }: { releases: ReleaseWithProjects[] }) {
                 y={26}
                 textAnchor="middle"
                 fontSize={9}
-                fill="var(--mui-palette-text-secondary, #999)"
+                fill="var(--color-text-tertiary, #999)"
               >
                 {formatDate(r.release_date)}
               </text>
@@ -148,7 +115,7 @@ function ReleaseTimeline({ releases }: { releases: ReleaseWithProjects[] }) {
           )
         })}
       </svg>
-    </Box>
+    </div>
   )
 }
 
@@ -160,52 +127,60 @@ function ReleaseCard({ release }: { release: ReleaseWithProjects }) {
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <Card sx={{ mb: 1.5 }}>
-      <CardContent sx={{ pb: expanded ? 1 : '16px !important' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <RocketLaunchIcon color="action" />
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="subtitle1" fontWeight={600}>
-              {release.name}
-            </Typography>
+    <div className="mb-3 rounded-[--radius-md] border border-surface-200 bg-white dark:bg-dark-surface shadow-sm">
+      <div className={cn('p-4', expanded && 'pb-2')}>
+        <div className="flex items-center gap-3">
+          <Rocket className="h-5 w-5 text-text-tertiary flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <h4 className="text-sm font-semibold text-text-primary">{release.name}</h4>
             {release.description && (
-              <Typography variant="body2" color="text.secondary">
-                {release.description}
-              </Typography>
+              <p className="text-sm text-text-secondary truncate">{release.description}</p>
             )}
-          </Box>
-          <Chip
-            label={release.status.replace('_', ' ')}
-            size="small"
-            color={STATUS_COLOR[release.status] ?? 'default'}
-          />
-          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 90, textAlign: 'right' }}>
+          </div>
+          <span
+            className={cn(
+              'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium flex-shrink-0',
+              STATUS_COLOR[release.status] ?? 'bg-surface-100 text-text-secondary border-surface-200'
+            )}
+          >
+            {release.status.replace('_', ' ')}
+          </span>
+          <span className="text-xs text-text-secondary min-w-[90px] text-right flex-shrink-0">
             {formatDate(release.release_date)}
-          </Typography>
-          <IconButton size="small" onClick={() => setExpanded((e) => !e)}>
-            {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          </IconButton>
-        </Box>
-      </CardContent>
+          </span>
+          <button
+            onClick={() => setExpanded((e) => !e)}
+            className="p-1 rounded hover:bg-surface-100 text-text-secondary transition-colors flex-shrink-0"
+          >
+            {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </button>
+        </div>
+      </div>
 
-      <Collapse in={expanded}>
-        <Box sx={{ px: 2, pb: 2 }}>
+      {/* Collapsible project list */}
+      <div
+        className={cn(
+          'overflow-hidden transition-all duration-200',
+          expanded ? 'max-h-[500px]' : 'max-h-0'
+        )}
+      >
+        <div className="px-4 pb-4">
           {release.projects.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
+            <p className="text-sm text-text-secondary">
               No projects linked to this release.
-            </Typography>
+            </p>
           ) : (
-            <List dense disablePadding>
+            <ul className="space-y-1">
               {release.projects.map((p) => (
-                <ListItem key={p.project_id} disableGutters>
-                  <ListItemText primary={p.project_name} />
-                </ListItem>
+                <li key={p.project_id} className="text-sm text-text-primary py-1">
+                  {p.project_name}
+                </li>
               ))}
-            </List>
+            </ul>
           )}
-        </Box>
-      </Collapse>
-    </Card>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -255,120 +230,161 @@ export default function ReleasesPage() {
 
   if (isLoading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Skeleton variant="text" width={200} height={40} />
-        <Skeleton variant="rectangular" height={80} sx={{ borderRadius: 2, mb: 2 }} />
+      <div className="py-8">
+        <div className="skeleton-shimmer h-8 w-48 rounded mb-4" />
+        <div className="skeleton-shimmer h-20 w-full rounded-[--radius-md] mb-4" />
         {Array.from({ length: 3 }, (_, i) => (
-          <Skeleton key={i} variant="rectangular" height={64} sx={{ borderRadius: 1, mb: 1 }} />
+          <div key={i} className="skeleton-shimmer h-16 w-full rounded-[--radius-sm] mb-2" />
         ))}
-      </Container>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Alert severity="error">Failed to load releases: {error.message}</Alert>
-      </Container>
+      <div>
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[--radius-sm]">
+          Failed to load releases: {error.message}
+        </div>
+      </div>
     )
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div>
       {/* Page header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h4" fontWeight={700}>
-          Releases
-        </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDialogOpen(true)}>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-text-primary">Releases</h2>
+        <button
+          onClick={() => setDialogOpen(true)}
+          className="inline-flex items-center gap-2 rounded-[--radius-sm] bg-primary-500 px-4 py-2 text-sm font-medium text-white shadow-[--shadow-sm] hover:bg-primary-600 transition-colors"
+        >
+          <Plus className="h-4 w-4" />
           New Release
-        </Button>
-      </Box>
+        </button>
+      </div>
 
       {/* Timeline visualization */}
       {sortedReleases.length > 0 && <ReleaseTimeline releases={sortedReleases} />}
 
-      {/* Release list */}
+      {/* Empty state */}
       {sortedReleases.length === 0 && (
-        <Box
-          sx={{
-            p: 6,
-            textAlign: 'center',
-            borderRadius: 3,
-            bgcolor: 'background.paper',
-            border: '1px solid',
-            borderColor: 'divider',
-          }}
-        >
-          <Typography variant="body1" color="text.secondary" gutterBottom>
+        <div className="p-12 text-center rounded-[--radius-lg] bg-white dark:bg-dark-surface border border-surface-200">
+          <p className="text-text-secondary mb-4">
             No releases yet. Create one to start tracking deliveries.
-          </Typography>
-          <Button variant="outlined" startIcon={<AddIcon />} onClick={() => setDialogOpen(true)}>
+          </p>
+          <button
+            onClick={() => setDialogOpen(true)}
+            className="inline-flex items-center gap-2 rounded-[--radius-sm] border border-primary-500 text-primary-600 px-4 py-2 text-sm font-medium hover:bg-primary-50 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
             Create Your First Release
-          </Button>
-        </Box>
+          </button>
+        </div>
       )}
 
+      {/* Release list */}
       {sortedReleases.map((release) => (
         <ReleaseCard key={release.id} release={release} />
       ))}
 
       {/* ---- Create Release Dialog ---- */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Create Release</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-            <TextField
-              autoFocus
-              fullWidth
-              label="Name"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            />
-            <TextField
-              fullWidth
-              multiline
-              minRows={2}
-              label="Description"
-              value={form.description}
-              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            />
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField
-                select
-                fullWidth
-                label="Status"
-                value={form.status}
-                onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} className="relative z-50">
+        {/* Backdrop */}
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+
+        {/* Dialog positioning */}
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="w-full max-w-md rounded-[--radius-md] bg-white dark:bg-dark-surface shadow-[--shadow-lg] border border-surface-200">
+            <DialogTitle className="text-lg font-semibold text-text-primary px-6 pt-6 pb-2">
+              Create Release
+            </DialogTitle>
+
+            <div className="px-6 py-4 flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Name</label>
+                <input
+                  autoFocus
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  className="w-full rounded-[--radius-sm] border border-surface-300 bg-white dark:bg-dark-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                  placeholder="Release name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Description</label>
+                <textarea
+                  rows={2}
+                  value={form.description}
+                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                  className="w-full rounded-[--radius-sm] border border-surface-300 bg-white dark:bg-dark-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors resize-none"
+                  placeholder="Optional description"
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">Status</label>
+                  <div className="relative">
+                    <select
+                      value={form.status}
+                      onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
+                      className="w-full appearance-none rounded-[--radius-sm] border border-surface-300 bg-white dark:bg-dark-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                    >
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s} value={s}>
+                          {s.replace('_', ' ')}
+                        </option>
+                      ))}
+                    </select>
+                    <svg
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary pointer-events-none"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">Release Date</label>
+                  <input
+                    type="date"
+                    value={form.release_date}
+                    onChange={(e) => setForm((f) => ({ ...f, release_date: e.target.value }))}
+                    className="w-full rounded-[--radius-sm] border border-surface-300 bg-white dark:bg-dark-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 px-6 pb-6">
+              <button
+                onClick={() => setDialogOpen(false)}
+                className="rounded-[--radius-sm] px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-100 transition-colors"
               >
-                {STATUS_OPTIONS.map((s) => (
-                  <MenuItem key={s} value={s}>
-                    {s.replace('_', ' ')}
-                  </MenuItem>
-                ))}
-              </TextField>
-              <TextField
-                fullWidth
-                type="date"
-                label="Release Date"
-                value={form.release_date}
-                onChange={(e) => setForm((f) => ({ ...f, release_date: e.target.value }))}
-                slotProps={{ inputLabel: { shrink: true } }}
-              />
-            </Box>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleCreate}
-            disabled={!form.name.trim() || createRelease.isPending}
-          >
-            {createRelease.isPending ? 'Creating...' : 'Create'}
-          </Button>
-        </DialogActions>
+                Cancel
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={!form.name.trim() || createRelease.isPending}
+                className={cn(
+                  'rounded-[--radius-sm] px-4 py-2 text-sm font-medium text-white shadow-[--shadow-sm] transition-colors',
+                  !form.name.trim() || createRelease.isPending
+                    ? 'bg-primary-300 cursor-not-allowed'
+                    : 'bg-primary-500 hover:bg-primary-600'
+                )}
+              >
+                {createRelease.isPending ? 'Creating...' : 'Create'}
+              </button>
+            </div>
+          </DialogPanel>
+        </div>
       </Dialog>
-    </Container>
+    </div>
   )
 }

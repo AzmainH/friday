@@ -1,38 +1,17 @@
-import { type FC } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import CircularProgress from '@mui/material/CircularProgress'
-import Alert from '@mui/material/Alert'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { listIssues } from '@/api/issues'
 import { updateIssue } from '@/api/issues'
 import { useProjectStore } from '@/stores/projectStore'
-import type { FilterState } from '@/hooks/useFilterState'
+import { useFilterState } from '@/hooks/useFilterState'
 import IssueTimeline from '@/components/gantt/IssueTimeline'
 import FilterBar from '@/components/views/FilterBar'
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export interface TimelineViewProps {
-  filters: FilterState
-  onFilterChange: <K extends keyof FilterState>(
-    key: K,
-    value: FilterState[K],
-  ) => void
-  onClearFilters: () => void
-}
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-const TimelineView: FC<TimelineViewProps> = ({
-  filters,
-  onFilterChange,
-  onClearFilters,
-}) => {
+export default function TimelineView() {
+  const { filters, setFilter: onFilterChange, clearFilters: onClearFilters } = useFilterState()
   const currentProject = useProjectStore((s) => s.currentProject)
   const statuses = useProjectStore((s) => s.statuses)
   const issueTypes = useProjectStore((s) => s.issueTypes)
@@ -120,16 +99,16 @@ const TimelineView: FC<TimelineViewProps> = ({
 
   if (!projectId) {
     return (
-      <Box sx={{ p: 4, textAlign: 'center' }}>
-        <Typography color="text.secondary">
+      <div className="p-8 text-center">
+        <p className="text-text-secondary">
           Select a project to view the timeline.
-        </Typography>
-      </Box>
+        </p>
+      </div>
     )
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 1 }}>
+    <div className="flex flex-col h-full gap-2">
       <FilterBar
         filters={filters}
         onFilterChange={onFilterChange}
@@ -139,32 +118,30 @@ const TimelineView: FC<TimelineViewProps> = ({
       />
 
       {isLoading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-          <CircularProgress />
-        </Box>
+        <div className="flex justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-surface-200 border-t-primary-500" />
+        </div>
       )}
 
       {isError && (
-        <Alert severity="error" sx={{ m: 2 }}>
+        <div className="mx-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-[--radius-sm]">
           Failed to load issues{error instanceof Error ? `: ${error.message}` : '.'}
-        </Alert>
+        </div>
       )}
 
       {!isLoading && !isError && issues.length === 0 && (
-        <Box sx={{ p: 4, textAlign: 'center' }}>
-          <Typography color="text.secondary">
+        <div className="p-8 text-center">
+          <p className="text-text-secondary">
             No issues found. Adjust your filters or create new issues.
-          </Typography>
-        </Box>
+          </p>
+        </div>
       )}
 
       {!isLoading && !isError && issues.length > 0 && (
-        <Box sx={{ flex: 1, minHeight: 0 }}>
+        <div className="flex-1 min-h-0">
           <IssueTimeline issues={issues} onTaskUpdate={handleTaskUpdate} />
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
-
-export default TimelineView

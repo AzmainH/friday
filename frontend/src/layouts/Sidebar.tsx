@@ -1,41 +1,67 @@
-import { useLocation, NavLink } from 'react-router-dom'
-import Box from '@mui/material/Box'
-import Drawer from '@mui/material/Drawer'
-import List from '@mui/material/List'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import IconButton from '@mui/material/IconButton'
-import Typography from '@mui/material/Typography'
-import Divider from '@mui/material/Divider'
-import useMediaQuery from '@mui/material/useMediaQuery'
-import { useTheme } from '@mui/material/styles'
-import HomeIcon from '@mui/icons-material/Home'
-import FolderIcon from '@mui/icons-material/Folder'
-import TimelineIcon from '@mui/icons-material/Timeline'
-import DashboardIcon from '@mui/icons-material/Dashboard'
-import ArticleIcon from '@mui/icons-material/Article'
-import SettingsIcon from '@mui/icons-material/Settings'
-import WorkIcon from '@mui/icons-material/Work'
-import NewReleasesIcon from '@mui/icons-material/NewReleases'
-import AssessmentIcon from '@mui/icons-material/Assessment'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import { type ReactNode } from 'react'
+import { useLocation, NavLink, useParams } from 'react-router-dom'
+import {
+  Home,
+  FolderKanban,
+  Map,
+  BookOpen,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  LayoutDashboard,
+  List,
+  GanttChart,
+  Milestone,
+  DollarSign,
+  Scale,
+  Users,
+  Clock,
+  BarChart3,
+  Zap,
+  ShieldCheck,
+  FileInput,
+  ArrowLeftRight,
+  Cog,
+  X,
+} from 'lucide-react'
+import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import { useUiStore } from '@/stores/uiStore'
+import { cn } from '@/lib/cn'
+import { useIsMobile } from '@/layouts/AppShell'
 
 const EXPANDED_WIDTH = 240
 const COLLAPSED_WIDTH = 64
 
-const navItems = [
-  { label: 'Home', path: '/', icon: <HomeIcon /> },
-  { label: 'Projects', path: '/projects', icon: <FolderIcon /> },
-  { label: 'Roadmaps', path: '/roadmaps', icon: <TimelineIcon /> },
-  { label: 'Portfolio', path: '/portfolio', icon: <WorkIcon /> },
-  { label: 'Releases', path: '/releases', icon: <NewReleasesIcon /> },
-  { label: 'Dashboards', path: '/dashboards', icon: <DashboardIcon /> },
-  { label: 'Reports', path: '/reports', icon: <AssessmentIcon /> },
-  { label: 'Wiki', path: '/wiki', icon: <ArticleIcon /> },
-  { label: 'Settings', path: '/settings', icon: <SettingsIcon /> },
+interface NavItem {
+  label: string
+  path: string
+  icon: ReactNode
+}
+
+const primaryNav: NavItem[] = [
+  { label: 'Home', path: '/', icon: <Home size={20} /> },
+  { label: 'Projects', path: '/projects', icon: <FolderKanban size={20} /> },
+  { label: 'Planning', path: '/planning', icon: <Map size={20} /> },
+  { label: 'Knowledge', path: '/knowledge', icon: <BookOpen size={20} /> },
+  { label: 'Settings', path: '/settings', icon: <Settings size={20} /> },
+]
+
+const projectNav: NavItem[] = [
+  { label: 'Board', path: 'board', icon: <LayoutDashboard size={18} /> },
+  { label: 'List', path: 'table', icon: <List size={18} /> },
+  { label: 'Timeline', path: 'timeline', icon: <GanttChart size={18} /> },
+  { label: 'Milestones', path: 'milestones', icon: <Milestone size={18} /> },
+  { label: 'Budget', path: 'budget', icon: <DollarSign size={18} /> },
+  { label: 'Decisions', path: 'decisions', icon: <Scale size={18} /> },
+  { label: 'Stakeholders', path: 'stakeholders', icon: <Users size={18} /> },
+  { label: 'Time', path: 'time-tracking', icon: <Clock size={18} /> },
+  { label: 'Dashboard', path: 'dashboard', icon: <BarChart3 size={18} /> },
+  { label: 'Reports', path: 'reports', icon: <BarChart3 size={18} /> },
+  { label: 'Automations', path: 'automations', icon: <Zap size={18} /> },
+  { label: 'Approvals', path: 'approvals', icon: <ShieldCheck size={18} /> },
+  { label: 'Intake', path: 'intake', icon: <FileInput size={18} /> },
+  { label: 'Import/Export', path: 'import-export', icon: <ArrowLeftRight size={18} /> },
+  { label: 'Settings', path: 'settings', icon: <Cog size={18} /> },
 ]
 
 interface SidebarProps {
@@ -44,130 +70,153 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isMobile = useIsMobile()
   const location = useLocation()
+  const { projectId } = useParams()
   const collapsed = useUiStore((s) => s.sidebarCollapsed)
   const toggleSidebar = useUiStore((s) => s.toggleSidebar)
 
+  const isInProject = Boolean(projectId)
   const width = collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH
 
-  const drawerContent = (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          px: collapsed ? 1 : 2.5,
-          py: 2,
-          minHeight: 64,
-        }}
+  const sidebarContent = (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div
+        className={cn(
+          'flex items-center min-h-[56px] px-5 py-3',
+          collapsed && 'justify-center px-2',
+        )}
       >
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: 800,
-            letterSpacing: 2,
-            background: 'linear-gradient(135deg, #90caf9 0%, #ce93d8 100%)',
+        <span
+          className="font-extrabold tracking-widest text-lg select-none"
+          style={{
+            background: 'linear-gradient(135deg, #f59e0b 0%, #14b8a6 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            userSelect: 'none',
           }}
         >
           {collapsed ? 'F' : 'FRIDAY'}
-        </Typography>
-      </Box>
+        </span>
+      </div>
 
-      <Divider />
+      <div className="h-px bg-surface-200 dark:bg-surface-200 mx-3" />
 
-      <List sx={{ flex: 1, pt: 1 }}>
-        {navItems.map(({ label, path, icon }) => {
-          const isActive =
-            path === '/' ? location.pathname === '/' : location.pathname.startsWith(path)
+      {/* Primary nav */}
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden pt-2 px-2">
+        <ul className="space-y-0.5">
+          {primaryNav.map(({ label, path, icon }) => {
+            const isActive =
+              path === '/' ? location.pathname === '/' : location.pathname.startsWith(path)
 
-          return (
-            <ListItemButton
-              key={path}
-              component={NavLink}
-              to={path}
-              selected={isActive}
-              onClick={isMobile ? onMobileClose : undefined}
-              sx={{
-                mx: 1,
-                mb: 0.5,
-                borderRadius: 2,
-                minHeight: 44,
-                justifyContent: collapsed ? 'center' : 'initial',
-                '&.Mui-selected': {
-                  backgroundColor: 'action.selected',
-                  '&:hover': { backgroundColor: 'action.selected' },
-                },
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: collapsed ? 0 : 2,
-                  justifyContent: 'center',
-                  color: isActive ? 'primary.main' : 'text.secondary',
-                }}
-              >
-                {icon}
-              </ListItemIcon>
-              {!collapsed && <ListItemText primary={label} />}
-            </ListItemButton>
-          )
-        })}
-      </List>
+            return (
+              <li key={path}>
+                <NavLink
+                  to={path}
+                  onClick={isMobile ? onMobileClose : undefined}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-2.5 rounded-[--radius-sm] text-sm font-medium transition-colors',
+                    collapsed && 'justify-center px-0',
+                    isActive
+                      ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+                      : 'text-text-secondary hover:bg-surface-100 hover:text-text-primary dark:hover:bg-surface-200',
+                  )}
+                  title={collapsed ? label : undefined}
+                >
+                  <span className={cn(isActive ? 'text-primary-600 dark:text-primary-400' : 'text-text-tertiary')}>
+                    {icon}
+                  </span>
+                  {!collapsed && label}
+                </NavLink>
+              </li>
+            )
+          })}
+        </ul>
 
-      <Divider />
+        {/* Project contextual nav */}
+        {isInProject && !collapsed && (
+          <>
+            <div className="h-px bg-surface-200 dark:bg-surface-200 my-3" />
+            <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">
+              Project
+            </p>
+            <ul className="space-y-0.5">
+              {projectNav.map(({ label, path, icon }) => {
+                const fullPath = `/projects/${projectId}/${path}`
+                const isActive = location.pathname === fullPath
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
-        <IconButton onClick={toggleSidebar} size="small">
-          {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-        </IconButton>
-      </Box>
-    </Box>
+                return (
+                  <li key={path}>
+                    <NavLink
+                      to={fullPath}
+                      onClick={isMobile ? onMobileClose : undefined}
+                      className={cn(
+                        'flex items-center gap-2.5 px-3 py-2 rounded-[--radius-sm] text-[13px] font-medium transition-colors',
+                        isActive
+                          ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+                          : 'text-text-secondary hover:bg-surface-100 hover:text-text-primary dark:hover:bg-surface-200',
+                      )}
+                    >
+                      <span className={cn(isActive ? 'text-primary-600 dark:text-primary-400' : 'text-text-tertiary')}>
+                        {icon}
+                      </span>
+                      {label}
+                    </NavLink>
+                  </li>
+                )
+              })}
+            </ul>
+          </>
+        )}
+      </nav>
+
+      <div className="h-px bg-surface-200 dark:bg-surface-200 mx-3" />
+
+      {/* Collapse toggle */}
+      <div className="flex justify-center py-2">
+        <button
+          onClick={toggleSidebar}
+          className="p-1.5 rounded-[--radius-sm] text-text-tertiary hover:bg-surface-100 hover:text-text-secondary transition-colors"
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
+      </div>
+    </div>
   )
 
+  // Mobile: overlay drawer
   if (isMobile) {
     return (
-      <Drawer
-        variant="temporary"
-        open={mobileOpen}
-        onClose={onMobileClose}
-        ModalProps={{ keepMounted: true }}
-        sx={{
-          '& .MuiDrawer-paper': {
-            boxSizing: 'border-box',
-            width: EXPANDED_WIDTH,
-          },
-        }}
-      >
-        {drawerContent}
-      </Drawer>
+      <Dialog open={mobileOpen} onClose={onMobileClose} className="relative z-[--z-overlay]">
+        <DialogBackdrop className="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity" />
+        <DialogPanel
+          className="fixed inset-y-0 left-0 w-[240px] bg-white dark:bg-surface-100 shadow-xl transition-transform"
+        >
+          <button
+            onClick={onMobileClose}
+            className="absolute top-3 right-3 p-1 rounded-[--radius-sm] text-text-tertiary hover:bg-surface-100"
+            aria-label="Close sidebar"
+          >
+            <X size={18} />
+          </button>
+          {sidebarContent}
+        </DialogPanel>
+      </Dialog>
     )
   }
 
+  // Desktop: permanent sidebar
   return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width,
-          boxSizing: 'border-box',
-          borderRight: '1px solid',
-          borderColor: 'divider',
-          transition: 'width 225ms cubic-bezier(0.4, 0, 0.6, 1)',
-          overflowX: 'hidden',
-        },
-      }}
+    <aside
+      className={cn(
+        'fixed inset-y-0 left-0 bg-white dark:bg-surface-100 border-r border-surface-200 dark:border-surface-200 overflow-x-hidden z-[--z-sticky]',
+        'transition-[width] duration-[225ms] ease-[cubic-bezier(0.4,0,0.6,1)]',
+      )}
+      style={{ width }}
     >
-      {drawerContent}
-    </Drawer>
+      {sidebarContent}
+    </aside>
   )
 }
 

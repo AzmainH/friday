@@ -1,17 +1,6 @@
 import { useState } from 'react'
-import Box from '@mui/material/Box'
-import Avatar from '@mui/material/Avatar'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import Divider from '@mui/material/Divider'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-import Skeleton from '@mui/material/Skeleton'
-import EditIcon from '@mui/icons-material/Edit'
-import DeleteIcon from '@mui/icons-material/Delete'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import SendIcon from '@mui/icons-material/Send'
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
+import { Pencil, Trash2, MoreVertical, Send } from 'lucide-react'
 import RichTextEditor from '@/components/editor/RichTextEditor'
 import {
   useIssueComments,
@@ -21,6 +10,7 @@ import {
 } from '@/hooks/useIssueDetail'
 import { useAuthStore } from '@/stores/authStore'
 import { formatRelativeTime } from '@/utils/formatters'
+import { cn } from '@/lib/cn'
 import type { IssueComment } from '@/types/api'
 
 interface CommentSectionProps {
@@ -38,7 +28,6 @@ function CommentItem({
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(comment.content)
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null)
   const updateMutation = useUpdateComment()
   const deleteMutation = useDeleteComment()
 
@@ -52,103 +41,107 @@ function CommentItem({
   }
 
   const handleDelete = () => {
-    setMenuAnchor(null)
     deleteMutation.mutate({ commentId: comment.id, issueId })
   }
 
-  return (
-    <Box sx={{ display: 'flex', gap: 1.5, py: 2 }}>
-      <Avatar
-        src={comment.author?.avatar_url ?? undefined}
-        alt={comment.author?.display_name ?? 'User'}
-        sx={{ width: 32, height: 32, fontSize: '0.8rem', mt: 0.25 }}
-      >
-        {(comment.author?.display_name ?? 'U').charAt(0).toUpperCase()}
-      </Avatar>
+  const initial = (comment.author?.display_name ?? 'U').charAt(0).toUpperCase()
 
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-          <Typography variant="body2" fontWeight={600}>
+  return (
+    <div className="flex gap-3 py-4">
+      {/* Avatar */}
+      {comment.author?.avatar_url ? (
+        <img
+          src={comment.author.avatar_url}
+          alt={comment.author?.display_name ?? 'User'}
+          className="w-8 h-8 rounded-full object-cover mt-0.5 shrink-0"
+        />
+      ) : (
+        <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-semibold mt-0.5 shrink-0">
+          {initial}
+        </div>
+      )}
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-sm font-semibold text-text-primary">
             {comment.author?.display_name ?? 'Unknown user'}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
+          </span>
+          <span className="text-xs text-text-tertiary">
             {formatRelativeTime(comment.created_at)}
-          </Typography>
+          </span>
           {comment.updated_at !== comment.created_at && (
-            <Typography variant="caption" color="text.secondary">
-              (edited)
-            </Typography>
+            <span className="text-xs text-text-tertiary">(edited)</span>
           )}
+
           {isOwner && (
-            <Box sx={{ ml: 'auto' }}>
-              <IconButton
-                size="small"
-                onClick={(e) => setMenuAnchor(e.currentTarget)}
-              >
-                <MoreVertIcon fontSize="small" />
-              </IconButton>
-              <Menu
-                anchorEl={menuAnchor}
-                open={Boolean(menuAnchor)}
-                onClose={() => setMenuAnchor(null)}
-              >
-                <MenuItem
-                  onClick={() => {
-                    setMenuAnchor(null)
-                    setIsEditing(true)
-                    setEditContent(comment.content)
-                  }}
+            <div className="ml-auto">
+              <Menu as="div" className="relative">
+                <MenuButton className="p-1 rounded-md text-text-tertiary hover:text-text-primary hover:bg-surface-100 transition-colors">
+                  <MoreVertical className="w-4 h-4" />
+                </MenuButton>
+                <MenuItems
+                  transition
+                  className="absolute right-0 z-10 mt-1 w-36 origin-top-right rounded-[--radius-sm] bg-white dark:bg-dark-surface border border-surface-200 shadow-[--shadow-md] transition duration-150 data-[closed]:opacity-0 data-[closed]:scale-95"
                 >
-                  <EditIcon fontSize="small" sx={{ mr: 1 }} />
-                  Edit
-                </MenuItem>
-                <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
-                  <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-                  Delete
-                </MenuItem>
+                  <MenuItem>
+                    <button
+                      onClick={() => {
+                        setIsEditing(true)
+                        setEditContent(comment.content)
+                      }}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-text-primary hover:bg-surface-50 transition-colors"
+                    >
+                      <Pencil className="w-4 h-4" />
+                      Edit
+                    </button>
+                  </MenuItem>
+                  <MenuItem>
+                    <button
+                      onClick={handleDelete}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-error hover:bg-surface-50 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete
+                    </button>
+                  </MenuItem>
+                </MenuItems>
               </Menu>
-            </Box>
+            </div>
           )}
-        </Box>
+        </div>
 
         {isEditing ? (
-          <Box>
+          <div>
             <RichTextEditor
               content={editContent}
               onChange={setEditContent}
               minHeight={80}
             />
-            <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-              <Button
-                size="small"
-                variant="contained"
+            <div className="flex gap-2 mt-2">
+              <button
                 onClick={handleSaveEdit}
                 disabled={updateMutation.isPending || !editContent.trim()}
+                className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[--radius-sm] transition-colors disabled:opacity-50"
               >
                 Save
-              </Button>
-              <Button
-                size="small"
+              </button>
+              <button
                 onClick={() => setIsEditing(false)}
                 disabled={updateMutation.isPending}
+                className="px-3 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-surface-100 rounded-[--radius-sm] transition-colors disabled:opacity-50"
               >
                 Cancel
-              </Button>
-            </Box>
-          </Box>
+              </button>
+            </div>
+          </div>
         ) : (
-          <Box
-            sx={{
-              '& p': { my: 0.25 },
-              '& p:first-of-type': { mt: 0 },
-              '& p:last-of-type': { mb: 0 },
-              fontSize: '0.875rem',
-            }}
+          <div
+            className="prose prose-sm max-w-none text-text-primary dark:prose-invert"
             dangerouslySetInnerHTML={{ __html: comment.content }}
           />
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 
@@ -172,66 +165,69 @@ export default function CommentSection({ issueId }: CommentSectionProps) {
 
   if (isLoading) {
     return (
-      <Box sx={{ p: 2 }}>
+      <div className="p-4">
         {Array.from({ length: 3 }, (_, i) => (
-          <Box key={i} sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
-            <Skeleton variant="circular" width={32} height={32} />
-            <Box sx={{ flex: 1 }}>
-              <Skeleton variant="text" width="30%" height={20} />
-              <Skeleton variant="text" width="80%" height={18} />
-              <Skeleton variant="text" width="60%" height={18} />
-            </Box>
-          </Box>
+          <div key={i} className="flex gap-3 mb-4 animate-pulse">
+            <div className="w-8 h-8 rounded-full bg-surface-200 shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-[30%] bg-surface-200 rounded" />
+              <div className="h-3.5 w-[80%] bg-surface-200 rounded" />
+              <div className="h-3.5 w-[60%] bg-surface-200 rounded" />
+            </div>
+          </div>
         ))}
-      </Box>
+      </div>
     )
   }
 
   return (
-    <Box>
-      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+    <div>
+      <h3 className="text-sm font-semibold text-text-primary mb-2">
         Comments ({comments.length})
-      </Typography>
+      </h3>
 
       {comments.length === 0 && (
-        <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+        <p className="text-sm text-text-tertiary py-4">
           No comments yet. Be the first to comment.
-        </Typography>
+        </p>
       )}
 
       {comments.map((comment, index) => (
-        <Box key={comment.id}>
+        <div key={comment.id}>
           <CommentItem
             comment={comment}
             issueId={issueId}
             currentUserId={currentUserId}
           />
-          {index < comments.length - 1 && <Divider />}
-        </Box>
+          {index < comments.length - 1 && (
+            <hr className="border-surface-200" />
+          )}
+        </div>
       ))}
 
-      <Divider sx={{ my: 2 }} />
+      <hr className="border-surface-200 my-4" />
 
-      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+      <h3 className="text-sm font-semibold text-text-primary mb-2">
         Add a comment
-      </Typography>
+      </h3>
       <RichTextEditor
         content={newComment}
         onChange={setNewComment}
         placeholder="Write a comment..."
         minHeight={80}
       />
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-        <Button
-          variant="contained"
-          size="small"
+      <div className="flex justify-end mt-2">
+        <button
           onClick={handleSubmit}
           disabled={addComment.isPending || !newComment.trim() || newComment === '<p></p>'}
-          startIcon={<SendIcon />}
+          className={cn(
+            'inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-[--radius-sm] transition-colors disabled:opacity-50 shadow-sm',
+          )}
         >
+          <Send className="w-4 h-4" />
           Comment
-        </Button>
-      </Box>
-    </Box>
+        </button>
+      </div>
+    </div>
   )
 }

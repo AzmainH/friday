@@ -1,14 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemAvatar from '@mui/material/ListItemAvatar'
-import ListItemText from '@mui/material/ListItemText'
-import Avatar from '@mui/material/Avatar'
-import Skeleton from '@mui/material/Skeleton'
 import client from '@/api/client'
 import { formatRelativeTime } from '@/utils/formatters'
 
@@ -45,67 +35,66 @@ export default function RecentActivityWidget() {
   const items = data ?? []
 
   return (
-    <Card sx={{ height: '100%' }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Recent Activity
-        </Typography>
+    <div className="h-full bg-white dark:bg-surface-100 rounded-[--radius-lg] shadow-sm border border-surface-200 p-5">
+      <h2 className="text-lg font-semibold text-text-primary mb-3">
+        Recent Activity
+      </h2>
 
-        {isLoading ? (
-          <Box>
-            {Array.from({ length: 4 }, (_, i) => (
-              <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                <Skeleton variant="circular" width={36} height={36} />
-                <Box sx={{ flex: 1 }}>
-                  <Skeleton variant="text" width="80%" height={20} />
-                  <Skeleton variant="text" width="40%" height={16} />
-                </Box>
-              </Box>
-            ))}
-          </Box>
-        ) : items.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              No recent activity
-            </Typography>
-          </Box>
-        ) : (
-          <List disablePadding>
-            {items.slice(0, 8).map((item) => (
-              <ListItem key={item.id} disableGutters sx={{ py: 0.75, alignItems: 'flex-start' }}>
-                <ListItemAvatar sx={{ minWidth: 44 }}>
-                  <Avatar
-                    src={item.user_avatar_url ?? undefined}
-                    sx={{ width: 32, height: 32, fontSize: '0.75rem' }}
-                  >
-                    {getInitials(item.user_name)}
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={
-                    <Typography variant="body2">
-                      <Typography component="span" variant="body2" fontWeight={600}>
-                        {item.user_name}
-                      </Typography>
-                      {' '}
-                      {item.action}
-                      {' '}
-                      <Typography component="span" variant="body2" color="primary" fontWeight={500}>
-                        {item.entity_key || item.entity_title}
-                      </Typography>
-                    </Typography>
-                  }
-                  secondary={
-                    <Typography variant="caption" color="text.disabled">
-                      {formatRelativeTime(item.created_at)}
-                    </Typography>
-                  }
+      {isLoading ? (
+        <div className="space-y-4">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full skeleton-shimmer shrink-0" />
+              <div className="flex-1 space-y-1">
+                <div className="h-4 w-4/5 skeleton-shimmer rounded-[--radius-xs]" />
+                <div className="h-3 w-2/5 skeleton-shimmer rounded-[--radius-xs]" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : items.length === 0 ? (
+        <div className="text-center py-6">
+          <p className="text-sm text-text-secondary">No recent activity</p>
+        </div>
+      ) : (
+        <div className="space-y-0.5">
+          {items.slice(0, 8).map((item) => (
+            <div
+              key={item.id}
+              className="flex items-start gap-3 py-2"
+            >
+              {/* Avatar */}
+              {item.user_avatar_url ? (
+                <img
+                  src={item.user_avatar_url}
+                  alt={item.user_name}
+                  className="w-8 h-8 rounded-full object-cover shrink-0"
                 />
-              </ListItem>
-            ))}
-          </List>
-        )}
-      </CardContent>
-    </Card>
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-medium shrink-0">
+                  {getInitials(item.user_name)}
+                </div>
+              )}
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-text-primary">
+                  <span className="font-semibold">{item.user_name}</span>
+                  {' '}
+                  {item.action}
+                  {' '}
+                  <span className="font-medium text-primary-600">
+                    {item.entity_key || item.entity_title}
+                  </span>
+                </p>
+                <p className="text-xs text-text-tertiary mt-0.5">
+                  {formatRelativeTime(item.created_at)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

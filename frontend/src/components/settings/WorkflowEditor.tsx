@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
   ReactFlow,
   Background,
@@ -15,21 +15,10 @@ import {
   MarkerType,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import TextField from '@mui/material/TextField'
-import MenuItem from '@mui/material/MenuItem'
-import Stack from '@mui/material/Stack'
-import Alert from '@mui/material/Alert'
-import Skeleton from '@mui/material/Skeleton'
-import Snackbar from '@mui/material/Snackbar'
-import AddIcon from '@mui/icons-material/Add'
-import SaveIcon from '@mui/icons-material/Save'
+import { Plus, Save, X } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { Button } from '@/components/ui/Button'
+import { Dialog, DialogFooter } from '@/components/ui/Dialog'
 import WorkflowNode, { type WorkflowNodeData } from '@/components/settings/WorkflowNode'
 import WorkflowEdge from '@/components/settings/WorkflowEdge'
 import {
@@ -83,6 +72,12 @@ const edgeTypes: EdgeTypes = {
   workflowTransition: WorkflowEdge,
 }
 
+const selectClasses =
+  'w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border'
+
+const inputClasses =
+  'w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border'
+
 /** Convert API statuses to React Flow nodes */
 function statusesToNodes(statuses: WorkflowStatus[]): Node[] {
   const categoryCounters: Record<string, number> = { todo: 0, in_progress: 0, done: 0 }
@@ -131,11 +126,18 @@ export default function WorkflowEditor({ projectId }: WorkflowEditorProps) {
 
   const [addStatusOpen, setAddStatusOpen] = useState(false)
   const [statusForm, setStatusForm] = useState<StatusFormState>(EMPTY_STATUS_FORM)
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
-    open: false,
+  const [toast, setToast] = useState<{ visible: boolean; message: string; severity: 'success' | 'error' }>({
+    visible: false,
     message: '',
     severity: 'success',
   })
+
+  // Auto-dismiss toast after 3s
+  useEffect(() => {
+    if (!toast.visible) return
+    const timer = setTimeout(() => setToast((prev) => ({ ...prev, visible: false })), 3000)
+    return () => clearTimeout(timer)
+  }, [toast.visible])
 
   // Callback for deleting an edge (passed into edge data)
   const handleDeleteEdge = useCallback(
@@ -152,7 +154,7 @@ export default function WorkflowEditor({ projectId }: WorkflowEditorProps) {
     setEdges(transitionsToEdges(workflow.transitions ?? [], handleDeleteEdge))
   }, [workflow, setNodes, setEdges, handleDeleteEdge])
 
-  // Connect handler — drag from source handle to target handle
+  // Connect handler -- drag from source handle to target handle
   const onConnect = useCallback(
     (connection: Connection) => {
       const newEdge: Edge = {
@@ -235,10 +237,10 @@ export default function WorkflowEditor({ projectId }: WorkflowEditorProps) {
       },
       {
         onSuccess: () => {
-          setSnackbar({ open: true, message: 'Workflow saved successfully.', severity: 'success' })
+          setToast({ visible: true, message: 'Workflow saved successfully.', severity: 'success' })
         },
         onError: () => {
-          setSnackbar({ open: true, message: 'Failed to save workflow.', severity: 'error' })
+          setToast({ visible: true, message: 'Failed to save workflow.', severity: 'error' })
         },
       },
     )
@@ -252,53 +254,51 @@ export default function WorkflowEditor({ projectId }: WorkflowEditorProps) {
 
   if (isLoading) {
     return (
-      <Stack spacing={2}>
-        <Skeleton variant="rounded" height={48} />
-        <Skeleton variant="rounded" height={400} />
-      </Stack>
+      <div className="flex flex-col gap-4">
+        <div className="skeleton-shimmer h-12 rounded-lg" />
+        <div className="skeleton-shimmer h-[400px] rounded-lg" />
+      </div>
     )
   }
 
   if (error) {
-    return <Alert severity="error">Failed to load workflow. Please try again.</Alert>
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
+        Failed to load workflow. Please try again.
+      </div>
+    )
   }
 
   return (
-    <Stack spacing={2}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">Workflow Editor</Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-semibold text-text-primary">Workflow Editor</h2>
+        <div className="flex gap-2">
           <Button
-            variant="outlined"
-            startIcon={<AddIcon />}
+            variant="ghost"
+            leftIcon={<Plus className="h-4 w-4" />}
             onClick={() => setAddStatusOpen(true)}
           >
             Add Status
           </Button>
           <Button
-            variant="contained"
-            startIcon={<SaveIcon />}
+            variant="primary"
+            leftIcon={<Save className="h-4 w-4" />}
             onClick={handleSave}
             disabled={saveWorkflow.isPending}
+            loading={saveWorkflow.isPending}
           >
             {saveWorkflow.isPending ? 'Saving...' : 'Save'}
           </Button>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <Typography variant="body2" color="text.secondary">
+      <p className="text-sm text-text-secondary">
         Drag between node handles to create transitions. Select a node or edge and press Delete to remove it.
-      </Typography>
+      </p>
 
-      <Box
-        sx={{
-          width: '100%',
-          height: 500,
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
-          overflow: 'hidden',
-        }}
+      <div
+        className="w-full h-[500px] border border-surface-200 rounded-lg overflow-hidden"
         onKeyDown={onKeyDown}
         tabIndex={0}
       >
@@ -324,24 +324,35 @@ export default function WorkflowEditor({ projectId }: WorkflowEditorProps) {
             pannable
           />
         </ReactFlow>
-      </Box>
+      </div>
 
       {/* Add Status Dialog */}
-      <Dialog open={addStatusOpen} onClose={() => setAddStatusOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Status</DialogTitle>
-        <DialogContent>
-          <Stack spacing={3} sx={{ mt: 1 }}>
-            <TextField
-              label="Status Name"
+      <Dialog
+        open={addStatusOpen}
+        onClose={() => setAddStatusOpen(false)}
+        title="Add Status"
+        size="sm"
+      >
+        <div className="flex flex-col gap-4">
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">
+              Status Name
+            </label>
+            <input
+              type="text"
+              className={inputClasses}
               value={statusForm.name}
               onChange={(e) => setStatusForm((prev) => ({ ...prev, name: e.target.value }))}
-              fullWidth
               autoFocus
             />
+          </div>
 
-            <TextField
-              select
-              label="Category"
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">
+              Category
+            </label>
+            <select
+              className={selectClasses}
               value={statusForm.category}
               onChange={(e) =>
                 setStatusForm((prev) => ({
@@ -349,69 +360,70 @@ export default function WorkflowEditor({ projectId }: WorkflowEditorProps) {
                   category: e.target.value as WorkflowStatus['category'],
                 }))
               }
-              fullWidth
             >
               {CATEGORIES.map((cat) => (
-                <MenuItem key={cat} value={cat}>
+                <option key={cat} value={cat}>
                   {CATEGORY_LABELS[cat]}
-                </MenuItem>
+                </option>
               ))}
-            </TextField>
+            </select>
+          </div>
 
-            <Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Color
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {STATUS_COLORS.map((c) => (
-                  <Box
-                    key={c}
-                    onClick={() => setStatusForm((prev) => ({ ...prev, color: c }))}
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: '50%',
-                      bgcolor: c,
-                      cursor: 'pointer',
-                      border: statusForm.color === c ? '3px solid' : '2px solid transparent',
-                      borderColor: statusForm.color === c ? 'primary.main' : 'transparent',
-                      transition: 'border-color 0.2s',
-                      '&:hover': { opacity: 0.8 },
-                    }}
-                  />
-                ))}
-              </Box>
-            </Box>
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setAddStatusOpen(false)} color="inherit">
+          <div>
+            <p className="text-sm text-text-secondary mb-2">Color</p>
+            <div className="flex flex-wrap gap-2">
+              {STATUS_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setStatusForm((prev) => ({ ...prev, color: c }))}
+                  className={cn(
+                    'w-8 h-8 rounded-full cursor-pointer transition-all hover:opacity-80',
+                    statusForm.color === c
+                      ? 'ring-2 ring-primary-500 ring-offset-2'
+                      : 'ring-2 ring-transparent'
+                  )}
+                  style={{ backgroundColor: c }}
+                  aria-label={`Select color ${c}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setAddStatusOpen(false)}>
             Cancel
           </Button>
           <Button
-            variant="contained"
+            variant="primary"
             onClick={handleAddStatus}
             disabled={!statusForm.name.trim()}
           >
             Add
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </Dialog>
 
-      {/* Snackbar for save feedback */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-      >
-        <Alert
-          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-          severity={snackbar.severity}
-          variant="filled"
+      {/* Toast notification for save feedback */}
+      {toast.visible && (
+        <div
+          className={cn(
+            'fixed bottom-6 left-1/2 -translate-x-1/2 z-50',
+            'flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-sm text-white',
+            toast.severity === 'success' ? 'bg-green-600' : 'bg-red-600'
+          )}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Stack>
+          <span>{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setToast((prev) => ({ ...prev, visible: false }))}
+            className="ml-2 hover:opacity-80"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+    </div>
   )
 }

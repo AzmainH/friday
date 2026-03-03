@@ -1,23 +1,7 @@
 import { useState } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import List from '@mui/material/List'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemText from '@mui/material/ListItemText'
-import Button from '@mui/material/Button'
-import Chip from '@mui/material/Chip'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Drawer from '@mui/material/Drawer'
-import Divider from '@mui/material/Divider'
-import IconButton from '@mui/material/IconButton'
-import Skeleton from '@mui/material/Skeleton'
-import Alert from '@mui/material/Alert'
-import CloseIcon from '@mui/icons-material/Close'
-import RestoreIcon from '@mui/icons-material/Restore'
-import HistoryIcon from '@mui/icons-material/History'
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
+import { X, RotateCcw, History } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import { usePageVersions, useRestoreVersion } from '@/hooks/useWiki'
 import type { WikiPageVersion } from '@/hooks/useWiki'
 import { formatDateTime, formatRelativeTime } from '@/utils/formatters'
@@ -53,69 +37,65 @@ function VersionPreview({
   if (!version) return null
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="h6">Version {version.version}</Typography>
-            <Chip label={formatRelativeTime(version.created_at)} size="small" variant="outlined" />
-          </Box>
-          <IconButton onClick={onClose} size="small">
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      </DialogTitle>
-      <DialogContent dividers>
-        <Typography variant="h5" gutterBottom fontWeight={600}>
-          {version.title}
-        </Typography>
-        {version.content ? (
-          <Box
-            sx={{
-              '& p': { my: 0.5 },
-              '& h1': { fontSize: '1.75rem', fontWeight: 700, mt: 2, mb: 1 },
-              '& h2': { fontSize: '1.4rem', fontWeight: 600, mt: 1.5, mb: 0.75 },
-              '& h3': { fontSize: '1.15rem', fontWeight: 600, mt: 1, mb: 0.5 },
-              '& ul, & ol': { pl: 3 },
-              '& pre': {
-                bgcolor: 'action.hover',
-                borderRadius: 1,
-                p: 1.5,
-                fontFamily: 'monospace',
-                fontSize: '0.875rem',
-                overflow: 'auto',
-              },
-              '& code': {
-                bgcolor: 'action.hover',
-                borderRadius: 0.5,
-                px: 0.5,
-                py: 0.25,
-                fontFamily: 'monospace',
-                fontSize: '0.875rem',
-              },
-              '& img': { maxWidth: '100%', height: 'auto', borderRadius: 1 },
-            }}
-            dangerouslySetInnerHTML={{ __html: version.content }}
-          />
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            (empty content)
-          </Typography>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="inherit">
-          Close
-        </Button>
-        <Button
-          variant="contained"
-          startIcon={<RestoreIcon />}
-          onClick={onRestore}
-          disabled={isRestoring}
-        >
-          Restore this version
-        </Button>
-      </DialogActions>
+    <Dialog open={open} onClose={onClose} className="relative z-[60]">
+      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <DialogPanel className="w-full max-w-2xl max-h-[80vh] flex flex-col rounded-[var(--radius-md)] bg-white dark:bg-surface-800 shadow-xl">
+          {/* Title bar */}
+          <div className="flex items-center justify-between px-5 pt-5 pb-3">
+            <div className="flex items-center gap-2">
+              <DialogTitle className="text-lg font-semibold text-text-primary">
+                Version {version.version}
+              </DialogTitle>
+              <span className="px-2 py-0.5 text-xs border border-surface-300 text-text-secondary rounded-full">
+                {formatRelativeTime(version.created_at)}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1 rounded hover:bg-surface-100 transition-colors text-text-secondary"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-auto px-5 py-3 border-t border-b border-surface-200">
+            <h2 className="text-xl font-semibold text-text-primary mb-3">
+              {version.title}
+            </h2>
+            {version.content ? (
+              <div
+                className="prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: version.content }}
+              />
+            ) : (
+              <p className="text-sm text-text-secondary">(empty content)</p>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-2 px-5 py-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-3 py-1.5 text-sm rounded-[var(--radius-sm)] text-text-secondary hover:bg-surface-100 transition-colors"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              onClick={onRestore}
+              disabled={isRestoring}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-[var(--radius-sm)] bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <RotateCcw size={14} />
+              Restore this version
+            </button>
+          </div>
+        </DialogPanel>
+      </div>
     </Dialog>
   )
 }
@@ -152,14 +132,14 @@ function VersionList({
 
   if (isLoading) {
     return (
-      <Box sx={{ p: 2 }}>
+      <div className="p-4">
         {Array.from({ length: 5 }, (_, i) => (
-          <Box key={i} sx={{ mb: 2 }}>
-            <Skeleton variant="text" width="60%" height={20} />
-            <Skeleton variant="text" width="40%" height={16} />
-          </Box>
+          <div key={i} className="mb-4">
+            <div className="h-4 w-[60%] bg-surface-100 animate-pulse rounded mb-1" />
+            <div className="h-3.5 w-[40%] bg-surface-100 animate-pulse rounded" />
+          </div>
         ))}
-      </Box>
+      </div>
     )
   }
 
@@ -167,59 +147,62 @@ function VersionList({
 
   if (versionList.length === 0) {
     return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <HistoryIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
-        <Typography variant="body2" color="text.secondary">
+      <div className="p-6 text-center">
+        <History size={40} className="mx-auto text-text-tertiary mb-2" />
+        <p className="text-sm text-text-secondary">
           No version history available yet.
-        </Typography>
-      </Box>
+        </p>
+      </div>
     )
   }
 
   return (
     <>
-      <List disablePadding>
+      <div>
         {versionList.map((version, index) => (
-          <Box key={version.id}>
-            <ListItemButton
+          <div key={version.id}>
+            <button
+              type="button"
               onClick={() => setSelectedVersion(version)}
-              selected={selectedVersion?.id === version.id}
-              sx={{ py: 1.5 }}
+              className={cn(
+                'w-full text-left px-4 py-3 transition-colors',
+                selectedVersion?.id === version.id
+                  ? 'bg-primary-50 dark:bg-primary-900/20'
+                  : 'hover:bg-surface-50',
+              )}
             >
-              <ListItemText
-                primary={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="body2" fontWeight={600}>
-                      Version {version.version}
-                    </Typography>
-                    {index === 0 && (
-                      <Chip label="Current" size="small" color="primary" variant="outlined" />
-                    )}
-                  </Box>
-                }
-                secondary={
-                  <Box component="span" sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, mt: 0.5 }}>
-                    <Typography variant="caption" color="text.secondary" component="span">
-                      {formatDateTime(version.created_at)}
-                    </Typography>
-                    {version.change_summary && (
-                      <Typography variant="caption" color="text.secondary" component="span">
-                        {version.change_summary}
-                      </Typography>
-                    )}
-                    {version.edited_by && (
-                      <Typography variant="caption" color="text.disabled" component="span">
-                        by {version.edited_by}
-                      </Typography>
-                    )}
-                  </Box>
-                }
-              />
-            </ListItemButton>
-            {index < versionList.length - 1 && <Divider />}
-          </Box>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-text-primary">
+                  Version {version.version}
+                </span>
+                {index === 0 && (
+                  <span className="px-2 py-0.5 text-xs border border-primary-500 text-primary-600 rounded-full">
+                    Current
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-col gap-0.5 mt-1">
+                <span className="text-xs text-text-tertiary">
+                  {formatDateTime(version.created_at)}
+                </span>
+                {version.change_summary && (
+                  <span className="text-xs text-text-tertiary">
+                    {version.change_summary}
+                  </span>
+                )}
+                {version.edited_by && (
+                  <span className="text-xs text-text-tertiary opacity-60">
+                    by {version.edited_by}
+                  </span>
+                )}
+              </div>
+            </button>
+            {index < versionList.length - 1 && (
+              <hr className="border-surface-200" />
+            )}
+          </div>
         ))}
-      </List>
+      </div>
 
       {/* Version preview */}
       <VersionPreview
@@ -234,30 +217,40 @@ function VersionList({
       <Dialog
         open={confirmRestore}
         onClose={() => setConfirmRestore(false)}
-        maxWidth="xs"
-        fullWidth
+        className="relative z-[70]"
       >
-        <DialogTitle>Restore version</DialogTitle>
-        <DialogContent>
-          <Alert severity="warning" sx={{ mt: 1 }}>
-            This will replace the current page content with version {selectedVersion?.version}.
-            The current version will be saved in history.
-          </Alert>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmRestore(false)} color="inherit">
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            color="warning"
-            onClick={handleRestore}
-            disabled={restoreVersion.isPending}
-            startIcon={<RestoreIcon />}
-          >
-            Restore
-          </Button>
-        </DialogActions>
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="w-full max-w-sm rounded-[var(--radius-md)] bg-white dark:bg-surface-800 shadow-xl">
+            <DialogTitle className="text-lg font-semibold px-5 pt-5 pb-2 text-text-primary">
+              Restore version
+            </DialogTitle>
+            <div className="px-5 pb-4">
+              <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-[var(--radius-sm)] p-3 text-sm mt-1">
+                This will replace the current page content with version {selectedVersion?.version}.
+                The current version will be saved in history.
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 px-5 pb-5">
+              <button
+                type="button"
+                onClick={() => setConfirmRestore(false)}
+                className="px-3 py-1.5 text-sm rounded-[var(--radius-sm)] text-text-secondary hover:bg-surface-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleRestore}
+                disabled={restoreVersion.isPending}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-[var(--radius-sm)] bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <RotateCcw size={14} />
+                Restore
+              </button>
+            </div>
+          </DialogPanel>
+        </div>
       </Dialog>
     </>
   )
@@ -275,60 +268,77 @@ export default function WikiVersionHistory({
 }: WikiVersionHistoryProps) {
   if (mode === 'dialog') {
     return (
-      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <HistoryIcon />
-              <Typography variant="h6">Version history</Typography>
-            </Box>
-            {onClose && (
-              <IconButton onClick={onClose} size="small">
-                <CloseIcon />
-              </IconButton>
-            )}
-          </Box>
-        </DialogTitle>
-        <DialogContent dividers sx={{ p: 0 }}>
-          <VersionList pageId={pageId} onClose={onClose} />
-        </DialogContent>
+      <Dialog
+        open={open}
+        onClose={onClose ?? (() => {})}
+        className="relative z-50"
+      >
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="w-full max-w-lg max-h-[80vh] flex flex-col rounded-[var(--radius-md)] bg-white dark:bg-surface-800 shadow-xl">
+            <div className="flex items-center justify-between px-5 pt-5 pb-3">
+              <div className="flex items-center gap-2">
+                <History size={20} className="text-text-secondary" />
+                <DialogTitle className="text-lg font-semibold text-text-primary">
+                  Version history
+                </DialogTitle>
+              </div>
+              {onClose && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="p-1 rounded hover:bg-surface-100 transition-colors text-text-secondary"
+                >
+                  <X size={18} />
+                </button>
+              )}
+            </div>
+            <div className="flex-1 overflow-auto border-t border-surface-200">
+              <VersionList pageId={pageId} onClose={onClose} />
+            </div>
+          </DialogPanel>
+        </div>
       </Dialog>
     )
   }
 
+  // Drawer mode: slide-over from right using Headless UI Dialog
   return (
-    <Drawer
-      anchor="right"
+    <Dialog
       open={open}
-      onClose={onClose}
-      PaperProps={{ sx: { width: 360, maxWidth: '100vw' } }}
+      onClose={onClose ?? (() => {})}
+      className="relative z-50"
     >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          px: 2,
-          py: 1.5,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <HistoryIcon sx={{ fontSize: 20 }} />
-          <Typography variant="subtitle1" fontWeight={600}>
-            Version history
-          </Typography>
-        </Box>
-        {onClose && (
-          <IconButton onClick={onClose} size="small">
-            <CloseIcon />
-          </IconButton>
-        )}
-      </Box>
-      <Box sx={{ flex: 1, overflow: 'auto' }}>
-        <VersionList pageId={pageId} onClose={onClose} />
-      </Box>
-    </Drawer>
+      <div
+        className="fixed inset-0 bg-black/30 transition-opacity duration-300"
+        aria-hidden="true"
+      />
+      <div className="fixed inset-0 flex justify-end">
+        <DialogPanel
+          className="w-[360px] max-w-full flex flex-col bg-white dark:bg-surface-800 shadow-xl transition duration-300 data-[closed]:translate-x-full"
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-surface-200">
+            <div className="flex items-center gap-2">
+              <History size={20} className="text-text-secondary" />
+              <DialogTitle className="text-base font-semibold text-text-primary">
+                Version history
+              </DialogTitle>
+            </div>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1 rounded hover:bg-surface-100 transition-colors text-text-secondary"
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
+          <div className="flex-1 overflow-auto">
+            <VersionList pageId={pageId} onClose={onClose} />
+          </div>
+        </DialogPanel>
+      </div>
+    </Dialog>
   )
 }

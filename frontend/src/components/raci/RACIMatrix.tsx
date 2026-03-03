@@ -1,16 +1,4 @@
 import { useMemo, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Table from '@mui/material/Table'
-import TableHead from '@mui/material/TableHead'
-import TableBody from '@mui/material/TableBody'
-import TableRow from '@mui/material/TableRow'
-import TableCell from '@mui/material/TableCell'
-import Paper from '@mui/material/Paper'
-import Avatar from '@mui/material/Avatar'
-import Tooltip from '@mui/material/Tooltip'
-import Alert from '@mui/material/Alert'
-import Skeleton from '@mui/material/Skeleton'
 import { useRACIMatrix, useUpdateRACICell, type RACIRole } from '@/hooks/useRACIMatrix'
 
 // ---- RACI role config ----
@@ -18,10 +6,10 @@ import { useRACIMatrix, useUpdateRACICell, type RACIRole } from '@/hooks/useRACI
 const RACI_CYCLE: RACIRole[] = ['R', 'A', 'C', 'I', null]
 
 const RACI_COLORS: Record<string, string> = {
-  R: '#2196f3', // Responsible - blue
-  A: '#f44336', // Accountable - red
-  C: '#ff9800', // Consulted - yellow/amber
-  I: '#4caf50', // Informed - green
+  R: '#3b82f6', // Responsible - blue
+  A: '#ef4444', // Accountable - red
+  C: '#f59e0b', // Consulted - amber
+  I: '#22c55e', // Informed - green
 }
 
 const RACI_LABELS: Record<string, string> = {
@@ -77,252 +65,152 @@ export default function RACIMatrix({ projectId }: RACIMatrixProps) {
 
   if (isError) {
     return (
-      <Alert severity="error" sx={{ m: 2 }}>
+      <div className="m-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
         Failed to load RACI matrix. Please try again.
-      </Alert>
+      </div>
     )
   }
 
   if (isLoading) {
     return (
-      <Box sx={{ p: 2 }}>
-        <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 2 }} />
-      </Box>
+      <div className="p-4">
+        <div className="skeleton-shimmer h-[300px] rounded-lg" />
+      </div>
     )
   }
 
   if (!data || data.rows.length === 0) {
     return (
-      <Box sx={{ py: 4, textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary">
+      <div className="py-8 text-center">
+        <p className="text-sm text-text-secondary">
           No activities or issues found to build a RACI matrix.
-        </Typography>
-      </Box>
+        </p>
+      </div>
     )
   }
 
   return (
-    <Box>
+    <div>
       {/* Legend */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+      <div className="flex flex-wrap gap-4 mb-4">
         {Object.entries(RACI_COLORS).map(([role, color]) => (
-          <Box key={role} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Box
-              sx={{
-                width: 24,
-                height: 24,
-                borderRadius: 1,
-                bgcolor: color,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
+          <div key={role} className="flex items-center gap-1">
+            <div
+              className="flex h-6 w-6 items-center justify-center rounded"
+              style={{ backgroundColor: color }}
             >
-              <Typography variant="caption" sx={{ color: '#fff', fontWeight: 700 }}>
+              <span className="text-xs font-bold text-white">
                 {role}
-              </Typography>
-            </Box>
-            <Typography variant="caption" color="text.secondary">
+              </span>
+            </div>
+            <span className="text-xs text-text-secondary">
               {RACI_LABELS[role]}
-            </Typography>
-          </Box>
+            </span>
+          </div>
         ))}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <Box
-            sx={{
-              width: 24,
-              height: 24,
-              borderRadius: 1,
-              bgcolor: 'grey.200',
-              border: '1px dashed',
-              borderColor: 'grey.400',
-            }}
-          />
-          <Typography variant="caption" color="text.secondary">
+        <div className="flex items-center gap-1">
+          <div className="flex h-6 w-6 items-center justify-center rounded border border-dashed border-stone-400 bg-stone-200" />
+          <span className="text-xs text-text-secondary">
             Unassigned (click to set)
-          </Typography>
-        </Box>
-      </Box>
+          </span>
+        </div>
+      </div>
 
       {/* Validation warnings */}
       {warnings.length > 0 && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700">
+          <p className="font-semibold mb-1">
             Validation warnings:
-          </Typography>
+          </p>
           {warnings.map((w, i) => (
-            <Typography key={i} variant="body2">
+            <p key={i} className="text-sm">
               {w}
-            </Typography>
+            </p>
           ))}
-        </Alert>
+        </div>
       )}
 
       {/* Matrix grid */}
-      <Paper
-        sx={{
-          borderRadius: 3,
-          border: '1px solid',
-          borderColor: 'divider',
-          overflow: 'auto',
-        }}
-      >
-        <Table size="small" stickyHeader>
-          <TableHead>
-            <TableRow>
-              <TableCell
-                sx={{
-                  fontWeight: 700,
-                  minWidth: 180,
-                  position: 'sticky',
-                  left: 0,
-                  bgcolor: 'background.paper',
-                  zIndex: 3,
-                }}
-              >
+      <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface overflow-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr>
+              <th className="sticky left-0 z-[3] min-w-[180px] bg-white dark:bg-dark-surface px-3 py-2 text-left text-sm font-bold border-b border-surface-200">
                 Activity / Issue
-              </TableCell>
+              </th>
               {data.members.map((member) => (
-                <TableCell
+                <th
                   key={member.user_id}
-                  align="center"
-                  sx={{ fontWeight: 600, minWidth: 80 }}
+                  className="min-w-[80px] px-3 py-2 text-center text-sm font-semibold border-b border-surface-200"
                 >
-                  <Tooltip title={member.display_name} arrow>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: 0.5,
-                      }}
-                    >
-                      <Avatar
-                        src={member.avatar_url ?? undefined}
-                        sx={{ width: 28, height: 28, fontSize: '0.75rem' }}
-                      >
-                        {member.display_name.charAt(0).toUpperCase()}
-                      </Avatar>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          maxWidth: 80,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {member.display_name.split(' ')[0]}
-                      </Typography>
-                    </Box>
-                  </Tooltip>
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.rows.map((row) => (
-              <TableRow key={row.issue_id} hover>
-                <TableCell
-                  sx={{
-                    position: 'sticky',
-                    left: 0,
-                    bgcolor: 'background.paper',
-                    zIndex: 1,
-                    borderRight: '1px solid',
-                    borderRightColor: 'divider',
-                  }}
-                >
-                  <Typography variant="body2" fontWeight={600}>
-                    {row.issue_key}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{
-                      display: 'block',
-                      maxWidth: 200,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
+                  <div
+                    className="flex flex-col items-center gap-1"
+                    title={member.display_name}
                   >
+                    {member.avatar_url ? (
+                      <img
+                        src={member.avatar_url}
+                        alt={member.display_name}
+                        className="h-7 w-7 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700">
+                        {member.display_name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    <span className="max-w-[80px] overflow-hidden text-ellipsis whitespace-nowrap text-xs">
+                      {member.display_name.split(' ')[0]}
+                    </span>
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.rows.map((row) => (
+              <tr key={row.issue_id} className="hover:bg-surface-50 dark:hover:bg-dark-border/30">
+                <td className="sticky left-0 z-[1] bg-white dark:bg-dark-surface border-r border-surface-200 px-3 py-2">
+                  <span className="text-sm font-semibold text-text-primary block">
+                    {row.issue_key}
+                  </span>
+                  <span className="block max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap text-xs text-text-secondary">
                     {row.issue_summary}
-                  </Typography>
-                </TableCell>
+                  </span>
+                </td>
                 {data.members.map((member) => {
                   const role = row.assignments[member.user_id] ?? null
                   const color = role ? RACI_COLORS[role] : undefined
 
                   return (
-                    <TableCell
+                    <td
                       key={member.user_id}
-                      align="center"
-                      sx={{
-                        cursor: 'pointer',
-                        userSelect: 'none',
-                        transition: 'background-color 0.15s',
-                        '&:hover': {
-                          bgcolor: 'action.hover',
-                        },
-                      }}
+                      className="cursor-pointer select-none text-center px-3 py-2 transition-colors hover:bg-surface-100 dark:hover:bg-dark-border/50"
                       onClick={() =>
                         handleCellClick(row.issue_id, member.user_id, role)
                       }
                     >
                       {role ? (
-                        <Tooltip
+                        <div
+                          className="inline-flex h-8 w-8 items-center justify-center rounded text-sm font-bold text-white transition-transform hover:scale-[1.15]"
+                          style={{ backgroundColor: color }}
                           title={`${RACI_LABELS[role]} - Click to change`}
-                          arrow
                         >
-                          <Box
-                            sx={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: 32,
-                              height: 32,
-                              borderRadius: 1,
-                              bgcolor: color,
-                              color: '#fff',
-                              fontWeight: 700,
-                              fontSize: '0.875rem',
-                              transition: 'transform 0.1s',
-                              '&:hover': { transform: 'scale(1.15)' },
-                            }}
-                          >
-                            {role}
-                          </Box>
-                        </Tooltip>
+                          {role}
+                        </div>
                       ) : (
-                        <Tooltip title="Click to assign" arrow>
-                          <Box
-                            sx={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: 32,
-                              height: 32,
-                              borderRadius: 1,
-                              bgcolor: 'grey.100',
-                              border: '1px dashed',
-                              borderColor: 'grey.300',
-                              '&:hover': {
-                                borderColor: 'primary.main',
-                                bgcolor: 'primary.50',
-                              },
-                            }}
-                          />
-                        </Tooltip>
+                        <div
+                          className="inline-flex h-8 w-8 items-center justify-center rounded border border-dashed border-stone-300 bg-stone-100 hover:border-primary-500 hover:bg-primary-50"
+                          title="Click to assign"
+                        />
                       )}
-                    </TableCell>
+                    </td>
                   )
                 })}
-              </TableRow>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
-      </Paper>
-    </Box>
+          </tbody>
+        </table>
+      </div>
+    </div>
   )
 }

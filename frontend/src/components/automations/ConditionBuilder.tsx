@@ -1,17 +1,6 @@
-import { useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import FormControl from '@mui/material/FormControl'
-import IconButton from '@mui/material/IconButton'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import Select, { type SelectChangeEvent } from '@mui/material/Select'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
-import AddIcon from '@mui/icons-material/Add'
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
-import FilterListIcon from '@mui/icons-material/FilterList'
+import { useCallback, type ChangeEvent } from 'react'
+import { Plus, Trash2, Filter } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -56,6 +45,16 @@ const OPERATORS = [
 ]
 
 // ---------------------------------------------------------------------------
+// Shared classes
+// ---------------------------------------------------------------------------
+
+const selectClass =
+  'w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border'
+
+const inputClass =
+  'w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border'
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -92,99 +91,93 @@ export default function ConditionBuilder({ conditions, onChange }: ConditionBuil
   )
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <FilterListIcon color="info" fontSize="small" />
-        <Typography variant="subtitle2" fontWeight={600}>
-          IF
-        </Typography>
-        <Chip label="Conditions (optional)" size="small" color="info" variant="outlined" />
-      </Box>
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <Filter className="h-4 w-4 text-blue-500" />
+        <span className="text-sm font-semibold text-text-primary">IF</span>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-blue-300 text-blue-700 dark:text-blue-400">
+          Conditions (optional)
+        </span>
+      </div>
 
       {conditions.length === 0 && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        <p className="text-sm text-text-secondary mb-2">
           No conditions — automation will run for every trigger match.
-        </Typography>
+        </p>
       )}
 
       {conditions.map((condition, index) => (
-        <Box
+        <div
           key={condition.id}
-          sx={{
-            display: 'flex',
-            gap: 1.5,
-            alignItems: 'center',
-            mb: 1.5,
-          }}
+          className="flex gap-2 items-center mb-3"
         >
-          {index > 0 && (
-            <Chip label="AND" size="small" variant="outlined" sx={{ minWidth: 48 }} />
+          {index > 0 ? (
+            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium border border-surface-200 text-text-secondary min-w-[48px]">
+              AND
+            </span>
+          ) : (
+            <div className="min-w-[48px]" />
           )}
-          {index === 0 && <Box sx={{ minWidth: 48 }} />}
 
-          <FormControl size="small" sx={{ minWidth: 140 }}>
-            <InputLabel>Field</InputLabel>
-            <Select
-              value={condition.field}
-              label="Field"
-              onChange={(e: SelectChangeEvent) =>
-                handleUpdate(condition.id, 'field', e.target.value)
-              }
-            >
-              {FIELDS.map((f) => (
-                <MenuItem key={f.value} value={f.value}>
-                  {f.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <select
+            value={condition.field}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              handleUpdate(condition.id, 'field', e.target.value)
+            }
+            className={selectClass}
+            style={{ minWidth: 140 }}
+          >
+            {FIELDS.map((f) => (
+              <option key={f.value} value={f.value}>
+                {f.label}
+              </option>
+            ))}
+          </select>
 
-          <FormControl size="small" sx={{ minWidth: 160 }}>
-            <InputLabel>Operator</InputLabel>
-            <Select
-              value={condition.operator}
-              label="Operator"
-              onChange={(e: SelectChangeEvent) =>
-                handleUpdate(condition.id, 'operator', e.target.value)
-              }
-            >
-              {OPERATORS.map((o) => (
-                <MenuItem key={o.value} value={o.value}>
-                  {o.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <select
+            value={condition.operator}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+              handleUpdate(condition.id, 'operator', e.target.value)
+            }
+            className={selectClass}
+            style={{ minWidth: 160 }}
+          >
+            {OPERATORS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
 
           {condition.operator !== 'is_empty' && condition.operator !== 'is_not_empty' && (
-            <TextField
-              size="small"
-              label="Value"
+            <input
+              type="text"
+              placeholder="Value"
               value={condition.value}
               onChange={(e) => handleUpdate(condition.id, 'value', e.target.value)}
-              sx={{ flex: 1 }}
+              className={inputClass + ' flex-1'}
             />
           )}
 
-          <IconButton
-            size="small"
-            color="error"
+          <button
             onClick={() => handleRemove(condition.id)}
             aria-label="Remove condition"
+            className="p-1.5 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors flex-shrink-0"
           >
-            <DeleteOutlineIcon fontSize="small" />
-          </IconButton>
-        </Box>
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
       ))}
 
       <Button
-        size="small"
-        startIcon={<AddIcon />}
+        variant="ghost"
+        size="sm"
+        leftIcon={<Plus className="h-4 w-4" />}
         onClick={handleAdd}
-        sx={{ mt: 0.5 }}
+        className="mt-1"
       >
         Add Condition
       </Button>
-    </Box>
+    </div>
   )
 }

@@ -1,6 +1,4 @@
 import { useMemo } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { STATUS_CATEGORY_COLORS } from '@/utils/formatters'
 
@@ -35,16 +33,14 @@ export default function ProgressDonutWidget({ done, inProgress, todo }: Progress
 
   if (total === 0) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-        <Typography variant="body2" color="text.secondary">
-          No issues tracked yet
-        </Typography>
-      </Box>
+      <div className="flex items-center justify-center h-full">
+        <p className="text-sm text-text-secondary">No issues tracked yet</p>
+      </div>
     )
   }
 
   return (
-    <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
+    <div className="w-full h-full relative">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
@@ -66,53 +62,26 @@ export default function ProgressDonutWidget({ done, inProgress, todo }: Progress
       </ResponsiveContainer>
 
       {/* Center label */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          textAlign: 'center',
-          pointerEvents: 'none',
-        }}
-      >
-        <Typography variant="h5" sx={{ fontWeight: 700, lineHeight: 1 }}>
-          {percent}%
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          Complete
-        </Typography>
-      </Box>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+        <span className="text-xl font-bold leading-none">{percent}%</span>
+        <br />
+        <span className="text-xs text-text-secondary">Complete</span>
+      </div>
 
       {/* Legend */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: 2,
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-        }}
-      >
+      <div className="flex justify-center gap-4 absolute bottom-0 left-0 right-0">
         {chartData.map((entry, index) => (
-          <Box key={entry.name} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Box
-              sx={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                bgcolor: COLORS[index],
-                flexShrink: 0,
-              }}
+          <div key={entry.name} className="flex items-center gap-1">
+            <span
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{ backgroundColor: COLORS[index] }}
             />
-            <Typography variant="caption" color="text.secondary">
+            <span className="text-xs text-text-secondary">
               {entry.name} ({entry.value})
-            </Typography>
-          </Box>
+            </span>
+          </div>
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }

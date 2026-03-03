@@ -1,19 +1,7 @@
 import { useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Avatar from '@mui/material/Avatar'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import Divider from '@mui/material/Divider'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-import Skeleton from '@mui/material/Skeleton'
-import Collapse from '@mui/material/Collapse'
-import EditIcon from '@mui/icons-material/Edit'
-import DeleteIcon from '@mui/icons-material/Delete'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import ReplyIcon from '@mui/icons-material/Reply'
-import SendIcon from '@mui/icons-material/Send'
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
+import { Pencil, Trash2, MoreVertical, Reply, Send } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import RichTextEditor from '@/components/editor/RichTextEditor'
 import {
   useWikiComments,
@@ -52,7 +40,6 @@ function CommentItem({
   const [editContent, setEditContent] = useState(comment.content)
   const [isReplying, setIsReplying] = useState(false)
   const [replyContent, setReplyContent] = useState('')
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null)
   const [showReplies, setShowReplies] = useState(true)
 
   const updateComment = useUpdateWikiComment()
@@ -71,7 +58,6 @@ function CommentItem({
   }, [comment.id, editContent, pageId, updateComment])
 
   const handleDelete = useCallback(() => {
-    setMenuAnchor(null)
     deleteComment.mutate({ commentId: comment.id, pageId })
   }, [comment.id, pageId, deleteComment])
 
@@ -89,176 +75,184 @@ function CommentItem({
     )
   }, [replyContent, pageId, comment.id, addComment])
 
-  return (
-    <Box sx={{ ml: depth > 0 ? 3 : 0 }}>
-      <Box sx={{ display: 'flex', gap: 1.5, py: 1.5 }}>
-        <Avatar
-          src={comment.author?.avatar_url ?? undefined}
-          alt={comment.author?.display_name ?? 'User'}
-          sx={{ width: 28, height: 28, fontSize: '0.75rem', mt: 0.25 }}
-        >
-          {(comment.author?.display_name ?? 'U').charAt(0).toUpperCase()}
-        </Avatar>
+  const initials = (comment.author?.display_name ?? 'U').charAt(0).toUpperCase()
 
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+  return (
+    <div className={cn(depth > 0 && 'ml-6')}>
+      <div className="flex gap-3 py-3">
+        {/* Avatar */}
+        {comment.author?.avatar_url ? (
+          <img
+            src={comment.author.avatar_url}
+            alt={comment.author?.display_name ?? 'User'}
+            className="w-7 h-7 rounded-full shrink-0 mt-0.5 object-cover"
+          />
+        ) : (
+          <div className="w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-semibold shrink-0 mt-0.5">
+            {initials}
+          </div>
+        )}
+
+        <div className="flex-1 min-w-0">
           {/* Header */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <Typography variant="body2" fontWeight={600}>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-sm font-semibold text-text-primary">
               {comment.author?.display_name ?? 'Unknown user'}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
+            </span>
+            <span className="text-xs text-text-tertiary">
               {formatRelativeTime(comment.created_at)}
-            </Typography>
+            </span>
             {comment.updated_at !== comment.created_at && (
-              <Typography variant="caption" color="text.secondary">
-                (edited)
-              </Typography>
+              <span className="text-xs text-text-tertiary">(edited)</span>
             )}
-            <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center' }}>
+            <div className="ml-auto flex items-center">
               {depth < maxNesting && (
-                <IconButton
-                  size="small"
+                <button
+                  type="button"
                   onClick={() => {
                     setIsReplying(!isReplying)
                     setReplyContent('')
                   }}
-                  sx={{ p: 0.25 }}
+                  className="p-0.5 rounded hover:bg-surface-100 transition-colors text-text-secondary"
                 >
-                  <ReplyIcon sx={{ fontSize: 16 }} />
-                </IconButton>
+                  <Reply size={16} />
+                </button>
               )}
               {isOwner && (
-                <>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => setMenuAnchor(e.currentTarget)}
-                    sx={{ p: 0.25 }}
+                <Menu as="div" className="relative">
+                  <MenuButton className="p-0.5 rounded hover:bg-surface-100 transition-colors text-text-secondary">
+                    <MoreVertical size={16} />
+                  </MenuButton>
+                  <MenuItems
+                    anchor="bottom end"
+                    className="z-50 w-36 rounded-[var(--radius-md)] bg-white dark:bg-surface-800 shadow-lg ring-1 ring-black/5 focus:outline-none py-1"
                   >
-                    <MoreVertIcon sx={{ fontSize: 16 }} />
-                  </IconButton>
-                  <Menu
-                    anchorEl={menuAnchor}
-                    open={Boolean(menuAnchor)}
-                    onClose={() => setMenuAnchor(null)}
-                  >
-                    <MenuItem
-                      onClick={() => {
-                        setMenuAnchor(null)
-                        setIsEditing(true)
-                        setEditContent(comment.content)
-                      }}
-                    >
-                      <EditIcon fontSize="small" sx={{ mr: 1 }} />
-                      Edit
+                    <MenuItem>
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-text-primary data-[focus]:bg-surface-50"
+                        onClick={() => {
+                          setIsEditing(true)
+                          setEditContent(comment.content)
+                        }}
+                      >
+                        <Pencil size={14} className="text-text-secondary" />
+                        Edit
+                      </button>
                     </MenuItem>
-                    <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
-                      <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-                      Delete
+                    <MenuItem>
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-red-600 data-[focus]:bg-surface-50"
+                        onClick={handleDelete}
+                      >
+                        <Trash2 size={14} className="text-red-500" />
+                        Delete
+                      </button>
                     </MenuItem>
-                  </Menu>
-                </>
+                  </MenuItems>
+                </Menu>
               )}
-            </Box>
-          </Box>
+            </div>
+          </div>
 
           {/* Content */}
           {isEditing ? (
-            <Box>
+            <div>
               <RichTextEditor
                 content={editContent}
                 onChange={setEditContent}
                 minHeight={60}
               />
-              <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                <Button
-                  size="small"
-                  variant="contained"
+              <div className="flex gap-2 mt-2">
+                <button
+                  type="button"
                   onClick={handleSaveEdit}
                   disabled={updateComment.isPending || !editContent.trim()}
+                  className="px-3 py-1 text-sm font-medium rounded-[var(--radius-sm)] bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Save
-                </Button>
-                <Button
-                  size="small"
+                </button>
+                <button
+                  type="button"
                   onClick={() => setIsEditing(false)}
                   disabled={updateComment.isPending}
+                  className="px-3 py-1 text-sm rounded-[var(--radius-sm)] text-text-secondary hover:bg-surface-100 disabled:opacity-50 transition-colors"
                 >
                   Cancel
-                </Button>
-              </Box>
-            </Box>
+                </button>
+              </div>
+            </div>
           ) : (
-            <Box
-              sx={{
-                '& p': { my: 0.25 },
-                '& p:first-of-type': { mt: 0 },
-                '& p:last-of-type': { mb: 0 },
-                fontSize: '0.875rem',
-              }}
+            <div
+              className="prose prose-sm max-w-none text-sm"
               dangerouslySetInnerHTML={{ __html: comment.content }}
             />
           )}
 
           {/* Reply form */}
-          <Collapse in={isReplying} timeout="auto">
-            <Box sx={{ mt: 1.5 }}>
-              <RichTextEditor
-                content={replyContent}
-                onChange={setReplyContent}
-                placeholder="Write a reply..."
-                minHeight={60}
-              />
-              <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                <Button
-                  size="small"
-                  variant="contained"
-                  onClick={handleReply}
-                  disabled={
-                    addComment.isPending || !replyContent.trim() || replyContent === '<p></p>'
-                  }
-                  startIcon={<SendIcon />}
-                >
-                  Reply
-                </Button>
-                <Button
-                  size="small"
-                  onClick={() => {
-                    setIsReplying(false)
-                    setReplyContent('')
-                  }}
-                  disabled={addComment.isPending}
-                >
-                  Cancel
-                </Button>
-              </Box>
-            </Box>
-          </Collapse>
+          <div
+            className={cn(
+              'overflow-hidden transition-all duration-200',
+              isReplying ? 'max-h-[500px] mt-3' : 'max-h-0',
+            )}
+          >
+            <RichTextEditor
+              content={replyContent}
+              onChange={setReplyContent}
+              placeholder="Write a reply..."
+              minHeight={60}
+            />
+            <div className="flex gap-2 mt-2">
+              <button
+                type="button"
+                onClick={handleReply}
+                disabled={
+                  addComment.isPending || !replyContent.trim() || replyContent === '<p></p>'
+                }
+                className="inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium rounded-[var(--radius-sm)] bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <Send size={14} />
+                Reply
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsReplying(false)
+                  setReplyContent('')
+                }}
+                disabled={addComment.isPending}
+                className="px-3 py-1 text-sm rounded-[var(--radius-sm)] text-text-secondary hover:bg-surface-100 disabled:opacity-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
 
           {/* Toggle replies */}
           {hasReplies && (
-            <Button
-              size="small"
+            <button
+              type="button"
               onClick={() => setShowReplies(!showReplies)}
-              sx={{ mt: 0.5, textTransform: 'none', fontSize: '0.75rem' }}
+              className="mt-1 text-xs text-primary-600 hover:text-primary-700 transition-colors"
             >
               {showReplies
                 ? `Hide ${comment.replies!.length} ${comment.replies!.length === 1 ? 'reply' : 'replies'}`
                 : `Show ${comment.replies!.length} ${comment.replies!.length === 1 ? 'reply' : 'replies'}`}
-            </Button>
+            </button>
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Nested replies */}
       {hasReplies && (
-        <Collapse in={showReplies} timeout="auto">
-          <Box
-            sx={{
-              borderLeft: '2px solid',
-              borderColor: 'divider',
-              ml: 1.5,
-            }}
-          >
+        <div
+          className={cn(
+            'overflow-hidden transition-all duration-200',
+            showReplies ? 'max-h-[9999px]' : 'max-h-0',
+          )}
+        >
+          <div className="border-l-2 border-surface-200 ml-3">
             {comment.replies!.map((reply) => (
               <CommentItem
                 key={reply.id}
@@ -268,10 +262,10 @@ function CommentItem({
                 depth={depth + 1}
               />
             ))}
-          </Box>
-        </Collapse>
+          </div>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 
@@ -299,67 +293,69 @@ export default function WikiComments({ pageId }: WikiCommentsProps) {
 
   if (isLoading) {
     return (
-      <Box sx={{ p: 2 }}>
+      <div className="p-4">
         {Array.from({ length: 3 }, (_, i) => (
-          <Box key={i} sx={{ display: 'flex', gap: 1.5, mb: 2 }}>
-            <Skeleton variant="circular" width={28} height={28} />
-            <Box sx={{ flex: 1 }}>
-              <Skeleton variant="text" width="30%" height={18} />
-              <Skeleton variant="text" width="80%" height={16} />
-              <Skeleton variant="text" width="50%" height={16} />
-            </Box>
-          </Box>
+          <div key={i} className="flex gap-3 mb-4">
+            <div className="w-7 h-7 rounded-full bg-surface-100 animate-pulse shrink-0" />
+            <div className="flex-1">
+              <div className="h-4 w-[30%] bg-surface-100 animate-pulse rounded mb-1" />
+              <div className="h-3.5 w-[80%] bg-surface-100 animate-pulse rounded mb-1" />
+              <div className="h-3.5 w-[50%] bg-surface-100 animate-pulse rounded" />
+            </div>
+          </div>
         ))}
-      </Box>
+      </div>
     )
   }
 
   return (
-    <Box>
-      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+    <div>
+      <h3 className="text-sm font-semibold text-text-primary mb-2">
         Comments ({comments.length})
-      </Typography>
+      </h3>
 
       {comments.length === 0 && (
-        <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+        <p className="text-sm text-text-secondary py-4">
           No comments yet. Be the first to comment.
-        </Typography>
+        </p>
       )}
 
       {comments.map((comment, index) => (
-        <Box key={comment.id}>
+        <div key={comment.id}>
           <CommentItem
             comment={comment}
             pageId={pageId}
             currentUserId={currentUserId}
             depth={0}
           />
-          {index < comments.length - 1 && <Divider sx={{ ml: 5 }} />}
-        </Box>
+          {index < comments.length - 1 && (
+            <hr className="border-surface-200 ml-10" />
+          )}
+        </div>
       ))}
 
-      <Divider sx={{ my: 2 }} />
+      <hr className="border-surface-200 my-4" />
 
-      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+      <h3 className="text-sm font-semibold text-text-primary mb-2">
         Add a comment
-      </Typography>
+      </h3>
       <RichTextEditor
         content={newComment}
         onChange={setNewComment}
         placeholder="Write a comment..."
         minHeight={80}
       />
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-        <Button
-          variant="contained"
-          size="small"
+      <div className="flex justify-end mt-2">
+        <button
+          type="button"
           onClick={handleSubmit}
           disabled={addComment.isPending || !newComment.trim() || newComment === '<p></p>'}
-          startIcon={<SendIcon />}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-[var(--radius-sm)] bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
+          <Send size={14} />
           Comment
-        </Button>
-      </Box>
-    </Box>
+        </button>
+      </div>
+    </div>
   )
 }

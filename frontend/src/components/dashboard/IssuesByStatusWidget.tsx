@@ -1,6 +1,4 @@
 import { useMemo } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
 import {
   BarChart,
   Bar,
@@ -35,20 +33,18 @@ export default function IssuesByStatusWidget({ data }: IssuesByStatusWidgetProps
 
   if (data.length === 0) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-        <Typography variant="body2" color="text.secondary">
-          No status data available
-        </Typography>
-      </Box>
+      <div className="flex items-center justify-center h-full">
+        <p className="text-sm text-text-secondary">No status data available</p>
+      </div>
     )
   }
 
   return (
-    <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5 }}>
+    <div className="w-full h-full flex flex-col">
+      <span className="text-xs text-text-secondary mb-1">
         {total} total issues
-      </Typography>
-      <Box sx={{ flex: 1, minHeight: 0 }}>
+      </span>
+      <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 4, right: 8, left: -12, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -79,7 +75,7 @@ export default function IssuesByStatusWidget({ data }: IssuesByStatusWidgetProps
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }

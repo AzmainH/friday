@@ -5,10 +5,7 @@ import {
   getBezierPath,
   type EdgeProps,
 } from '@xyflow/react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
-import CloseIcon from '@mui/icons-material/Close'
+import { X } from 'lucide-react'
 
 export interface WorkflowEdgeData {
   label?: string
@@ -71,52 +68,31 @@ function WorkflowEdge({
       />
 
       <EdgeLabelRenderer>
-        <Box
+        <div
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
-          sx={{
-            position: 'absolute',
+          className="absolute flex items-center gap-1"
+          style={{
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
             pointerEvents: 'all',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.5,
           }}
         >
           {edgeData?.label && (
-            <Typography
-              variant="caption"
-              sx={{
-                bgcolor: 'background.paper',
-                px: 1,
-                py: 0.25,
-                borderRadius: 1,
-                border: '1px solid',
-                borderColor: 'divider',
-                fontSize: '0.7rem',
-                whiteSpace: 'nowrap',
-              }}
-            >
+            <span className="text-xs bg-white dark:bg-dark-surface px-2 py-0.5 rounded border border-surface-200 whitespace-nowrap">
               {edgeData.label}
-            </Typography>
+            </span>
           )}
 
           {hovered && (
-            <IconButton
-              size="small"
+            <button
+              type="button"
               onClick={handleDelete}
-              sx={{
-                width: 20,
-                height: 20,
-                bgcolor: 'error.main',
-                color: 'white',
-                '&:hover': { bgcolor: 'error.dark' },
-              }}
+              className="flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
             >
-              <CloseIcon sx={{ fontSize: 12 }} />
-            </IconButton>
+              <X className="h-3 w-3" />
+            </button>
           )}
-        </Box>
+        </div>
       </EdgeLabelRenderer>
 
       {/* CSS animation for dashed edge movement */}

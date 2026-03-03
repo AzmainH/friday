@@ -1,29 +1,8 @@
-import { useState, useCallback, useMemo } from 'react'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Paper from '@mui/material/Paper'
-import List from '@mui/material/List'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import IconButton from '@mui/material/IconButton'
-import Divider from '@mui/material/Divider'
-import TextField from '@mui/material/TextField'
-import MenuItem from '@mui/material/MenuItem'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Skeleton from '@mui/material/Skeleton'
-import Alert from '@mui/material/Alert'
-import Chip from '@mui/material/Chip'
-import AddIcon from '@mui/icons-material/Add'
-import PlayArrowIcon from '@mui/icons-material/PlayArrow'
-import DeleteIcon from '@mui/icons-material/Delete'
-import SaveIcon from '@mui/icons-material/Save'
-import BarChartIcon from '@mui/icons-material/BarChart'
+import { useState, useCallback } from 'react'
+import { Play, Trash2, Save, BarChart3 } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { Button } from '@/components/ui/Button'
+import { Dialog, DialogFooter } from '@/components/ui/Dialog'
 import { formatDateTime } from '@/utils/formatters'
 import ReportViewer from '@/components/reports/ReportViewer'
 import {
@@ -33,7 +12,6 @@ import {
   useDeleteReport,
   type ReportType,
   type ReportConfig,
-  type ReportResult,
   type SavedReport,
 } from '@/hooks/useReports'
 
@@ -93,11 +71,6 @@ export default function ReportsPage() {
   // Selected saved report (to view details)
   const [selectedSavedId, setSelectedSavedId] = useState<string | null>(null)
 
-  const selectedSavedReport = useMemo(
-    () => savedReports?.find((r) => r.id === selectedSavedId) ?? null,
-    [savedReports, selectedSavedId],
-  )
-
   // ---------- Handlers ----------
 
   const handleRunReport = useCallback(() => {
@@ -141,7 +114,7 @@ export default function ReportsPage() {
   }, [selectedType, saveName, config, createReport])
 
   const handleConfigChange = useCallback(
-    (field: keyof ReportConfig) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    (field: keyof ReportConfig) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setConfig((prev) => ({ ...prev, [field]: e.target.value }))
     },
     [],
@@ -150,190 +123,171 @@ export default function ReportsPage() {
   // ---------- Render ----------
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
+    <div className="max-w-5xl mx-auto px-6 py-8">
+      <h1 className="text-2xl font-bold text-text-primary mb-6">
         Reports
-      </Typography>
+      </h1>
 
-      <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', md: 'row' } }}>
+      <div className="flex gap-6 flex-col md:flex-row">
         {/* Left sidebar: saved reports */}
-        <Paper
-          variant="outlined"
-          sx={{
-            width: { xs: '100%', md: 280 },
-            flexShrink: 0,
-            borderRadius: 2,
-            overflow: 'hidden',
-          }}
-        >
-          <Box
-            sx={{
-              px: 2,
-              py: 1.5,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-            }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+        <div className="w-full md:w-[280px] shrink-0 border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface overflow-hidden">
+          <div className="px-4 py-3 flex items-center justify-between border-b border-surface-200">
+            <span className="text-sm font-semibold text-text-primary">
               Saved Reports
-            </Typography>
-          </Box>
+            </span>
+          </div>
 
           {reportsLoading ? (
-            <Box sx={{ p: 2 }}>
+            <div className="p-4 space-y-2">
               {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} variant="rounded" height={48} sx={{ mb: 1 }} />
+                <div key={i} className="skeleton-shimmer h-12 rounded-[--radius-sm]" />
               ))}
-            </Box>
+            </div>
           ) : reportsError ? (
-            <Alert severity="error" sx={{ m: 1 }}>
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[--radius-sm] text-sm m-2">
               Failed to load reports
-            </Alert>
+            </div>
           ) : savedReports && savedReports.length > 0 ? (
-            <List dense disablePadding>
+            <div>
               {savedReports.map((report) => (
-                <ListItemButton
+                <button
                   key={report.id}
-                  selected={selectedSavedId === report.id}
+                  type="button"
                   onClick={() => handleRunSavedReport(report)}
-                  sx={{ py: 1 }}
+                  className={cn(
+                    'flex items-center gap-2 w-full px-3 py-2 cursor-pointer hover:bg-surface-50 transition-colors text-left',
+                    selectedSavedId === report.id && 'bg-primary-50 border-l-2 border-primary-500',
+                  )}
                 >
-                  <ListItemIcon sx={{ minWidth: 32 }}>
-                    <BarChartIcon fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={report.name}
-                    secondary={
-                      <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Chip
-                          label={report.report_type.replace(/_/g, ' ')}
-                          size="small"
-                          sx={{ height: 18, fontSize: '0.65rem', textTransform: 'capitalize' }}
-                        />
-                        <Typography variant="caption" color="text.secondary">
-                          {formatDateTime(report.updated_at)}
-                        </Typography>
-                      </Box>
-                    }
-                    primaryTypographyProps={{ variant: 'body2', fontWeight: 500, noWrap: true }}
-                  />
-                  <IconButton
-                    size="small"
-                    edge="end"
+                  <BarChart3 className="h-4 w-4 text-text-tertiary shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-text-primary truncate">
+                      {report.name}
+                    </div>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <span className="px-1.5 py-0.5 text-[0.65rem] font-medium rounded-full border border-surface-200 text-text-secondary capitalize">
+                        {report.report_type.replace(/_/g, ' ')}
+                      </span>
+                      <span className="text-xs text-text-secondary">
+                        {formatDateTime(report.updated_at)}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="p-1 rounded text-text-tertiary hover:text-error transition-colors shrink-0"
                     onClick={(e) => {
                       e.stopPropagation()
                       handleDeleteReport(report.id)
                     }}
                     aria-label={`Delete report ${report.name}`}
                   >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </ListItemButton>
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </button>
               ))}
-            </List>
+            </div>
           ) : (
-            <Box sx={{ p: 2, textAlign: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
+            <div className="p-4 text-center">
+              <p className="text-sm text-text-secondary">
                 No saved reports yet.
-              </Typography>
-            </Box>
+              </p>
+            </div>
           )}
-        </Paper>
+        </div>
 
         {/* Main content area */}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+        <div className="flex-1 min-w-0">
           {/* Config form */}
-          <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 2, mb: 3 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+          <div className="p-5 border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface mb-6">
+            <h2 className="text-base font-semibold text-text-primary mb-4">
               Run New Report
-            </Typography>
+            </h2>
 
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-                gap: 2,
-                mb: 2,
-              }}
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               {/* Report type */}
-              <TextField
-                select
-                label="Report Type"
-                size="small"
-                fullWidth
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value as ReportType | '')}
-              >
-                <MenuItem value="">
-                  <em>Select a type...</em>
-                </MenuItem>
-                {REPORT_TYPE_OPTIONS.map((opt) => (
-                  <MenuItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </MenuItem>
-                ))}
-              </TextField>
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Report Type
+                </label>
+                <select
+                  className="w-full text-sm border border-surface-200 rounded-[--radius-sm] px-3 py-2 bg-white dark:bg-dark-surface outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value as ReportType | '')}
+                >
+                  <option value="">Select a type...</option>
+                  {REPORT_TYPE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               {/* Group by */}
-              <TextField
-                select
-                label="Group By"
-                size="small"
-                fullWidth
-                value={config.group_by ?? ''}
-                onChange={handleConfigChange('group_by')}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                {GROUP_BY_OPTIONS.map((opt) => (
-                  <MenuItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </MenuItem>
-                ))}
-              </TextField>
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Group By
+                </label>
+                <select
+                  className="w-full text-sm border border-surface-200 rounded-[--radius-sm] px-3 py-2 bg-white dark:bg-dark-surface outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                  value={config.group_by ?? ''}
+                  onChange={handleConfigChange('group_by')}
+                >
+                  <option value="">None</option>
+                  {GROUP_BY_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               {/* Date from */}
-              <TextField
-                label="Date From"
-                type="date"
-                size="small"
-                fullWidth
-                value={config.date_from ?? ''}
-                onChange={handleConfigChange('date_from')}
-                slotProps={{ inputLabel: { shrink: true } }}
-              />
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Date From
+                </label>
+                <input
+                  type="date"
+                  className="w-full text-sm border border-surface-200 rounded-[--radius-sm] px-3 py-2 bg-white dark:bg-dark-surface outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                  value={config.date_from ?? ''}
+                  onChange={handleConfigChange('date_from')}
+                />
+              </div>
 
               {/* Date to */}
-              <TextField
-                label="Date To"
-                type="date"
-                size="small"
-                fullWidth
-                value={config.date_to ?? ''}
-                onChange={handleConfigChange('date_to')}
-                slotProps={{ inputLabel: { shrink: true } }}
-              />
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Date To
+                </label>
+                <input
+                  type="date"
+                  className="w-full text-sm border border-surface-200 rounded-[--radius-sm] px-3 py-2 bg-white dark:bg-dark-surface outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                  value={config.date_to ?? ''}
+                  onChange={handleConfigChange('date_to')}
+                />
+              </div>
 
               {/* Project ID */}
-              <TextField
-                label="Project ID"
-                size="small"
-                fullWidth
-                placeholder="Optional"
-                value={config.project_id ?? ''}
-                onChange={handleConfigChange('project_id')}
-              />
-            </Box>
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Project ID
+                </label>
+                <input
+                  type="text"
+                  className="w-full text-sm border border-surface-200 rounded-[--radius-sm] px-3 py-2 bg-white dark:bg-dark-surface outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                  placeholder="Optional"
+                  value={config.project_id ?? ''}
+                  onChange={handleConfigChange('project_id')}
+                />
+              </div>
+            </div>
 
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <div className="flex gap-2">
               <Button
-                variant="contained"
-                startIcon={<PlayArrowIcon />}
+                variant="primary"
+                leftIcon={<Play className="h-4 w-4" />}
                 onClick={handleRunReport}
                 disabled={!selectedType || reportRunning}
               >
@@ -342,8 +296,8 @@ export default function ReportsPage() {
 
               {reportResult && (
                 <Button
-                  variant="outlined"
-                  startIcon={<SaveIcon />}
+                  variant="ghost"
+                  leftIcon={<Save className="h-4 w-4" />}
                   onClick={() => {
                     setSaveName('')
                     setSaveDialogOpen(true)
@@ -352,89 +306,79 @@ export default function ReportsPage() {
                   Save Report
                 </Button>
               )}
-            </Box>
-          </Paper>
+            </div>
+          </div>
 
-          <Divider sx={{ mb: 3 }} />
+          <hr className="border-surface-200 mb-6" />
 
           {/* Report results */}
           {reportError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[--radius-sm] text-sm mb-4">
               Failed to run report. Please check your configuration and try again.
-            </Alert>
+            </div>
           )}
 
           {reportRunning ? (
-            <Box>
-              <Skeleton variant="rounded" height={360} sx={{ borderRadius: 2 }} />
-            </Box>
+            <div className="skeleton-shimmer h-[360px] rounded-[--radius-md]" />
           ) : reportResult ? (
             <ReportViewer
               reportType={runConfig?.type ?? 'custom'}
               data={reportResult}
             />
           ) : (
-            <Box
-              sx={{
-                py: 8,
-                textAlign: 'center',
-                border: '1px dashed',
-                borderColor: 'divider',
-                borderRadius: 2,
-              }}
-            >
-              <BarChartIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
-              <Typography variant="body1" color="text.secondary">
-                Select a report type and click "Run Report" to see results.
-              </Typography>
-              <Typography variant="body2" color="text.disabled" sx={{ mt: 0.5 }}>
+            <div className="py-16 text-center border border-dashed border-surface-300 rounded-[--radius-md]">
+              <BarChart3 className="h-12 w-12 text-text-tertiary mx-auto mb-2" />
+              <p className="text-base text-text-secondary">
+                Select a report type and click &quot;Run Report&quot; to see results.
+              </p>
+              <p className="text-sm text-text-tertiary mt-1">
                 Or select a saved report from the sidebar.
-              </Typography>
-            </Box>
+              </p>
+            </div>
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Save report dialog */}
       <Dialog
         open={saveDialogOpen}
         onClose={() => setSaveDialogOpen(false)}
-        maxWidth="xs"
-        fullWidth
+        title="Save Report"
+        size="sm"
       >
-        <DialogTitle>Save Report</DialogTitle>
-        <DialogContent>
-          <TextField
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">
+            Report Name
+          </label>
+          <input
             autoFocus
-            label="Report Name"
-            fullWidth
-            size="small"
+            type="text"
+            className="w-full text-sm border border-surface-200 rounded-[--radius-sm] px-3 py-2 bg-white dark:bg-dark-surface outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
             value={saveName}
             onChange={(e) => setSaveName(e.target.value)}
-            sx={{ mt: 1 }}
             placeholder="e.g., Sprint Velocity Q1"
           />
           {selectedType && (
-            <Box sx={{ mt: 1.5 }}>
-              <Chip
-                label={selectedType.replace(/_/g, ' ')}
-                size="small"
-                sx={{ textTransform: 'capitalize' }}
-              />
-            </Box>
+            <div className="mt-3">
+              <span className="px-1.5 py-0.5 text-[0.65rem] font-medium rounded-full border border-surface-200 text-text-secondary capitalize">
+                {selectedType.replace(/_/g, ' ')}
+              </span>
+            </div>
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setSaveDialogOpen(false)}>Cancel</Button>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setSaveDialogOpen(false)}>
+            Cancel
+          </Button>
           <Button
-            variant="contained"
+            variant="primary"
             onClick={handleSaveReport}
             disabled={!saveName.trim() || createReport.isPending}
           >
             {createReport.isPending ? 'Saving...' : 'Save'}
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </Dialog>
-    </Container>
+    </div>
   )
 }

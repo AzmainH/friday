@@ -1,14 +1,4 @@
-import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import LinearProgress from '@mui/material/LinearProgress'
-import Avatar from '@mui/material/Avatar'
-import Chip from '@mui/material/Chip'
-import Tooltip from '@mui/material/Tooltip'
-import BugReportIcon from '@mui/icons-material/BugReport'
-import WarningAmberIcon from '@mui/icons-material/WarningAmber'
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import { Bug, AlertTriangle, CheckCircle } from 'lucide-react'
 import type { PortfolioProject } from '@/hooks/usePortfolio'
 import { RAG_COLORS, formatPercent, formatCurrency } from '@/utils/formatters'
 
@@ -32,6 +22,11 @@ const STATUS_LABELS: Record<string, string> = {
   archived: 'Archived',
 }
 
+const STATUS_CHIP_CLASSES: Record<string, string> = {
+  active: 'border-primary-300 text-primary-600',
+  completed: 'border-green-300 text-green-600',
+}
+
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
@@ -40,121 +35,98 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
   const ragColor = RAG_COLORS[project.rag_status] ?? RAG_COLORS.none
 
   return (
-    <Card
-      sx={{
-        height: '100%',
-        cursor: onClick ? 'pointer' : 'default',
-        transition: 'box-shadow 0.2s, transform 0.15s',
-        '&:hover': onClick
-          ? { boxShadow: 6, transform: 'translateY(-2px)' }
-          : undefined,
-      }}
+    <div
+      className={
+        'h-full rounded-[--radius-md] border border-surface-200 bg-white p-4 shadow-sm transition-all dark:bg-surface-50' +
+        (onClick ? ' cursor-pointer hover:-translate-y-0.5 hover:shadow-md' : '')
+      }
       onClick={() => onClick?.(project.id)}
     >
-      <CardContent sx={{ pb: '16px !important' }}>
-        {/* Top row: RAG indicator + name + status */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <Tooltip title={`RAG: ${project.rag_status}`}>
-            <Box
-              sx={{
-                width: 14,
-                height: 14,
-                borderRadius: '50%',
-                bgcolor: ragColor,
-                flexShrink: 0,
-                boxShadow: `0 0 0 2px ${ragColor}33`,
-              }}
-            />
-          </Tooltip>
-          <Typography variant="subtitle1" fontWeight={600} noWrap sx={{ flex: 1 }}>
-            {project.name}
-          </Typography>
-          <Chip
-            label={STATUS_LABELS[project.status] ?? project.status}
-            size="small"
-            variant="outlined"
-            color={
-              project.status === 'active'
-                ? 'primary'
-                : project.status === 'completed'
-                  ? 'success'
-                  : 'default'
-            }
-          />
-        </Box>
+      {/* Top row: RAG indicator + name + status */}
+      <div className="mb-1 flex items-center gap-1">
+        <span
+          title={`RAG: ${project.rag_status}`}
+          className="h-3.5 w-3.5 flex-shrink-0 rounded-full"
+          style={{
+            backgroundColor: ragColor,
+            boxShadow: `0 0 0 2px ${ragColor}33`,
+          }}
+        />
+        <span className="flex-1 truncate text-sm font-semibold text-text-primary">
+          {project.name}
+        </span>
+        <span
+          className={
+            'inline-flex items-center rounded-full border px-2 py-0.5 text-xs ' +
+            (STATUS_CHIP_CLASSES[project.status] ?? 'border-surface-200 text-text-secondary')
+          }
+        >
+          {STATUS_LABELS[project.status] ?? project.status}
+        </span>
+      </div>
 
-        {/* Progress bar */}
-        <Box sx={{ mb: 1.5 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography variant="caption" color="text.secondary">
-              Progress
-            </Typography>
-            <Typography variant="caption" fontWeight={600}>
-              {formatPercent(project.progress_pct)}
-            </Typography>
-          </Box>
-          <LinearProgress
-            variant="determinate"
-            value={Math.min(project.progress_pct, 100)}
-            sx={{
-              height: 6,
-              borderRadius: 3,
-              bgcolor: 'action.hover',
-              '& .MuiLinearProgress-bar': {
-                borderRadius: 3,
-                bgcolor: ragColor,
-              },
+      {/* Progress bar */}
+      <div className="mb-1.5">
+        <div className="mb-0.5 flex justify-between">
+          <span className="text-xs text-text-secondary">Progress</span>
+          <span className="text-xs font-semibold text-text-primary">
+            {formatPercent(project.progress_pct)}
+          </span>
+        </div>
+        <div className="h-1.5 overflow-hidden rounded-full bg-surface-200">
+          <div
+            className="h-full rounded-full transition-all"
+            style={{
+              width: `${Math.min(project.progress_pct, 100)}%`,
+              backgroundColor: ragColor,
             }}
           />
-        </Box>
+        </div>
+      </div>
 
-        {/* Key metrics row */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-          <Tooltip title="Total issues">
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <BugReportIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-              <Typography variant="body2">{project.total_issues}</Typography>
-            </Box>
-          </Tooltip>
-          <Tooltip title="Completed issues">
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <CheckCircleOutlineIcon sx={{ fontSize: 16, color: 'success.main' }} />
-              <Typography variant="body2">{project.completed_issues}</Typography>
-            </Box>
-          </Tooltip>
-          {project.overdue_issues > 0 && (
-            <Tooltip title="Overdue issues">
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <WarningAmberIcon sx={{ fontSize: 16, color: 'error.main' }} />
-                <Typography variant="body2" color="error.main">
-                  {project.overdue_issues}
-                </Typography>
-              </Box>
-            </Tooltip>
-          )}
-        </Box>
-
-        {/* Budget (if available) */}
-        {project.budget_allocated != null && project.budget_allocated > 0 && (
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-            Budget: {formatCurrency(project.budget_spent ?? 0)} /{' '}
-            {formatCurrency(project.budget_allocated)}
-          </Typography>
+      {/* Key metrics row */}
+      <div className="mb-1 flex items-center gap-2">
+        <span className="flex items-center gap-0.5" title="Total issues">
+          <Bug className="h-4 w-4 text-text-secondary" />
+          <span className="text-sm text-text-primary">{project.total_issues}</span>
+        </span>
+        <span className="flex items-center gap-0.5" title="Completed issues">
+          <CheckCircle className="h-4 w-4 text-green-500" />
+          <span className="text-sm text-text-primary">{project.completed_issues}</span>
+        </span>
+        {project.overdue_issues > 0 && (
+          <span className="flex items-center gap-0.5" title="Overdue issues">
+            <AlertTriangle className="h-4 w-4 text-red-500" />
+            <span className="text-sm text-red-500">{project.overdue_issues}</span>
+          </span>
         )}
+      </div>
 
-        {/* Lead avatar */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-          <Avatar
-            src={project.lead_avatar_url ?? undefined}
-            sx={{ width: 24, height: 24, fontSize: 12 }}
-          >
+      {/* Budget (if available) */}
+      {project.budget_allocated != null && project.budget_allocated > 0 && (
+        <p className="mb-1 text-xs text-text-secondary">
+          Budget: {formatCurrency(project.budget_spent ?? 0)} /{' '}
+          {formatCurrency(project.budget_allocated)}
+        </p>
+      )}
+
+      {/* Lead avatar */}
+      <div className="mt-0.5 flex items-center gap-1">
+        {project.lead_avatar_url ? (
+          <img
+            src={project.lead_avatar_url}
+            alt={project.lead_name ?? 'Lead'}
+            className="h-6 w-6 rounded-full object-cover"
+          />
+        ) : (
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-200 text-xs font-medium text-text-secondary">
             {project.lead_name ? project.lead_name.charAt(0).toUpperCase() : '?'}
-          </Avatar>
-          <Typography variant="caption" color="text.secondary">
-            {project.lead_name ?? 'Unassigned'}
-          </Typography>
-        </Box>
-      </CardContent>
-    </Card>
+          </span>
+        )}
+        <span className="text-xs text-text-secondary">
+          {project.lead_name ?? 'Unassigned'}
+        </span>
+      </div>
+    </div>
   )
 }

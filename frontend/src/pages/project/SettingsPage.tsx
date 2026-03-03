@@ -1,15 +1,8 @@
-import { lazy, Suspense, useState, type SyntheticEvent } from 'react'
+import { lazy, Suspense } from 'react'
 import { useParams } from 'react-router-dom'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
-import CircularProgress from '@mui/material/CircularProgress'
-import Alert from '@mui/material/Alert'
-import AlertTitle from '@mui/material/AlertTitle'
-import Paper from '@mui/material/Paper'
-import LockIcon from '@mui/icons-material/Lock'
+import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/react'
+import { Lock } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import { useProjectDetail, useProjectMembers } from '@/hooks/useProjectSettings'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -20,32 +13,6 @@ const IssueTypeSettings = lazy(() => import('@/components/settings/IssueTypeSett
 const CustomFieldSettings = lazy(() => import('@/components/settings/CustomFieldSettings'))
 const LabelSettings = lazy(() => import('@/components/settings/LabelSettings'))
 const WorkflowEditor = lazy(() => import('@/components/settings/WorkflowEditor'))
-
-interface TabPanelProps {
-  children: React.ReactNode
-  index: number
-  value: number
-}
-
-function TabPanel({ children, value, index }: TabPanelProps) {
-  return (
-    <Box
-      role="tabpanel"
-      hidden={value !== index}
-      id={`settings-tabpanel-${index}`}
-      aria-labelledby={`settings-tab-${index}`}
-    >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
-    </Box>
-  )
-}
-
-function a11yProps(index: number) {
-  return {
-    id: `settings-tab-${index}`,
-    'aria-controls': `settings-tabpanel-${index}`,
-  }
-}
 
 const TAB_LABELS = [
   'General',
@@ -58,23 +25,18 @@ const TAB_LABELS = [
 
 function TabFallback() {
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-      <CircularProgress />
-    </Box>
+    <div className="flex justify-center py-6">
+      <div className="animate-spin rounded-full h-8 w-8 border-2 border-surface-200 border-t-primary-500" />
+    </div>
   )
 }
 
 export default function ProjectSettingsPage() {
   const { projectId } = useParams<{ projectId: string }>()
-  const [tab, setTab] = useState(0)
   const currentUserId = useAuthStore((s) => s.currentUserId)
 
   const { data: project, isLoading: projectLoading } = useProjectDetail(projectId)
   const { data: members = [] } = useProjectMembers(projectId)
-
-  const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
-    setTab(newValue)
-  }
 
   // Check if current user is an admin of this project
   const currentMember = members.find((m) => m.user_id === currentUserId)
@@ -83,92 +45,97 @@ export default function ProjectSettingsPage() {
 
   if (!projectId) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Alert severity="error">No project ID provided.</Alert>
-      </Container>
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
+          No project ID provided.
+        </div>
+      </div>
     )
   }
 
   if (projectLoading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress />
-        </Box>
-      </Container>
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-surface-200 border-t-primary-500" />
+        </div>
+      </div>
     )
   }
 
   // Show access warning for non-admins (but still allow viewing for graceful UX)
   if (hasCheckedAccess && !isAdmin) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Paper
-          sx={{
-            p: 4,
-            textAlign: 'center',
-            bgcolor: 'background.paper',
-            border: '1px solid',
-            borderColor: 'divider',
-          }}
-        >
-          <LockIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-          <Typography variant="h5" gutterBottom>
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface p-8 text-center">
+          <Lock className="h-12 w-12 text-text-secondary mx-auto mb-3" />
+          <h2 className="text-xl font-semibold text-text-primary mb-2">
             Admin Access Required
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
+          </h2>
+          <p className="text-sm text-text-secondary">
             You need admin permissions on this project to access settings.
             Contact your project lead to request access.
-          </Typography>
-        </Paper>
-      </Container>
+          </p>
+        </div>
+      </div>
     )
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
+    <div className="max-w-6xl mx-auto px-6 py-8">
+      <h1 className="text-2xl font-bold text-text-primary mb-4">
         {project?.name ?? 'Project'} Settings
-      </Typography>
+      </h1>
 
-      <Paper variant="outlined" sx={{ mt: 2 }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs
-            value={tab}
-            onChange={handleTabChange}
-            variant="scrollable"
-            scrollButtons="auto"
-            aria-label="Project settings tabs"
-          >
-            {TAB_LABELS.map((label, idx) => (
-              <Tab key={label} label={label} {...a11yProps(idx)} />
-            ))}
-          </Tabs>
-        </Box>
+      <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface mt-2">
+        <TabGroup>
+          <div className="border-b border-surface-200">
+            <TabList className="flex gap-0 overflow-x-auto px-2" aria-label="Project settings tabs">
+              {TAB_LABELS.map((label) => (
+                <Tab
+                  key={label}
+                  className={({ selected }) =>
+                    cn(
+                      'px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors',
+                      'border-b-2 outline-none focus-visible:bg-surface-50',
+                      selected
+                        ? 'border-primary-500 text-primary-600'
+                        : 'border-transparent text-text-secondary hover:text-text-primary hover:border-surface-300'
+                    )
+                  }
+                >
+                  {label}
+                </Tab>
+              ))}
+            </TabList>
+          </div>
 
-        <Box sx={{ px: 3 }}>
-          <Suspense fallback={<TabFallback />}>
-            <TabPanel value={tab} index={0}>
-              <GeneralSettings projectId={projectId} />
-            </TabPanel>
-            <TabPanel value={tab} index={1}>
-              <MemberSettings projectId={projectId} />
-            </TabPanel>
-            <TabPanel value={tab} index={2}>
-              <IssueTypeSettings projectId={projectId} />
-            </TabPanel>
-            <TabPanel value={tab} index={3}>
-              <CustomFieldSettings projectId={projectId} />
-            </TabPanel>
-            <TabPanel value={tab} index={4}>
-              <LabelSettings projectId={projectId} />
-            </TabPanel>
-            <TabPanel value={tab} index={5}>
-              <WorkflowEditor projectId={projectId} />
-            </TabPanel>
-          </Suspense>
-        </Box>
-      </Paper>
-    </Container>
+          <div className="px-4">
+            <Suspense fallback={<TabFallback />}>
+              <TabPanels>
+                <TabPanel className="py-4">
+                  <GeneralSettings projectId={projectId} />
+                </TabPanel>
+                <TabPanel className="py-4">
+                  <MemberSettings projectId={projectId} />
+                </TabPanel>
+                <TabPanel className="py-4">
+                  <IssueTypeSettings projectId={projectId} />
+                </TabPanel>
+                <TabPanel className="py-4">
+                  <CustomFieldSettings projectId={projectId} />
+                </TabPanel>
+                <TabPanel className="py-4">
+                  <LabelSettings projectId={projectId} />
+                </TabPanel>
+                <TabPanel className="py-4">
+                  <WorkflowEditor projectId={projectId} />
+                </TabPanel>
+              </TabPanels>
+            </Suspense>
+          </div>
+        </TabGroup>
+      </div>
+    </div>
   )
 }

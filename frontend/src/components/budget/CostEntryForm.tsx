@@ -1,14 +1,7 @@
-import { useCallback } from 'react'
+import { useCallback, useState, useMemo } from 'react'
 import { useForm, Controller } from 'react-hook-form'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
-import MenuItem from '@mui/material/MenuItem'
-import Autocomplete from '@mui/material/Autocomplete'
-import Stack from '@mui/material/Stack'
+import { Dialog, DialogFooter } from '@/components/ui/Dialog'
+import { Button } from '@/components/ui/Button'
 import { useCreateCostEntry } from '@/hooks/useBudget'
 
 // ---------------------------------------------------------------------------
@@ -61,6 +54,7 @@ export default function CostEntryForm({
   issueOptions = [],
 }: CostEntryFormProps) {
   const createCost = useCreateCostEntry()
+  const [issueSearch, setIssueSearch] = useState('')
 
   const {
     control,
@@ -97,36 +91,47 @@ export default function CostEntryForm({
     [createCost, projectId, handleClose],
   )
 
+  const filteredIssues = useMemo(() => {
+    if (!issueSearch) return issueOptions
+    const q = issueSearch.toLowerCase()
+    return issueOptions.filter((o) => o.label.toLowerCase().includes(q))
+  }, [issueOptions, issueSearch])
+
+  const inputClass =
+    'w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border'
+  const labelClass = 'block text-sm font-medium text-text-primary mb-1'
+  const errorClass = 'text-xs text-red-500 mt-1'
+
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={() => handleClose()} title="Add Cost Entry" size="md">
       <form onSubmit={handleSubmit(onSubmit)}>
-        <DialogTitle>Add Cost Entry</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2.5} sx={{ mt: 1 }}>
-            {/* Category */}
+        <div className="flex flex-col gap-5">
+          {/* Category */}
+          <div>
+            <label className={labelClass}>Category *</label>
             <Controller
               name="category"
               control={control}
               rules={{ required: 'Category is required' }}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Category"
-                  fullWidth
-                  error={!!errors.category}
-                  helperText={errors.category?.message}
-                >
+                <select {...field} className={inputClass}>
+                  <option value="">Select a category</option>
                   {COST_CATEGORIES.map((cat) => (
-                    <MenuItem key={cat} value={cat}>
+                    <option key={cat} value={cat}>
                       {cat}
-                    </MenuItem>
+                    </option>
                   ))}
-                </TextField>
+                </select>
               )}
             />
+            {errors.category && (
+              <span className={errorClass}>{errors.category.message}</span>
+            )}
+          </div>
 
-            {/* Amount */}
+          {/* Amount */}
+          <div>
+            <label className={labelClass}>Amount *</label>
             <Controller
               name="amount"
               control={control}
@@ -137,83 +142,108 @@ export default function CostEntryForm({
                   'Enter a positive number',
               }}
               render={({ field }) => (
-                <TextField
+                <input
                   {...field}
-                  label="Amount"
                   type="number"
-                  fullWidth
-                  inputProps={{ min: 0, step: '0.01' }}
-                  error={!!errors.amount}
-                  helperText={errors.amount?.message}
+                  min={0}
+                  step="0.01"
+                  className={inputClass}
+                  placeholder="0.00"
                 />
               )}
             />
+            {errors.amount && (
+              <span className={errorClass}>{errors.amount.message}</span>
+            )}
+          </div>
 
-            {/* Description */}
+          {/* Description */}
+          <div>
+            <label className={labelClass}>Description</label>
             <Controller
               name="description"
               control={control}
               render={({ field }) => (
-                <TextField
+                <textarea
                   {...field}
-                  label="Description"
-                  fullWidth
-                  multiline
-                  minRows={2}
+                  rows={2}
+                  className={inputClass}
+                  placeholder="Optional description"
                 />
               )}
             />
+          </div>
 
-            {/* Date */}
+          {/* Date */}
+          <div>
+            <label className={labelClass}>Date *</label>
             <Controller
               name="date"
               control={control}
               rules={{ required: 'Date is required' }}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Date"
-                  type="date"
-                  fullWidth
-                  slotProps={{ inputLabel: { shrink: true } }}
-                  error={!!errors.date}
-                  helperText={errors.date?.message}
-                />
+                <input {...field} type="date" className={inputClass} />
               )}
             />
+            {errors.date && (
+              <span className={errorClass}>{errors.date.message}</span>
+            )}
+          </div>
 
-            {/* Issue (optional autocomplete) */}
+          {/* Issue (optional) */}
+          <div>
+            <label className={labelClass}>Issue (optional)</label>
             <Controller
               name="issue_id"
               control={control}
               render={({ field }) => (
-                <Autocomplete
-                  options={issueOptions}
-                  getOptionLabel={(opt) => opt.label}
-                  value={
-                    issueOptions.find((o) => o.id === field.value) ?? null
-                  }
-                  onChange={(_e, newVal) => field.onChange(newVal?.id ?? '')}
-                  renderInput={(params) => (
-                    <TextField {...params} label="Issue (optional)" fullWidth />
+                <div className="relative">
+                  <input
+                    type="text"
+                    className={inputClass}
+                    placeholder="Search issues..."
+                    value={
+                      field.value
+                        ? issueOptions.find((o) => o.id === field.value)?.label ?? issueSearch
+                        : issueSearch
+                    }
+                    onChange={(e) => {
+                      setIssueSearch(e.target.value)
+                      if (!e.target.value) field.onChange('')
+                    }}
+                    onFocus={() => setIssueSearch('')}
+                  />
+                  {issueSearch && filteredIssues.length > 0 && (
+                    <div className="absolute z-10 top-full left-0 right-0 mt-1 max-h-40 overflow-y-auto border border-surface-200 rounded-lg bg-white dark:bg-dark-surface shadow-lg">
+                      {filteredIssues.map((opt) => (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-surface-50 dark:hover:bg-dark-border"
+                          onClick={() => {
+                            field.onChange(opt.id)
+                            setIssueSearch('')
+                          }}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
                   )}
-                />
+                </div>
               )}
             />
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleClose} color="inherit">
+          </div>
+        </div>
+
+        <DialogFooter className="mt-6 border-t-0 px-0">
+          <Button variant="ghost" type="button" onClick={handleClose}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={isSubmitting}
-          >
+          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Saving...' : 'Add Cost'}
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </form>
     </Dialog>
   )

@@ -1,5 +1,3 @@
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
 import {
   PieChart,
   Pie,
@@ -49,30 +47,17 @@ function DonutTooltip({ active, payload }: CustomTooltipProps) {
   const entry = payload[0]
 
   return (
-    <Box
-      sx={{
-        bgcolor: 'background.paper',
-        border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: 1,
-        p: 1,
-        boxShadow: 2,
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-        <Box
-          sx={{
-            width: 10,
-            height: 10,
-            borderRadius: '50%',
-            bgcolor: entry.payload.fill,
-          }}
+    <div className="border border-surface-200 rounded bg-white p-2 shadow-md dark:bg-dark-surface dark:border-dark-border">
+      <div className="flex items-center gap-1">
+        <div
+          className="h-2.5 w-2.5 rounded-full"
+          style={{ backgroundColor: entry.payload.fill }}
         />
-        <Typography variant="body2" fontWeight={600}>
+        <span className="text-sm font-semibold text-text-primary">
           {entry.name}: {entry.value}
-        </Typography>
-      </Box>
-    </Box>
+        </span>
+      </div>
+    </div>
   )
 }
 
@@ -124,17 +109,17 @@ export default function RAGDistributionDonut({ data }: RAGDistributionDonutProps
 
   if (total === 0) {
     return (
-      <Box sx={{ py: 4, textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary">
+      <div className="py-8 text-center">
+        <p className="text-sm text-text-secondary">
           No RAG status data available.
-        </Typography>
-      </Box>
+        </p>
+      </div>
     )
   }
 
   return (
-    <Box>
-      <Box sx={{ width: '100%', height: 220, position: 'relative' }}>
+    <div>
+      <div className="relative w-full" style={{ height: 220 }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -167,39 +152,25 @@ export default function RAGDistributionDonut({ data }: RAGDistributionDonutProps
             />
           </PieChart>
         </ResponsiveContainer>
-      </Box>
+      </div>
 
       {/* Legend below chart */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: 3,
-          mt: 1,
-        }}
-      >
+      <div className="flex justify-center gap-6 mt-2">
         {SEGMENT_CONFIG.map(({ key, label, color }) => (
-          <Box
-            key={key}
-            sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-          >
-            <Box
-              sx={{
-                width: 12,
-                height: 12,
-                borderRadius: '50%',
-                bgcolor: color,
-              }}
+          <div key={key} className="flex items-center gap-1">
+            <div
+              className="h-3 w-3 rounded-full"
+              style={{ backgroundColor: color }}
             />
-            <Typography variant="body2" color="text.secondary">
+            <span className="text-sm text-text-secondary">
               {label}
-            </Typography>
-            <Typography variant="body2" fontWeight={700}>
+            </span>
+            <span className="text-sm font-bold text-text-primary">
               {data[key]}
-            </Typography>
-          </Box>
+            </span>
+          </div>
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }

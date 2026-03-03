@@ -1,10 +1,3 @@
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
-import Avatar from '@mui/material/Avatar'
-import Box from '@mui/material/Box'
-import { useTheme } from '@mui/material/styles'
 import type { Issue } from '@/types/api'
 import { PRIORITY_COLORS, truncate } from '@/utils/formatters'
 
@@ -18,100 +11,52 @@ interface DragOverlayCardProps {
  * to give a "lifted" visual cue.
  */
 export default function DragOverlayCard({ issue }: DragOverlayCardProps) {
-  const theme = useTheme()
   const priorityColor = PRIORITY_COLORS[issue.priority] ?? PRIORITY_COLORS.none
 
   return (
-    <Card
-      sx={{
-        cursor: 'grabbing',
-        width: 260,
-        transform: 'rotate(3deg)',
-        boxShadow: theme.shadows[8],
-        border: '1px solid',
-        borderColor: 'primary.main',
-        borderRadius: 1.5,
-      }}
-    >
-      <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-        {/* Top row: issue key chip */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.75 }}>
-          <Chip
-            label={issue.issue_key}
-            size="small"
-            sx={{
-              height: 20,
-              fontSize: '0.7rem',
-              fontWeight: 600,
-              bgcolor: 'action.hover',
-              color: 'text.secondary',
-            }}
+    <div className="cursor-grabbing w-[260px] rotate-3 shadow-xl border-2 border-primary-500 rounded-[--radius-md] bg-white dark:bg-surface-100 p-3">
+      {/* Top row: issue key chip */}
+      <div className="flex items-center mb-1.5">
+        <span className="inline-flex px-1.5 py-0.5 text-[11px] font-semibold bg-surface-100 text-text-secondary rounded">
+          {issue.issue_key}
+        </span>
+      </div>
+
+      {/* Summary */}
+      <p className="text-sm font-medium text-text-primary leading-snug mb-2 break-words">
+        {truncate(issue.summary, 80)}
+      </p>
+
+      {/* Bottom row: priority dot + assignee avatar */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1">
+          <span
+            className="w-2 h-2 rounded-full shrink-0"
+            style={{ backgroundColor: priorityColor }}
           />
-        </Box>
+          <span className="text-xs text-text-secondary capitalize">
+            {issue.priority}
+          </span>
+        </div>
 
-        {/* Summary */}
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 500,
-            lineHeight: 1.4,
-            mb: 1,
-            color: 'text.primary',
-            wordBreak: 'break-word',
-          }}
-        >
-          {truncate(issue.summary, 80)}
-        </Typography>
-
-        {/* Bottom row: priority dot + assignee avatar */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Box
-              sx={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                bgcolor: priorityColor,
-                flexShrink: 0,
-              }}
-            />
-            <Typography
-              variant="caption"
-              sx={{ color: 'text.secondary', textTransform: 'capitalize' }}
-            >
-              {issue.priority}
-            </Typography>
-          </Box>
-
-          {issue.assignee ? (
-            <Avatar
-              src={issue.assignee.avatar_url ?? undefined}
-              alt={issue.assignee.display_name}
-              sx={{ width: 24, height: 24, fontSize: '0.7rem' }}
-            >
-              {issue.assignee.display_name.charAt(0).toUpperCase()}
-            </Avatar>
-          ) : (
-            <Avatar
-              sx={{
-                width: 24,
-                height: 24,
-                fontSize: '0.7rem',
-                bgcolor: 'action.disabledBackground',
-                color: 'text.disabled',
-              }}
-            >
-              ?
-            </Avatar>
-          )}
-        </Box>
-      </CardContent>
-    </Card>
+        {issue.assignee ? (
+          <div className="w-6 h-6 rounded-full bg-primary-100 text-primary-700 text-[11px] font-semibold flex items-center justify-center shrink-0 overflow-hidden">
+            {issue.assignee.avatar_url ? (
+              <img
+                src={issue.assignee.avatar_url}
+                alt={issue.assignee.display_name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              issue.assignee.display_name.charAt(0).toUpperCase()
+            )}
+          </div>
+        ) : (
+          <div className="w-6 h-6 rounded-full bg-surface-200 text-text-tertiary text-[11px] flex items-center justify-center">
+            ?
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

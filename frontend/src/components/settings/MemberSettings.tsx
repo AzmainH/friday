@@ -1,30 +1,7 @@
-import { useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
-import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import MenuItem from '@mui/material/MenuItem'
-import TextField from '@mui/material/TextField'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Autocomplete from '@mui/material/Autocomplete'
-import Skeleton from '@mui/material/Skeleton'
-import Alert from '@mui/material/Alert'
-import Stack from '@mui/material/Stack'
-import Avatar from '@mui/material/Avatar'
-import Chip from '@mui/material/Chip'
-import Select from '@mui/material/Select'
-import PersonAddIcon from '@mui/icons-material/PersonAdd'
-import DeleteIcon from '@mui/icons-material/Delete'
+import { useState, useCallback, useMemo } from 'react'
+import { UserPlus, Trash2 } from 'lucide-react'
+import { Dialog, DialogFooter } from '@/components/ui/Dialog'
+import { Button } from '@/components/ui/Button'
 import {
   useProjectMembers,
   useAddProjectMember,
@@ -39,6 +16,31 @@ interface MemberSettingsProps {
 }
 
 const ROLES = ['admin', 'member', 'viewer'] as const
+
+function UserAvatar({ user, size = 32 }: { user?: { avatar_url?: string | null; display_name?: string | null } | null; size?: number }) {
+  const name = user?.display_name ?? '?'
+  const initial = name.charAt(0).toUpperCase()
+
+  if (user?.avatar_url) {
+    return (
+      <img
+        src={user.avatar_url}
+        alt={name}
+        className="rounded-full object-cover flex-shrink-0"
+        style={{ width: size, height: size }}
+      />
+    )
+  }
+
+  return (
+    <span
+      className="inline-flex items-center justify-center rounded-full bg-primary-100 text-primary-700 text-xs font-medium flex-shrink-0"
+      style={{ width: size, height: size }}
+    >
+      {initial}
+    </span>
+  )
+}
 
 export default function MemberSettings({ projectId }: MemberSettingsProps) {
   const { data: members = [], isLoading, error } = useProjectMembers(projectId)
@@ -56,6 +58,18 @@ export default function MemberSettings({ projectId }: MemberSettingsProps) {
   // Users not already in the project
   const memberUserIds = new Set(members.map((m) => m.user_id))
   const availableUsers = users.filter((u) => !memberUserIds.has(u.id))
+
+  // Search state for user autocomplete
+  const [userSearch, setUserSearch] = useState('')
+  const filteredUsers = useMemo(() => {
+    if (!userSearch.trim()) return availableUsers
+    const q = userSearch.toLowerCase()
+    return availableUsers.filter(
+      (u) =>
+        (u.display_name ?? '').toLowerCase().includes(q) ||
+        (u.email ?? '').toLowerCase().includes(q),
+    )
+  }, [availableUsers, userSearch])
 
   const handleAddMember = useCallback(() => {
     if (!selectedUser) return
@@ -76,6 +90,7 @@ export default function MemberSettings({ projectId }: MemberSettingsProps) {
           setNewRole('member')
           setNewCapacity(100)
           setNewHours(40)
+          setUserSearch('')
         },
       },
     )
@@ -97,168 +112,197 @@ export default function MemberSettings({ projectId }: MemberSettingsProps) {
 
   if (isLoading) {
     return (
-      <Stack spacing={2}>
-        <Skeleton variant="rounded" height={48} />
-        <Skeleton variant="rounded" height={200} />
-      </Stack>
+      <div className="space-y-4">
+        <div className="skeleton-shimmer h-12 rounded-lg" />
+        <div className="skeleton-shimmer h-52 rounded-lg" />
+      </div>
     )
   }
 
   if (error) {
-    return <Alert severity="error">Failed to load project members.</Alert>
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">
+        Failed to load project members.
+      </div>
+    )
   }
 
   return (
-    <Stack spacing={3}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">Members</Typography>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-text-primary">Members</h3>
         <Button
-          variant="contained"
-          startIcon={<PersonAddIcon />}
+          variant="primary"
+          leftIcon={<UserPlus className="h-4 w-4" />}
           onClick={() => setAddDialogOpen(true)}
         >
           Add Member
         </Button>
-      </Box>
+      </div>
 
-      <TableContainer component={Paper} variant="outlined">
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>User</TableCell>
-              <TableCell>Role</TableCell>
-              <TableCell align="right">Capacity %</TableCell>
-              <TableCell align="right">Hours / Week</TableCell>
-              <TableCell align="center" width={60}>
-                Actions
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+      <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-surface-50">
+            <tr>
+              <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">User</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold text-text-secondary uppercase">Role</th>
+              <th className="px-4 py-2 text-right text-xs font-semibold text-text-secondary uppercase">Capacity %</th>
+              <th className="px-4 py-2 text-right text-xs font-semibold text-text-secondary uppercase">Hours / Week</th>
+              <th className="px-4 py-2 text-center text-xs font-semibold text-text-secondary uppercase w-[60px]">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
             {members.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5} align="center">
-                  <Typography variant="body2" color="text.secondary" sx={{ py: 4 }}>
-                    No members yet. Add team members to get started.
-                  </Typography>
-                </TableCell>
-              </TableRow>
+              <tr>
+                <td colSpan={5} className="px-4 py-10 text-center text-sm text-text-secondary border-t border-surface-200">
+                  No members yet. Add team members to get started.
+                </td>
+              </tr>
             )}
             {members.map((member) => (
-              <TableRow key={member.id}>
-                <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Avatar
-                      src={member.user?.avatar_url ?? undefined}
-                      sx={{ width: 32, height: 32 }}
-                    >
-                      {(member.user?.display_name ?? member.user_id).charAt(0).toUpperCase()}
-                    </Avatar>
-                    <Box>
-                      <Typography variant="body2" fontWeight={500}>
+              <tr key={member.id}>
+                <td className="px-4 py-2 border-t border-surface-200">
+                  <div className="flex items-center gap-3">
+                    <UserAvatar user={member.user} />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-text-primary truncate">
                         {member.user?.display_name ?? 'Unknown User'}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
+                      </p>
+                      <p className="text-xs text-text-secondary truncate">
                         {member.user?.email ?? ''}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Select
-                    size="small"
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-2 border-t border-surface-200">
+                  <select
                     value={member.role}
                     onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                    variant="standard"
-                    disableUnderline
+                    className="rounded-lg border border-surface-200 bg-white px-2 py-1 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
                   >
                     {ROLES.map((role) => (
-                      <MenuItem key={role} value={role}>
-                        <Chip
-                          label={role}
-                          size="small"
-                          color={role === 'admin' ? 'primary' : role === 'member' ? 'default' : 'secondary'}
-                          variant="outlined"
-                        />
-                      </MenuItem>
+                      <option key={role} value={role}>
+                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                      </option>
                     ))}
-                  </Select>
-                </TableCell>
-                <TableCell align="right">{member.capacity_pct}%</TableCell>
-                <TableCell align="right">{member.hours_per_week}h</TableCell>
-                <TableCell align="center">
-                  <IconButton
-                    size="small"
-                    color="error"
+                  </select>
+                </td>
+                <td className="px-4 py-2 border-t border-surface-200 text-right">{member.capacity_pct}%</td>
+                <td className="px-4 py-2 border-t border-surface-200 text-right">{member.hours_per_week}h</td>
+                <td className="px-4 py-2 border-t border-surface-200 text-center">
+                  <button
+                    type="button"
                     onClick={() => handleRemoveMember(member.id)}
                     aria-label="Remove member"
+                    className="inline-flex items-center justify-center rounded-[--radius-sm] p-1.5 text-red-500 hover:bg-red-50 hover:text-red-700 transition-colors"
                   >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </td>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </tbody>
+        </table>
+      </div>
 
       {/* Add Member Dialog */}
-      <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Project Member</DialogTitle>
-        <DialogContent>
-          <Stack spacing={3} sx={{ mt: 1 }}>
-            <Autocomplete
-              options={availableUsers}
-              getOptionLabel={(u) => `${u.display_name} (${u.email})`}
-              value={selectedUser}
-              onChange={(_e, val) => setSelectedUser(val)}
-              renderInput={(params) => <TextField {...params} label="Select User" />}
-              isOptionEqualToValue={(opt, val) => opt.id === val.id}
-            />
-            <TextField
-              select
-              label="Role"
+      <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} title="Add Project Member" size="sm">
+        <div className="space-y-4">
+          {/* User search / autocomplete */}
+          <div>
+            <label htmlFor="member-user" className="block text-sm font-medium text-text-primary mb-1">Select User</label>
+            <div className="relative">
+              <input
+                id="member-user"
+                type="text"
+                value={selectedUser ? `${selectedUser.display_name} (${selectedUser.email})` : userSearch}
+                onChange={(e) => {
+                  setUserSearch(e.target.value)
+                  setSelectedUser(null)
+                }}
+                placeholder="Search users..."
+                className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
+              />
+              {!selectedUser && userSearch.trim() && filteredUsers.length > 0 && (
+                <div className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-surface-200 bg-white shadow-lg dark:bg-dark-surface dark:border-dark-border">
+                  {filteredUsers.map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedUser(u)
+                        setUserSearch('')
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-text-primary hover:bg-surface-50 text-left transition-colors"
+                    >
+                      <UserAvatar user={u} size={24} />
+                      <span>
+                        {u.display_name} <span className="text-text-secondary">({u.email})</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="member-role" className="block text-sm font-medium text-text-primary mb-1">Role</label>
+            <select
+              id="member-role"
               value={newRole}
               onChange={(e) => setNewRole(e.target.value)}
-              fullWidth
+              className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
             >
               {ROLES.map((role) => (
-                <MenuItem key={role} value={role}>
+                <option key={role} value={role}>
                   {role.charAt(0).toUpperCase() + role.slice(1)}
-                </MenuItem>
+                </option>
               ))}
-            </TextField>
-            <TextField
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="member-capacity" className="block text-sm font-medium text-text-primary mb-1">Capacity %</label>
+            <input
+              id="member-capacity"
               type="number"
-              label="Capacity %"
               value={newCapacity}
               onChange={(e) => setNewCapacity(Number(e.target.value))}
-              fullWidth
-              slotProps={{ input: { inputProps: { min: 0, max: 100 } } }}
+              min={0}
+              max={100}
+              className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
             />
-            <TextField
+          </div>
+
+          <div>
+            <label htmlFor="member-hours" className="block text-sm font-medium text-text-primary mb-1">Hours per Week</label>
+            <input
+              id="member-hours"
               type="number"
-              label="Hours per Week"
               value={newHours}
               onChange={(e) => setNewHours(Number(e.target.value))}
-              fullWidth
-              slotProps={{ input: { inputProps: { min: 0, max: 168 } } }}
+              min={0}
+              max={168}
+              className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
             />
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setAddDialogOpen(false)} color="inherit">
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setAddDialogOpen(false)}>
             Cancel
           </Button>
           <Button
-            variant="contained"
+            variant="primary"
             onClick={handleAddMember}
             disabled={!selectedUser || addMember.isPending}
+            loading={addMember.isPending}
           >
-            {addMember.isPending ? 'Adding...' : 'Add Member'}
+            Add Member
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </Dialog>
-    </Stack>
+    </div>
   )
 }

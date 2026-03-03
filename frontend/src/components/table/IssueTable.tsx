@@ -1,4 +1,4 @@
-import { useRef, useCallback, useMemo } from 'react'
+import { useRef, useCallback } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -10,20 +10,8 @@ import {
   type RowSelectionState,
 } from '@tanstack/react-table'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import Box from '@mui/material/Box'
-import MuiTable from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import TableSortLabel from '@mui/material/TableSortLabel'
-import Checkbox from '@mui/material/Checkbox'
-import Chip from '@mui/material/Chip'
-import Avatar from '@mui/material/Avatar'
-import LinearProgress from '@mui/material/LinearProgress'
-import Skeleton from '@mui/material/Skeleton'
-import Typography from '@mui/material/Typography'
+import { ChevronUp, ChevronDown } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import type { Issue } from '@/types/api'
 
 const ROW_HEIGHT = 44
@@ -54,7 +42,7 @@ export interface IssueTableProps {
  */
 function CellRenderer({ value }: { value: unknown }) {
   if (value == null) {
-    return <Typography variant="body2">{'\u2014'}</Typography>
+    return <span className="text-sm text-text-tertiary">{'\u2014'}</span>
   }
 
   if (typeof value === 'object' && value !== null && 'type' in value) {
@@ -63,14 +51,16 @@ function CellRenderer({ value }: { value: unknown }) {
     // Checkbox (select column)
     if (typed.type === 'checkbox') {
       return (
-        <Checkbox
-          size="small"
+        <input
+          type="checkbox"
+          className="w-4 h-4 rounded border-surface-300 text-primary-500 focus:ring-primary-500"
           checked={typed.checked as boolean}
-          indeterminate={typed.indeterminate as boolean | undefined}
+          ref={(el) => {
+            if (el) el.indeterminate = !!(typed.indeterminate as boolean | undefined)
+          }}
           disabled={typed.disabled as boolean | undefined}
           onChange={typed.onChange as React.ChangeEventHandler<HTMLInputElement>}
           onClick={(e) => e.stopPropagation()}
-          sx={{ p: 0.5 }}
         />
       )
     }
@@ -78,51 +68,44 @@ function CellRenderer({ value }: { value: unknown }) {
     // Status chip
     if (typed.type === 'chip') {
       return (
-        <Chip
-          label={typed.label as string}
-          size="small"
-          sx={{
-            bgcolor: typed.color as string,
-            color: '#fff',
-            fontWeight: 500,
-            fontSize: '0.75rem',
-          }}
-        />
+        <span
+          className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full text-white"
+          style={{ backgroundColor: typed.color as string }}
+        >
+          {typed.label as string}
+        </span>
       )
     }
 
     // Priority (dot + label)
     if (typed.type === 'priority') {
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <Box
-            sx={{
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              bgcolor: typed.color as string,
-              flexShrink: 0,
-            }}
+        <div className="flex items-center gap-1.5">
+          <span
+            className="w-2.5 h-2.5 rounded-full shrink-0"
+            style={{ backgroundColor: typed.color as string }}
           />
-          <Typography variant="body2">{typed.label as string}</Typography>
-        </Box>
+          <span className="text-sm text-text-primary">{typed.label as string}</span>
+        </div>
       )
     }
 
     // Assignee (avatar + name)
     if (typed.type === 'assignee') {
+      const avatarUrl = typed.avatarUrl as string | null
+      const name = typed.name as string
+      const initial = name.charAt(0)
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Avatar
-            src={(typed.avatarUrl as string | null) ?? undefined}
-            sx={{ width: 24, height: 24, fontSize: '0.75rem' }}
-          >
-            {(typed.name as string).charAt(0)}
-          </Avatar>
-          <Typography variant="body2" noWrap>
-            {typed.name as string}
-          </Typography>
-        </Box>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-primary-100 text-primary-700 text-[11px] font-semibold flex items-center justify-center shrink-0">
+            {avatarUrl ? (
+              <img src={avatarUrl} className="w-6 h-6 rounded-full" alt={name} />
+            ) : (
+              initial
+            )}
+          </div>
+          <span className="text-sm text-text-primary truncate">{name}</span>
+        </div>
       )
     }
 
@@ -130,22 +113,21 @@ function CellRenderer({ value }: { value: unknown }) {
     if (typed.type === 'progress') {
       const pct = typed.value as number
       return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-          <LinearProgress
-            variant="determinate"
-            value={pct}
-            sx={{ flex: 1, height: 6, borderRadius: 3 }}
-          />
-          <Typography variant="caption" sx={{ minWidth: 32, textAlign: 'right' }}>
-            {pct}%
-          </Typography>
-        </Box>
+        <div className="flex items-center gap-2 w-full">
+          <div className="flex-1 h-1.5 bg-surface-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary-500 rounded-full transition-all"
+              style={{ width: pct + '%' }}
+            />
+          </div>
+          <span className="text-xs text-text-secondary min-w-[32px] text-right">{pct}%</span>
+        </div>
       )
     }
   }
 
   // Fallback: plain string/number
-  return <Typography variant="body2" noWrap>{String(value)}</Typography>
+  return <span className="text-sm text-text-primary truncate">{String(value)}</span>
 }
 
 export default function IssueTable({
@@ -200,20 +182,19 @@ export default function IssueTable({
   // Loading skeleton
   if (isLoading) {
     return (
-      <Box>
+      <div>
         {Array.from({ length: 8 }, (_, i) => (
-          <Box key={i} sx={{ display: 'flex', gap: 2, mb: 0.5, px: 1 }}>
-            <Skeleton variant="text" width="8%" height={28} />
-            <Skeleton variant="text" width="28%" height={28} />
-            <Skeleton variant="text" width="12%" height={28} />
-            <Skeleton variant="text" width="10%" height={28} />
-            <Skeleton variant="text" width="14%" height={28} />
-            <Skeleton variant="text" width="10%" height={28} />
-            <Skeleton variant="text" width="8%" height={28} />
-            <Skeleton variant="text" width="10%" height={28} />
-          </Box>
+          <div key={i} className="flex gap-4 mb-1 px-2">
+            {[8, 28, 12, 10, 14, 10, 8, 10].map((w, j) => (
+              <div
+                key={j}
+                className="skeleton-shimmer h-6 rounded"
+                style={{ width: w + '%' }}
+              />
+            ))}
+          </div>
         ))}
-      </Box>
+      </div>
     )
   }
 
@@ -221,21 +202,15 @@ export default function IssueTable({
   const headerGroups = table.getHeaderGroups()
 
   return (
-    <TableContainer
+    <div
       ref={parentRef}
-      sx={{
-        maxHeight: 'calc(100vh - 240px)',
-        overflow: 'auto',
-        border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: 1,
-      }}
+      className="max-h-[calc(100vh-240px)] overflow-auto border border-surface-200 rounded-[--radius-sm]"
     >
-      <MuiTable stickyHeader size="small" sx={{ minWidth: 900 }}>
+      <table className="min-w-[900px] w-full text-sm">
         {/* ---- Header ---- */}
-        <TableHead>
+        <thead className="sticky top-0 z-10">
           {headerGroups.map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
+            <tr key={headerGroup.id} className="bg-surface-50 dark:bg-surface-100">
               {headerGroup.headers.map((header) => {
                 const canSort = header.column.getCanSort()
                 const sorted = header.column.getIsSorted()
@@ -249,102 +224,103 @@ export default function IssueTable({
                 const isCheckboxHeader =
                   typeof rendered === 'object' &&
                   rendered !== null &&
-                  'type' in (rendered as Record<string, unknown>) &&
-                  (rendered as Record<string, unknown>).type === 'checkbox'
+                  !Array.isArray(rendered) &&
+                  'type' in (rendered as object) &&
+                  (rendered as { type?: unknown }).type === 'checkbox'
 
                 return (
-                  <TableCell
+                  <th
                     key={header.id}
-                    sx={{
-                      width: header.getSize(),
-                      fontWeight: 600,
-                      bgcolor: 'background.paper',
-                      userSelect: 'none',
-                    }}
+                    className="px-3 py-2.5 text-left text-xs font-semibold text-text-secondary uppercase tracking-wide border-b border-surface-200"
+                    style={{ width: header.getSize() }}
                   >
                     {isCheckboxHeader ? (
                       <CellRenderer value={rendered} />
                     ) : canSort ? (
-                      <TableSortLabel
-                        active={!!sorted}
-                        direction={sorted === 'desc' ? 'desc' : 'asc'}
+                      <button
                         onClick={header.column.getToggleSortingHandler()}
+                        className="inline-flex items-center gap-1 hover:text-text-primary transition-colors"
                       >
                         {rendered as React.ReactNode}
-                      </TableSortLabel>
+                        {sorted === 'asc' && <ChevronUp size={14} />}
+                        {sorted === 'desc' && <ChevronDown size={14} />}
+                        {!sorted && <span className="w-3.5" />}
+                      </button>
                     ) : (
                       (rendered as React.ReactNode)
                     )}
-                  </TableCell>
+                  </th>
                 )
               })}
-            </TableRow>
+            </tr>
           ))}
-        </TableHead>
+        </thead>
 
         {/* ---- Virtualized Body ---- */}
-        <TableBody>
+        <tbody>
           {/* Spacer row before virtual window */}
           {virtualRows.length > 0 && virtualRows[0].start > 0 && (
-            <TableRow>
-              <TableCell
+            <tr>
+              <td
                 colSpan={columns.length}
-                sx={{ height: virtualRows[0].start, p: 0, border: 0 }}
+                style={{ height: virtualRows[0].start }}
+                className="p-0 border-0"
               />
-            </TableRow>
+            </tr>
           )}
 
           {virtualRows.map((virtualRow) => {
             const row = rows[virtualRow.index]
             return (
-              <TableRow
+              <tr
                 key={row.id}
-                hover
-                selected={row.getIsSelected()}
                 onClick={() => handleRowClick(row.original.id)}
                 onDoubleClick={() => onIssueClick(row.original.id)}
-                sx={{ cursor: 'pointer', height: ROW_HEIGHT }}
+                className={cn(
+                  'border-b border-surface-100 cursor-pointer transition-colors',
+                  row.getIsSelected()
+                    ? 'bg-primary-50 dark:bg-primary-900/20'
+                    : 'hover:bg-surface-50/50',
+                )}
+                style={{ height: ROW_HEIGHT }}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} sx={{ py: 0.5, px: 1 }}>
+                  <td key={cell.id} className="px-3 py-1">
                     <CellRenderer
                       value={flexRender(cell.column.columnDef.cell, cell.getContext())}
                     />
-                  </TableCell>
+                  </td>
                 ))}
-              </TableRow>
+              </tr>
             )
           })}
 
           {/* Spacer row after virtual window */}
           {virtualRows.length > 0 && (
-            <TableRow>
-              <TableCell
+            <tr>
+              <td
                 colSpan={columns.length}
-                sx={{
+                style={{
                   height:
                     totalSize -
                     (virtualRows[virtualRows.length - 1].start +
                       virtualRows[virtualRows.length - 1].size),
-                  p: 0,
-                  border: 0,
                 }}
+                className="p-0 border-0"
               />
-            </TableRow>
+            </tr>
           )}
 
           {/* Empty state */}
           {rows.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={columns.length} sx={{ textAlign: 'center', py: 6 }}>
-                <Typography variant="body2" color="text.secondary">
-                  No issues found.
-                </Typography>
-              </TableCell>
-            </TableRow>
+            <tr>
+              <td colSpan={columns.length} className="text-center py-6">
+                <span className="text-sm text-text-secondary">No issues found.</span>
+              </td>
+            </tr>
           )}
-        </TableBody>
-      </MuiTable>
-    </TableContainer>
+        </tbody>
+      </table>
+    </div>
   )
 }

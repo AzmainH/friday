@@ -1,14 +1,7 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Skeleton from '@mui/material/Skeleton'
-import Alert from '@mui/material/Alert'
-import EditIcon from '@mui/icons-material/Edit'
-import CheckIcon from '@mui/icons-material/Check'
-import AddIcon from '@mui/icons-material/Add'
+import { Pencil, Check, Plus } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 import DashboardGrid from '@/components/dashboard/DashboardGrid'
 import WidgetPicker from '@/components/dashboard/WidgetPicker'
 import type { WidgetTypeDefinition } from '@/components/dashboard/WidgetPicker'
@@ -161,48 +154,39 @@ export default function ProjectDashboard() {
 
   if (isLoading) {
     return (
-      <Container maxWidth={false} sx={{ py: 4, px: 3 }}>
-        <Skeleton variant="text" width={260} height={40} />
-        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-          <Skeleton variant="rounded" width="33%" height={240} />
-          <Skeleton variant="rounded" width="33%" height={240} />
-          <Skeleton variant="rounded" width="33%" height={240} />
-        </Box>
-      </Container>
+      <div className="w-full py-8 px-6">
+        <div className="skeleton-shimmer h-10 w-64 rounded mb-4" />
+        <div className="flex gap-4 mt-4">
+          <div className="skeleton-shimmer w-1/3 h-[240px] rounded-[--radius-md]" />
+          <div className="skeleton-shimmer w-1/3 h-[240px] rounded-[--radius-md]" />
+          <div className="skeleton-shimmer w-1/3 h-[240px] rounded-[--radius-md]" />
+        </div>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <Container maxWidth={false} sx={{ py: 4, px: 3 }}>
-        <Alert severity="error">Failed to load project dashboard. Please try again.</Alert>
-      </Container>
+      <div className="w-full py-8 px-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[--radius-sm] text-sm">
+          Failed to load project dashboard. Please try again.
+        </div>
+      </div>
     )
   }
 
   return (
-    <Container maxWidth={false} sx={{ py: 4, px: 3 }} ref={containerRef}>
+    <div className="w-full py-8 px-6" ref={containerRef}>
       {/* Header */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          mb: 3,
-          flexWrap: 'wrap',
-          gap: 1,
-        }}
-      >
-        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-          Project Dashboard
-        </Typography>
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+        <h1 className="text-2xl font-bold text-text-primary">Project Dashboard</h1>
 
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <div className="flex gap-2">
           {editable && (
             <Button
-              variant="outlined"
-              size="small"
-              startIcon={<AddIcon />}
+              variant="ghost"
+              size="sm"
+              leftIcon={<Plus className="h-4 w-4" />}
               onClick={() => setPickerOpen(true)}
             >
               Add Widget
@@ -210,9 +194,9 @@ export default function ProjectDashboard() {
           )}
           {editable ? (
             <Button
-              variant="contained"
-              size="small"
-              startIcon={<CheckIcon />}
+              variant="primary"
+              size="sm"
+              leftIcon={<Check className="h-4 w-4" />}
               onClick={handleSave}
               disabled={saveDashboard.isPending}
             >
@@ -220,16 +204,16 @@ export default function ProjectDashboard() {
             </Button>
           ) : (
             <Button
-              variant="outlined"
-              size="small"
-              startIcon={<EditIcon />}
+              variant="ghost"
+              size="sm"
+              leftIcon={<Pencil className="h-4 w-4" />}
               onClick={() => setEditable(true)}
             >
               Edit Dashboard
             </Button>
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Grid */}
       <DashboardGrid
@@ -247,6 +231,6 @@ export default function ProjectDashboard() {
         onClose={() => setPickerOpen(false)}
         onAddWidget={handleAddWidget}
       />
-    </Container>
+    </div>
   )
 }

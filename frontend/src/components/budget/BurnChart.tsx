@@ -1,6 +1,4 @@
 import { useMemo } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
 import {
   AreaChart,
   Area,
@@ -46,24 +44,16 @@ export default function BurnChart({ monthlyBurn, totalBudget }: BurnChartProps) 
 
   if (chartData.length === 0) {
     return (
-      <Box
-        sx={{
-          p: 4,
-          textAlign: 'center',
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
-        }}
-      >
-        <Typography color="text.secondary">
+      <div className="p-8 text-center border border-dashed border-surface-200 rounded-lg">
+        <span className="text-text-secondary text-sm">
           No burn data available yet.
-        </Typography>
-      </Box>
+        </span>
+      </div>
     )
   }
 
   return (
-    <Box sx={{ width: '100%', height: 360 }}>
+    <div className="w-full h-[360px]">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={chartData}
@@ -85,12 +75,12 @@ export default function BurnChart({ monthlyBurn, totalBudget }: BurnChartProps) 
           />
           <ReferenceLine
             y={totalBudget}
-            stroke="#d32f2f"
+            stroke="#ef4444"
             strokeDasharray="6 4"
             label={{
               value: `Budget: ${formatCurrency(totalBudget)}`,
               position: 'insideTopRight',
-              fill: '#d32f2f',
+              fill: '#ef4444',
               fontSize: 12,
             }}
           />
@@ -98,12 +88,12 @@ export default function BurnChart({ monthlyBurn, totalBudget }: BurnChartProps) 
             type="monotone"
             dataKey="spend"
             name="Cumulative Spend"
-            stroke="#1976d2"
-            fill="rgba(25, 118, 210, 0.15)"
+            stroke="#f59e0b"
+            fill="rgba(245, 158, 11, 0.15)"
             strokeWidth={2}
           />
         </AreaChart>
       </ResponsiveContainer>
-    </Box>
+    </div>
   )
 }

@@ -1,10 +1,6 @@
 import { lazy, Suspense, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import Box from '@mui/material/Box'
-import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
-import CircularProgress from '@mui/material/CircularProgress'
-import Divider from '@mui/material/Divider'
+import { Divider } from '@/components/ui/Divider'
 import { useProjectStore } from '@/stores/projectStore'
 import { useFilterState, type FilterState } from '@/hooks/useFilterState'
 import ViewSwitcher, { type ViewType } from '@/components/views/ViewSwitcher'
@@ -30,9 +26,9 @@ function isValidView(v: string | null): v is ViewType {
 
 function ViewFallback() {
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-      <CircularProgress />
-    </Box>
+    <div className="flex justify-center py-16">
+      <div className="skeleton-shimmer h-8 w-8 rounded-full" />
+    </div>
   )
 }
 
@@ -72,45 +68,25 @@ export default function ProjectIssuesPage() {
   )
 
   // ---- Active view panel ----
-  // TimelineView accepts filter props; BoardView and TableView manage their
-  // own internal state so we render them without extra props.
   const viewPanel = useMemo(() => {
     switch (currentView) {
       case 'timeline':
-        return (
-          <TimelineView
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            onClearFilters={clearFilters}
-          />
-        )
+        return <TimelineView />
       case 'table':
         return <TableView />
       case 'board':
       default:
         return <BoardView />
     }
-  }, [currentView, filters, handleFilterChange, clearFilters])
+  }, [currentView])
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        p: { xs: 2, md: 3 },
-      }}
-    >
+    <div className="flex h-full flex-col p-4 md:p-6">
       {/* ---- Toolbar row ---- */}
-      <Stack
-        direction="row"
-        alignItems="center"
-        spacing={2}
-        sx={{ mb: 1, flexWrap: 'wrap' }}
-      >
-        <Typography variant="h5" sx={{ mr: 'auto' }}>
+      <div className="mb-2 flex flex-wrap items-center gap-4">
+        <h2 className="mr-auto text-xl font-semibold text-text-primary">
           {currentProject?.name ?? 'Issues'}
-        </Typography>
+        </h2>
 
         <ViewSwitcher
           currentView={currentView}
@@ -124,7 +100,7 @@ export default function ProjectIssuesPage() {
             currentView={currentView}
           />
         )}
-      </Stack>
+      </div>
 
       {/* ---- Filter bar ---- */}
       <FilterBar
@@ -135,12 +111,12 @@ export default function ProjectIssuesPage() {
         onClearAll={clearFilters}
       />
 
-      <Divider sx={{ my: 1 }} />
+      <Divider className="my-2" />
 
       {/* ---- Active view ---- */}
-      <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
+      <div className="min-h-0 flex-1 overflow-auto">
         <Suspense fallback={<ViewFallback />}>{viewPanel}</Suspense>
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }

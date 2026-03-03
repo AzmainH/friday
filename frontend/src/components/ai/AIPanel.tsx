@@ -1,22 +1,6 @@
 import { useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Chip from '@mui/material/Chip'
-import CircularProgress from '@mui/material/CircularProgress'
-import Divider from '@mui/material/Divider'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import Typography from '@mui/material/Typography'
-import Alert from '@mui/material/Alert'
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
-import WarningAmberIcon from '@mui/icons-material/WarningAmber'
-import SummarizeIcon from '@mui/icons-material/Summarize'
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
+import { Sparkles, Calendar, AlertTriangle, FileBarChart, Circle } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 import { useTriggerAI, useAITaskStatus, type AITaskType } from '@/hooks/useAI'
 
 // ---------------------------------------------------------------------------
@@ -32,7 +16,7 @@ interface AIAction {
   label: string
   description: string
   icon: React.ReactNode
-  color: 'primary' | 'warning' | 'info'
+  colorClass: string
 }
 
 // ---------------------------------------------------------------------------
@@ -44,22 +28,22 @@ const AI_ACTIONS: AIAction[] = [
     type: 'smart_schedule',
     label: 'Smart Schedule',
     description: 'Optimize task scheduling based on priorities, dependencies, and team capacity.',
-    icon: <CalendarMonthIcon />,
-    color: 'primary',
+    icon: <Calendar size={20} />,
+    colorClass: 'bg-[#f59e0b]',
   },
   {
     type: 'risk_prediction',
     label: 'Risk Prediction',
     description: 'Identify potential risks and bottlenecks in your current sprint or project.',
-    icon: <WarningAmberIcon />,
-    color: 'warning',
+    icon: <AlertTriangle size={20} />,
+    colorClass: 'bg-[#f59e0b]',
   },
   {
     type: 'project_summary',
     label: 'Project Summary',
     description: 'Generate a comprehensive summary of project status, progress, and key metrics.',
-    icon: <SummarizeIcon />,
-    color: 'info',
+    icon: <FileBarChart size={20} />,
+    colorClass: 'bg-[#3b82f6]',
   },
 ]
 
@@ -70,82 +54,79 @@ const AI_ACTIONS: AIAction[] = [
 function ScheduleResult({ data }: { data: Record<string, unknown> }) {
   const suggestions = (data.suggestions as Array<Record<string, unknown>>) ?? []
   return (
-    <Box>
-      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+    <div>
+      <p className="text-sm font-semibold mb-1">
         Scheduling Suggestions
-      </Typography>
+      </p>
       {suggestions.length > 0 ? (
-        <List dense disablePadding>
+        <div className="flex flex-col">
           {suggestions.map((s, i) => (
-            <ListItem key={i} disableGutters>
-              <ListItemIcon sx={{ minWidth: 28 }}>
-                <FiberManualRecordIcon sx={{ fontSize: 8, color: 'primary.main' }} />
-              </ListItemIcon>
-              <ListItemText
-                primary={s.issue_key as string}
-                secondary={s.recommendation as string}
-              />
-            </ListItem>
+            <div key={i} className="flex items-start gap-2 py-1">
+              <div className="mt-1.5 shrink-0">
+                <Circle size={8} className="text-[#f59e0b] fill-[#f59e0b]" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-sm font-medium block">{s.issue_key as string}</span>
+                <span className="text-xs text-[#78716c] block">{s.recommendation as string}</span>
+              </div>
+            </div>
           ))}
-        </List>
+        </div>
       ) : (
-        <Typography variant="body2" color="text.secondary">
+        <p className="text-sm text-[#78716c]">
           {(data.summary as string) ?? 'Schedule looks optimal.'}
-        </Typography>
+        </p>
       )}
-    </Box>
+    </div>
   )
 }
 
 function RiskResult({ data }: { data: Record<string, unknown> }) {
   const risks = (data.risks as Array<Record<string, unknown>>) ?? []
   return (
-    <Box>
-      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+    <div>
+      <p className="text-sm font-semibold mb-1">
         Identified Risks
-      </Typography>
+      </p>
       {risks.length > 0 ? (
-        <List dense disablePadding>
-          {risks.map((r, i) => (
-            <ListItem key={i} disableGutters>
-              <ListItemIcon sx={{ minWidth: 28 }}>
-                <WarningAmberIcon
-                  sx={{
-                    fontSize: 16,
-                    color:
-                      (r.severity as string) === 'high'
-                        ? 'error.main'
-                        : (r.severity as string) === 'medium'
-                          ? 'warning.main'
-                          : 'text.secondary',
-                  }}
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary={r.title as string}
-                secondary={r.description as string}
-              />
-              <Chip
-                label={r.severity as string}
-                size="small"
-                color={
-                  (r.severity as string) === 'high'
-                    ? 'error'
-                    : (r.severity as string) === 'medium'
-                      ? 'warning'
-                      : 'default'
-                }
-                variant="outlined"
-              />
-            </ListItem>
-          ))}
-        </List>
+        <div className="flex flex-col">
+          {risks.map((r, i) => {
+            const severityColor =
+              (r.severity as string) === 'high'
+                ? 'text-red-500'
+                : (r.severity as string) === 'medium'
+                  ? 'text-amber-500'
+                  : 'text-[#78716c]'
+
+            const badgeStyle =
+              (r.severity as string) === 'high'
+                ? 'border-red-300 text-red-600'
+                : (r.severity as string) === 'medium'
+                  ? 'border-amber-300 text-amber-600'
+                  : 'border-surface-300 text-[#78716c]'
+
+            return (
+              <div key={i} className="flex items-start gap-2 py-1">
+                <div className="mt-1 shrink-0">
+                  <AlertTriangle size={16} className={severityColor} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm font-medium block">{r.title as string}</span>
+                  <span className="text-xs text-[#78716c] block">{r.description as string}</span>
+                </div>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${badgeStyle}`}>
+                  {r.severity as string}
+                </span>
+              </div>
+            )
+          })}
+        </div>
       ) : (
-        <Typography variant="body2" color="text.secondary">
+        <p className="text-sm text-[#78716c]">
           {(data.summary as string) ?? 'No significant risks detected.'}
-        </Typography>
+        </p>
       )}
-    </Box>
+    </div>
   )
 }
 
@@ -157,28 +138,28 @@ function SummaryResult({ data }: { data: Record<string, unknown> }) {
       : null
 
   return (
-    <Box>
-      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+    <div>
+      <p className="text-sm font-semibold mb-1">
         Project Summary
-      </Typography>
+      </p>
       {summary && (
-        <Typography variant="body2" sx={{ mb: 2, whiteSpace: 'pre-wrap' }}>
+        <p className="text-sm mb-2 whitespace-pre-wrap">
           {summary}
-        </Typography>
+        </p>
       )}
       {metrics && (
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        <div className="flex gap-2 flex-wrap">
           {Object.entries(metrics).map(([key, val]) => (
-            <Chip
+            <span
               key={key}
-              label={`${key.replace(/_/g, ' ')}: ${String(val)}`}
-              size="small"
-              variant="outlined"
-            />
+              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-surface-200 text-[#78716c]"
+            >
+              {key.replace(/_/g, ' ')}: {String(val)}
+            </span>
           ))}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 
@@ -198,9 +179,9 @@ function AIResultDisplay({
       return <SummaryResult data={data} />
     default:
       return (
-        <Typography variant="body2" color="text.secondary">
+        <p className="text-sm text-[#78716c]">
           {JSON.stringify(data, null, 2)}
-        </Typography>
+        </p>
       )
   }
 }
@@ -236,97 +217,80 @@ export default function AIPanel({ projectId }: AIPanelProps) {
   }, [])
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-        <AutoAwesomeIcon color="primary" />
-        <Typography variant="h6" fontWeight={600}>
+    <div>
+      <div className="flex items-center gap-1.5 mb-3">
+        <Sparkles size={24} className="text-[#f59e0b]" />
+        <h2 className="text-lg font-semibold">
           AI Assistant
-        </Typography>
-      </Box>
+        </h2>
+      </div>
 
       {/* Action cards */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
+      <div className="flex flex-col gap-2 mb-3">
         {AI_ACTIONS.map((action) => (
-          <Card
+          <div
             key={action.type}
-            variant="outlined"
-            sx={{
-              borderRadius: 2,
-              cursor: 'pointer',
-              transition: 'border-color 0.2s',
-              '&:hover': { borderColor: `${action.color}.main` },
-            }}
+            className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface cursor-pointer transition-colors hover:border-[#f59e0b]"
             onClick={() => handleTrigger(action.type)}
           >
-            <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 40,
-                  height: 40,
-                  borderRadius: 1.5,
-                  bgcolor: `${action.color}.main`,
-                  color: 'white',
-                }}
+            <div className="flex items-center gap-2 p-4">
+              <div
+                className={`flex items-center justify-center w-10 h-10 rounded-md text-white ${action.colorClass}`}
               >
                 {action.icon}
-              </Box>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="subtitle2" fontWeight={600}>
+              </div>
+              <div className="flex-1">
+                <span className="text-sm font-semibold block">
                   {action.label}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
+                </span>
+                <span className="text-xs text-[#78716c]">
                   {action.description}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
+                </span>
+              </div>
+            </div>
+          </div>
         ))}
-      </Box>
+      </div>
 
       {/* Loading / results area */}
       {(isPolling || result) && (
         <>
-          <Divider sx={{ mb: 2 }} />
+          <hr className="border-surface-200 mb-2" />
 
           {isPolling && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 3, justifyContent: 'center' }}>
-              <CircularProgress size={28} />
-              <Typography variant="body2" color="text.secondary">
+            <div className="flex items-center gap-2 py-3 justify-center">
+              <div className="h-7 w-7 animate-spin rounded-full border-2 border-surface-300 border-t-primary-500" />
+              <p className="text-sm text-[#78716c]">
                 {status === 'pending'
                   ? 'Queued, waiting to start...'
                   : 'Analyzing your project...'}
-              </Typography>
-            </Box>
+              </p>
+            </div>
           )}
 
           {!isPolling && result && (
-            <Box>
+            <div>
               {result.status === 'failed' && (
-                <Alert severity="error" sx={{ mb: 2 }}>
+                <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm mb-2">
                   {result.error ?? 'AI task failed. Please try again.'}
-                </Alert>
+                </div>
               )}
 
               {result.status === 'completed' && result.result && activeTaskType && (
-                <Card variant="outlined" sx={{ borderRadius: 2 }}>
-                  <CardContent>
-                    <AIResultDisplay taskType={activeTaskType} data={result.result} />
-                  </CardContent>
-                </Card>
+                <div className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface p-4">
+                  <AIResultDisplay taskType={activeTaskType} data={result.result} />
+                </div>
               )}
 
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                <Button size="small" onClick={handleReset}>
+              <div className="flex justify-center mt-2">
+                <Button size="sm" variant="ghost" onClick={handleReset}>
                   Clear Results
                 </Button>
-              </Box>
-            </Box>
+              </div>
+            </div>
           )}
         </>
       )}
-    </Box>
+    </div>
   )
 }

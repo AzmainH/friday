@@ -1,20 +1,8 @@
 import { useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Chip from '@mui/material/Chip'
-import Container from '@mui/material/Container'
-import Divider from '@mui/material/Divider'
-import Skeleton from '@mui/material/Skeleton'
-import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import CancelIcon from '@mui/icons-material/Cancel'
-import GavelIcon from '@mui/icons-material/Gavel'
-import HistoryIcon from '@mui/icons-material/History'
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
+import { CheckCircle, XCircle, Gavel, History } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { Button } from '@/components/ui/Button'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import client from '@/api/client'
 import { formatDateTime } from '@/utils/formatters'
@@ -88,7 +76,6 @@ export default function ApprovalsPage() {
   const { data: history, isLoading: loadingHistory } = useApprovalHistory()
   const decideMutation = useDecideApproval()
 
-  const [activeTab, setActiveTab] = useState(0)
   const [notes, setNotes] = useState<Record<string, string>>({})
 
   const handleDecide = useCallback(
@@ -106,187 +93,175 @@ export default function ApprovalsPage() {
   }, [])
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div className="max-w-5xl mx-auto px-6 py-8">
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-        <GavelIcon color="primary" />
-        <Typography variant="h5" fontWeight={600}>
+      <div className="flex items-center gap-3 mb-6">
+        <Gavel className="h-6 w-6 text-primary-500" />
+        <h1 className="text-xl font-semibold text-text-primary">
           Approvals
-        </Typography>
+        </h1>
         {pending && pending.length > 0 && (
-          <Chip
-            label={`${pending.length} pending`}
-            size="small"
-            color="warning"
-          />
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 border border-amber-200 text-amber-700">
+            {pending.length} pending
+          </span>
         )}
-      </Box>
+      </div>
 
       {/* Tabs */}
-      <Tabs
-        value={activeTab}
-        onChange={(_, v) => setActiveTab(v)}
-        sx={{ mb: 3 }}
-      >
-        <Tab
-          label="Pending"
-          icon={<GavelIcon />}
-          iconPosition="start"
-        />
-        <Tab
-          label="History"
-          icon={<HistoryIcon />}
-          iconPosition="start"
-        />
-      </Tabs>
+      <TabGroup>
+        <TabList className="flex gap-1 border-b border-surface-200 mb-6">
+          <Tab className={({ selected }) => cn(
+            'flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors focus:outline-none',
+            selected
+              ? 'border-primary-500 text-primary-600'
+              : 'border-transparent text-text-secondary hover:text-text-primary hover:border-surface-300',
+          )}>
+            <Gavel className="h-4 w-4" />
+            Pending
+          </Tab>
+          <Tab className={({ selected }) => cn(
+            'flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors focus:outline-none',
+            selected
+              ? 'border-primary-500 text-primary-600'
+              : 'border-transparent text-text-secondary hover:text-text-primary hover:border-surface-300',
+          )}>
+            <History className="h-4 w-4" />
+            History
+          </Tab>
+        </TabList>
 
-      {/* Pending tab */}
-      {activeTab === 0 && (
-        <>
-          {loadingPending && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {Array.from({ length: 3 }, (_, i) => (
-                <Skeleton key={i} variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
-              ))}
-            </Box>
-          )}
+        <TabPanels>
+          {/* Pending tab */}
+          <TabPanel>
+            {loadingPending && (
+              <div className="flex flex-col gap-4">
+                {Array.from({ length: 3 }, (_, i) => (
+                  <div key={i} className="skeleton-shimmer h-[120px] rounded-lg" />
+                ))}
+              </div>
+            )}
 
-          {!loadingPending && (!pending || pending.length === 0) && (
-            <Box
-              sx={{
-                p: 6,
-                borderRadius: 3,
-                bgcolor: 'background.paper',
-                border: '1px solid',
-                borderColor: 'divider',
-                textAlign: 'center',
-              }}
-            >
-              <CheckCircleIcon sx={{ fontSize: 48, color: 'success.main', mb: 1 }} />
-              <Typography variant="h6" color="text.secondary" gutterBottom>
-                All caught up!
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                No pending approvals at this time.
-              </Typography>
-            </Box>
-          )}
+            {!loadingPending && (!pending || pending.length === 0) && (
+              <div className="p-12 rounded-xl bg-white border border-surface-200 text-center dark:bg-dark-surface dark:border-dark-border">
+                <CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-2" />
+                <h3 className="text-lg font-medium text-text-secondary mb-1">
+                  All caught up!
+                </h3>
+                <p className="text-sm text-text-secondary">
+                  No pending approvals at this time.
+                </p>
+              </div>
+            )}
 
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {pending?.map((approval) => (
-              <Card key={approval.id} variant="outlined" sx={{ borderRadius: 2 }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight={600}>
-                        {approval.entity_summary}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Requested by {approval.requested_by_name} on{' '}
-                        {formatDateTime(approval.created_at)}
-                      </Typography>
-                    </Box>
-                    <Chip
-                      label={approval.step_name}
-                      size="small"
-                      color="info"
-                      variant="outlined"
-                    />
-                  </Box>
+            <div className="flex flex-col gap-4">
+              {pending?.map((approval) => (
+                <div key={approval.id} className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface">
+                  <div className="p-4">
+                    <div className="flex justify-between mb-2">
+                      <div>
+                        <h4 className="text-base font-semibold text-text-primary">
+                          {approval.entity_summary}
+                        </h4>
+                        <p className="text-sm text-text-secondary">
+                          Requested by {approval.requested_by_name} on{' '}
+                          {formatDateTime(approval.created_at)}
+                        </p>
+                      </div>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-blue-200 bg-blue-50 text-blue-700 h-fit">
+                        {approval.step_name}
+                      </span>
+                    </div>
 
-                  <Divider sx={{ my: 1.5 }} />
+                    <hr className="border-surface-200 my-3" />
 
-                  <TextField
-                    size="small"
-                    label="Notes (optional)"
-                    placeholder="Add review notes..."
-                    value={notes[approval.id] ?? ''}
-                    onChange={(e) => updateNotes(approval.id, e.target.value)}
-                    fullWidth
-                    multiline
-                    rows={2}
-                    sx={{ mb: 2 }}
-                  />
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-text-secondary mb-1">Notes (optional)</label>
+                      <textarea
+                        placeholder="Add review notes..."
+                        value={notes[approval.id] ?? ''}
+                        onChange={(e) => updateNotes(approval.id, e.target.value)}
+                        rows={2}
+                        className="w-full rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
+                      />
+                    </div>
 
-                  <Box sx={{ display: 'flex', gap: 1.5 }}>
-                    <Button
-                      variant="contained"
-                      color="success"
-                      startIcon={<CheckCircleIcon />}
-                      onClick={() => handleDecide(approval.id, 'approved')}
-                      disabled={decideMutation.isPending}
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      startIcon={<CancelIcon />}
-                      onClick={() => handleDecide(approval.id, 'rejected')}
-                      disabled={decideMutation.isPending}
-                    >
-                      Reject
-                    </Button>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        </>
-      )}
-
-      {/* History tab */}
-      {activeTab === 1 && (
-        <>
-          {loadingHistory && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {Array.from({ length: 3 }, (_, i) => (
-                <Skeleton key={i} variant="rectangular" height={60} sx={{ borderRadius: 2 }} />
-              ))}
-            </Box>
-          )}
-
-          {!loadingHistory && (!history || history.length === 0) && (
-            <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-              No approval history.
-            </Typography>
-          )}
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {history?.map((item) => (
-              <Card key={item.id} variant="outlined" sx={{ borderRadius: 2 }}>
-                <CardContent sx={{ py: 1.5 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Chip
-                      label={item.status}
-                      size="small"
-                      color={item.status === 'approved' ? 'success' : 'error'}
-                      variant="outlined"
-                    />
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="body2" fontWeight={500} noWrap>
-                        {item.entity_summary}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {item.step_name} — {formatDateTime(item.decided_at)}
-                      </Typography>
-                    </Box>
-                    {item.notes && (
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                    <div className="flex gap-3">
+                      <Button
+                        variant="primary"
+                        leftIcon={<CheckCircle className="h-4 w-4" />}
+                        onClick={() => handleDecide(approval.id, 'approved')}
+                        disabled={decideMutation.isPending}
+                        className="bg-green-500 hover:bg-green-600 active:bg-green-700 focus-visible:ring-green-500/30"
                       >
-                        {item.notes}
-                      </Typography>
-                    )}
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        </>
-      )}
-    </Container>
+                        Approve
+                      </Button>
+                      <Button
+                        variant="danger"
+                        leftIcon={<XCircle className="h-4 w-4" />}
+                        onClick={() => handleDecide(approval.id, 'rejected')}
+                        disabled={decideMutation.isPending}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabPanel>
+
+          {/* History tab */}
+          <TabPanel>
+            {loadingHistory && (
+              <div className="flex flex-col gap-4">
+                {Array.from({ length: 3 }, (_, i) => (
+                  <div key={i} className="skeleton-shimmer h-[60px] rounded-lg" />
+                ))}
+              </div>
+            )}
+
+            {!loadingHistory && (!history || history.length === 0) && (
+              <p className="py-8 text-center text-sm text-text-secondary">
+                No approval history.
+              </p>
+            )}
+
+            <div className="flex flex-col gap-3">
+              {history?.map((item) => (
+                <div key={item.id} className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface">
+                  <div className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={cn(
+                          'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border',
+                          item.status === 'approved'
+                            ? 'bg-green-50 border-green-200 text-green-700'
+                            : 'bg-red-50 border-red-200 text-red-700',
+                        )}
+                      >
+                        {item.status}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-text-primary truncate">
+                          {item.entity_summary}
+                        </p>
+                        <p className="text-xs text-text-secondary">
+                          {item.step_name} — {formatDateTime(item.decided_at)}
+                        </p>
+                      </div>
+                      {item.notes && (
+                        <p className="text-xs text-text-secondary max-w-[200px] truncate">
+                          {item.notes}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabPanel>
+        </TabPanels>
+      </TabGroup>
+    </div>
   )
 }

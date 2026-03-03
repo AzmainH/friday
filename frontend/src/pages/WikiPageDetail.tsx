@@ -1,16 +1,8 @@
 import { useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
-import Chip from '@mui/material/Chip'
-import Divider from '@mui/material/Divider'
-import Skeleton from '@mui/material/Skeleton'
-import Paper from '@mui/material/Paper'
-import EditIcon from '@mui/icons-material/Edit'
-import HistoryIcon from '@mui/icons-material/History'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import PersonIcon from '@mui/icons-material/Person'
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
+import { Pencil, History, ArrowLeft, User, Calendar } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { Skeleton } from '@/components/ui/Skeleton'
+import { Divider } from '@/components/ui/Divider'
 import WikiEditor from '@/components/wiki/WikiEditor'
 import WikiVersionHistory from '@/components/wiki/WikiVersionHistory'
 import WikiComments from '@/components/wiki/WikiComments'
@@ -33,77 +25,8 @@ interface WikiPageDetailProps {
 
 function PageContent({ page }: { page: WikiPage }) {
   return (
-    <Box
-      sx={{
-        '& p': { my: 0.5 },
-        '& h1': { fontSize: '1.75rem', fontWeight: 700, mt: 3, mb: 1 },
-        '& h2': { fontSize: '1.4rem', fontWeight: 600, mt: 2, mb: 0.75 },
-        '& h3': { fontSize: '1.15rem', fontWeight: 600, mt: 1.5, mb: 0.5 },
-        '& ul, & ol': { pl: 3 },
-        '& ul[data-type="taskList"]': {
-          listStyle: 'none',
-          pl: 0,
-          '& li': {
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: 1,
-            '& label': { mt: 0.25 },
-          },
-        },
-        '& pre': {
-          bgcolor: 'action.hover',
-          borderRadius: 1,
-          p: 1.5,
-          fontFamily: 'monospace',
-          fontSize: '0.875rem',
-          overflow: 'auto',
-        },
-        '& code': {
-          bgcolor: 'action.hover',
-          borderRadius: 0.5,
-          px: 0.5,
-          py: 0.25,
-          fontFamily: 'monospace',
-          fontSize: '0.875rem',
-        },
-        '& img': {
-          maxWidth: '100%',
-          height: 'auto',
-          borderRadius: 1,
-        },
-        '& mark': {
-          bgcolor: 'warning.light',
-          borderRadius: 0.25,
-          px: 0.25,
-        },
-        '& blockquote': {
-          borderLeft: '3px solid',
-          borderColor: 'divider',
-          pl: 2,
-          ml: 0,
-          color: 'text.secondary',
-        },
-        '& table': {
-          borderCollapse: 'collapse',
-          width: '100%',
-          '& th, & td': {
-            border: '1px solid',
-            borderColor: 'divider',
-            px: 1.5,
-            py: 1,
-          },
-          '& th': {
-            bgcolor: 'action.hover',
-            fontWeight: 600,
-          },
-        },
-        '& hr': {
-          border: 'none',
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          my: 2,
-        },
-      }}
+    <div
+      className="prose prose-sm max-w-none"
       dangerouslySetInnerHTML={{ __html: page.content ?? '' }}
     />
   )
@@ -129,156 +52,143 @@ export default function WikiPageDetail({ pageId, onBack }: WikiPageDetailProps) 
   // Loading state
   if (isLoading) {
     return (
-      <Box sx={{ maxWidth: 900, mx: 'auto', p: 4 }}>
-        <Skeleton variant="text" width="60%" height={48} />
-        <Box sx={{ display: 'flex', gap: 1, mt: 1, mb: 3 }}>
-          <Skeleton variant="rounded" width={80} height={24} />
-          <Skeleton variant="rounded" width={120} height={24} />
-          <Skeleton variant="rounded" width={100} height={24} />
-        </Box>
-        <Skeleton variant="rectangular" width="100%" height={400} sx={{ borderRadius: 1 }} />
-      </Box>
+      <div className="max-w-[900px] mx-auto p-8">
+        <Skeleton width="60%" height={40} rounded="sm" />
+        <div className="flex gap-2 mt-3 mb-6">
+          <Skeleton width={80} height={24} rounded="full" />
+          <Skeleton width={120} height={24} rounded="full" />
+          <Skeleton width={100} height={24} rounded="full" />
+        </div>
+        <Skeleton width="100%" height={400} rounded="sm" />
+      </div>
     )
   }
 
   // Page not found
   if (!page) {
     return (
-      <Box sx={{ maxWidth: 900, mx: 'auto', p: 4, textAlign: 'center' }}>
-        <Typography variant="h5" gutterBottom>
+      <div className="max-w-[900px] mx-auto p-8 text-center">
+        <h2 className="text-xl font-semibold text-text-primary mb-2">
           Page not found
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+        </h2>
+        <p className="text-sm text-text-secondary mb-4">
           The wiki page you are looking for does not exist or has been deleted.
-        </Typography>
+        </p>
         {onBack && (
-          <Button startIcon={<ArrowBackIcon />} onClick={onBack}>
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
             Go back
-          </Button>
+          </button>
         )}
-      </Box>
+      </div>
     )
   }
 
   // Editing mode
   if (isEditing) {
     return (
-      <Box sx={{ maxWidth: 900, mx: 'auto', p: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Button
-            startIcon={<ArrowBackIcon />}
+      <div className="max-w-[900px] mx-auto p-8">
+        <div className="flex items-center mb-4">
+          <button
+            type="button"
             onClick={() => setIsEditing(false)}
-            sx={{ mr: 'auto' }}
+            className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors mr-auto"
           >
+            <ArrowLeft className="h-4 w-4" />
             Back to view
-          </Button>
-        </Box>
+          </button>
+        </div>
         <WikiEditor page={page} onSave={handleSave} />
-      </Box>
+      </div>
     )
   }
 
   // Read-only view
   return (
-    <Box sx={{ maxWidth: 900, mx: 'auto', p: 4 }}>
+    <div className="max-w-[900px] mx-auto p-8">
       {/* Back button */}
       {onBack && (
-        <Button
-          startIcon={<ArrowBackIcon />}
+        <button
+          type="button"
           onClick={onBack}
-          sx={{ mb: 2 }}
-          color="inherit"
-          size="small"
+          className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors mb-4"
         >
+          <ArrowLeft className="h-4 w-4" />
           Back
-        </Button>
+        </button>
       )}
 
       {/* Title */}
-      <Typography variant="h3" fontWeight={700} sx={{ mb: 1.5 }}>
+      <h1 className="text-3xl font-bold text-text-primary mb-3">
         {page.title}
-      </Typography>
+      </h1>
 
       {/* Metadata bar */}
-      <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5, mb: 3 }}>
+      <div className="flex items-center flex-wrap gap-3 mb-6">
         {page.updated_by && (
-          <Chip
-            icon={<PersonIcon />}
-            label={`Edited by ${page.updated_by}`}
-            size="small"
-            variant="outlined"
-          />
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs border border-surface-200 rounded-full text-text-secondary">
+            <User className="h-3 w-3" />
+            Edited by {page.updated_by}
+          </span>
         )}
-        <Chip
-          icon={<CalendarTodayIcon />}
-          label={`Updated ${formatRelativeTime(page.updated_at)}`}
-          size="small"
-          variant="outlined"
-        />
-        <Chip
-          label={`v${page.version}`}
-          size="small"
-          variant="outlined"
-          color="default"
-        />
-        <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<HistoryIcon />}
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs border border-surface-200 rounded-full text-text-secondary">
+          <Calendar className="h-3 w-3" />
+          Updated {formatRelativeTime(page.updated_at)}
+        </span>
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs border border-surface-200 rounded-full text-text-secondary">
+          v{page.version}
+        </span>
+        <div className="ml-auto flex gap-2">
+          <button
+            type="button"
             onClick={() => setShowHistory(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-[--radius-sm] border border-surface-200 text-text-primary hover:bg-surface-50 transition-colors"
           >
+            <History className="h-4 w-4" />
             History
-          </Button>
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<EditIcon />}
+          </button>
+          <button
+            type="button"
             onClick={() => setIsEditing(true)}
+            className={cn(
+              'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-[--radius-sm] transition-colors',
+              'bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700',
+            )}
           >
+            <Pencil className="h-4 w-4" />
             Edit
-          </Button>
-        </Box>
-      </Box>
+          </button>
+        </div>
+      </div>
 
-      <Divider sx={{ mb: 3 }} />
+      <Divider className="mb-6" />
 
       {/* Content */}
-      <Paper
-        variant="outlined"
-        sx={{
-          p: 4,
-          minHeight: 200,
-          borderRadius: 2,
-        }}
-      >
+      <div className="p-8 min-h-[200px] border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface">
         {page.content ? (
           <PageContent page={page} />
         ) : (
-          <Typography variant="body1" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+          <p className="text-sm text-text-secondary italic">
             This page has no content yet. Click &quot;Edit&quot; to start writing.
-          </Typography>
+          </p>
         )}
-      </Paper>
+      </div>
 
       {/* Page metadata footer */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          mt: 2,
-          px: 1,
-        }}
-      >
-        <Typography variant="caption" color="text.disabled">
+      <div className="flex justify-between mt-4 px-2">
+        <span className="text-xs text-text-tertiary">
           Created {formatDateTime(page.created_at)}
-        </Typography>
-        <Typography variant="caption" color="text.disabled">
+        </span>
+        <span className="text-xs text-text-tertiary">
           Last updated {formatDateTime(page.updated_at)}
-        </Typography>
-      </Box>
+        </span>
+      </div>
 
-      <Divider sx={{ my: 4 }} />
+      <Divider className="my-8" />
 
       {/* Comments section */}
       <WikiComments pageId={pageId} />
@@ -290,6 +200,6 @@ export default function WikiPageDetail({ pageId, onBack }: WikiPageDetailProps) 
         onClose={() => setShowHistory(false)}
         mode="drawer"
       />
-    </Box>
+    </div>
   )
 }

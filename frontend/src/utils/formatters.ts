@@ -50,13 +50,13 @@ export function formatHours(hours: number): string {
   return `${hours.toFixed(1)}h`
 }
 
-/** Priority helpers */
+/** Priority helpers — warm palette */
 export const PRIORITY_COLORS: Record<string, string> = {
-  critical: '#d32f2f',
-  high: '#f44336',
-  medium: '#ff9800',
-  low: '#4caf50',
-  none: '#9e9e9e',
+  critical: '#dc2626',
+  high: '#ef4444',
+  medium: '#f59e0b',
+  low: '#22c55e',
+  none: '#a8a29e',
 }
 
 export const PRIORITY_ORDER: Record<string, number> = {
@@ -67,19 +67,19 @@ export const PRIORITY_ORDER: Record<string, number> = {
   none: 4,
 }
 
-/** RAG status colors */
+/** RAG status colors — warm palette */
 export const RAG_COLORS: Record<string, string> = {
-  green: '#4caf50',
-  amber: '#ff9800',
-  red: '#f44336',
-  none: '#9e9e9e',
+  green: '#22c55e',
+  amber: '#f59e0b',
+  red: '#ef4444',
+  none: '#a8a29e',
 }
 
-/** Status category colors */
+/** Status category colors — warm palette */
 export const STATUS_CATEGORY_COLORS: Record<string, string> = {
-  todo: '#9e9e9e',
-  in_progress: '#2196f3',
-  done: '#4caf50',
+  todo: '#a8a29e',
+  in_progress: '#3b82f6',
+  done: '#22c55e',
 }
 
 /** File size formatter */

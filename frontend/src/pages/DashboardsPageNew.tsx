@@ -1,16 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Skeleton from '@mui/material/Skeleton'
-import Alert from '@mui/material/Alert'
-import Paper from '@mui/material/Paper'
-import EditIcon from '@mui/icons-material/Edit'
-import CheckIcon from '@mui/icons-material/Check'
-import AddIcon from '@mui/icons-material/Add'
-import AssignmentIcon from '@mui/icons-material/Assignment'
-import WarningAmberIcon from '@mui/icons-material/WarningAmber'
+import { Pencil, Check, Plus, ClipboardList, AlertTriangle } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 import DashboardGrid from '@/components/dashboard/DashboardGrid'
 import WidgetPicker from '@/components/dashboard/WidgetPicker'
 import type { WidgetTypeDefinition } from '@/components/dashboard/WidgetPicker'
@@ -79,27 +69,13 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, color }: StatCardProps) {
   return (
-    <Paper
-      variant="outlined"
-      sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 1,
-        p: 2,
-        borderRadius: 2,
-      }}
-    >
-      <Box sx={{ color, display: 'flex', alignItems: 'center' }}>{icon}</Box>
-      <Typography variant="h3" sx={{ fontWeight: 700 }}>
-        {value}
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        {title}
-      </Typography>
-    </Paper>
+    <div className="h-full flex flex-col items-center justify-center gap-2 p-4 border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface">
+      <div className="flex items-center" style={{ color }}>
+        {icon}
+      </div>
+      <span className="text-3xl font-bold text-text-primary">{value}</span>
+      <span className="text-sm text-text-secondary">{title}</span>
+    </div>
   )
 }
 
@@ -226,15 +202,15 @@ export default function DashboardsPageNew() {
 
   if (isLoading) {
     return (
-      <Container maxWidth={false} sx={{ py: 4, px: 3 }}>
-        <Skeleton variant="text" width={200} height={40} />
-        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-          <Skeleton variant="rounded" width={200} height={160} />
-          <Skeleton variant="rounded" width={160} height={160} />
-          <Skeleton variant="rounded" width="40%" height={300} />
-          <Skeleton variant="rounded" width="25%" height={240} />
-        </Box>
-      </Container>
+      <div className="w-full py-8 px-6">
+        <div className="skeleton-shimmer h-10 w-48 rounded mb-4" />
+        <div className="flex gap-4 mt-4">
+          <div className="skeleton-shimmer w-[200px] h-[160px] rounded-[--radius-md]" />
+          <div className="skeleton-shimmer w-[160px] h-[160px] rounded-[--radius-md]" />
+          <div className="skeleton-shimmer w-[40%] h-[300px] rounded-[--radius-md]" />
+          <div className="skeleton-shimmer w-[25%] h-[240px] rounded-[--radius-md]" />
+        </div>
+      </div>
     )
   }
 
@@ -244,28 +220,17 @@ export default function DashboardsPageNew() {
   }
 
   return (
-    <Container maxWidth={false} sx={{ py: 4, px: 3 }} ref={containerRef}>
+    <div className="w-full py-8 px-6" ref={containerRef}>
       {/* Header */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          mb: 3,
-          flexWrap: 'wrap',
-          gap: 1,
-        }}
-      >
-        <Typography variant="h4" sx={{ fontWeight: 700 }}>
-          My Dashboard
-        </Typography>
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+        <h1 className="text-2xl font-bold text-text-primary">My Dashboard</h1>
 
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <div className="flex gap-2">
           {editable && (
             <Button
-              variant="outlined"
-              size="small"
-              startIcon={<AddIcon />}
+              variant="ghost"
+              size="sm"
+              leftIcon={<Plus className="h-4 w-4" />}
               onClick={() => setPickerOpen(true)}
             >
               Add Widget
@@ -273,9 +238,9 @@ export default function DashboardsPageNew() {
           )}
           {editable ? (
             <Button
-              variant="contained"
-              size="small"
-              startIcon={<CheckIcon />}
+              variant="primary"
+              size="sm"
+              leftIcon={<Check className="h-4 w-4" />}
               onClick={handleSave}
               disabled={saveDashboard.isPending}
             >
@@ -283,45 +248,45 @@ export default function DashboardsPageNew() {
             </Button>
           ) : (
             <Button
-              variant="outlined"
-              size="small"
-              startIcon={<EditIcon />}
+              variant="ghost"
+              size="sm"
+              leftIcon={<Pencil className="h-4 w-4" />}
               onClick={() => setEditable(true)}
             >
               Edit Dashboard
             </Button>
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {error && (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          Using default dashboard layout. Customize it by clicking "Edit Dashboard".
-        </Alert>
+        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-[--radius-sm] text-sm mb-2">
+          Using default dashboard layout. Customize it by clicking &quot;Edit Dashboard&quot;.
+        </div>
       )}
 
       {/* Quick stat cards for personal widgets that are not chart-based */}
       {!editable && (
-        <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+        <div className="flex gap-4 mb-6 flex-wrap">
           {enrichedWidgets
             .filter((w) => w.config._statCard)
             .map((w) => (
-              <Box key={w.id} sx={{ width: 180 }}>
+              <div key={w.id} className="w-[180px]">
                 <StatCard
                   title={w.title}
                   value={String(w.config._value ?? '--')}
                   icon={
                     w.config._icon === 'assignment' ? (
-                      <AssignmentIcon sx={{ fontSize: 32 }} />
+                      <ClipboardList className="h-8 w-8" />
                     ) : (
-                      <WarningAmberIcon sx={{ fontSize: 32 }} />
+                      <AlertTriangle className="h-8 w-8" />
                     )
                   }
                   color={String(w.config._color ?? '#2196f3')}
                 />
-              </Box>
+              </div>
             ))}
-        </Box>
+        </div>
       )}
 
       {/* Dashboard grid */}
@@ -340,6 +305,6 @@ export default function DashboardsPageNew() {
         onClose={() => setPickerOpen(false)}
         onAddWidget={handleAddWidget}
       />
-    </Container>
+    </div>
   )
 }

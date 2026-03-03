@@ -1,9 +1,5 @@
 import { useState, useRef, useEffect, useCallback, type KeyboardEvent } from 'react'
-import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import Typography from '@mui/material/Typography'
+import { cn } from '@/lib/cn'
 
 export interface SelectOption {
   value: string
@@ -26,7 +22,7 @@ export interface TableCellProps {
 export default function TableCell({ value, onChange, type, options = [], disabled = false }: TableCellProps) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<string>(value != null ? String(value) : '')
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement | HTMLSelectElement>(null)
 
   // Sync draft whenever the external value changes while not editing
   useEffect(() => {
@@ -39,7 +35,7 @@ export default function TableCell({ value, onChange, type, options = [], disable
   useEffect(() => {
     if (editing && inputRef.current) {
       inputRef.current.focus()
-      if (type === 'text') {
+      if (type === 'text' && inputRef.current instanceof HTMLInputElement) {
         inputRef.current.select()
       }
     }
@@ -84,32 +80,24 @@ export default function TableCell({ value, onChange, type, options = [], disable
 
   if (!editing) {
     return (
-      <Box
+      <div
         onClick={startEditing}
-        sx={{
-          cursor: disabled ? 'default' : 'pointer',
-          px: 1,
-          py: 0.5,
-          minHeight: 32,
-          display: 'flex',
-          alignItems: 'center',
-          borderRadius: 0.5,
-          '&:hover': disabled
-            ? {}
-            : { bgcolor: 'action.hover' },
-        }}
+        className={cn(
+          'px-2 py-1 min-h-[32px] flex items-center rounded',
+          disabled ? 'cursor-default' : 'cursor-pointer hover:bg-surface-100 transition-colors',
+        )}
       >
-        <Typography variant="body2" noWrap>
+        <span className="text-sm text-text-primary truncate">
           {value != null ? String(value) : '\u2014'}
-        </Typography>
-      </Box>
+        </span>
+      </div>
     )
   }
 
   if (type === 'select') {
     return (
-      <Select
-        size="small"
+      <select
+        ref={inputRef as React.RefObject<HTMLSelectElement>}
         value={draft}
         onChange={(e) => {
           setDraft(e.target.value)
@@ -117,34 +105,26 @@ export default function TableCell({ value, onChange, type, options = [], disable
           onChange(e.target.value)
         }}
         onBlur={cancel}
-        inputRef={inputRef}
-        open
-        fullWidth
-        sx={{ minWidth: 100 }}
+        className="w-full min-w-[100px] px-2 py-1 text-sm border border-primary-500 rounded-[--radius-sm] outline-none bg-white dark:bg-surface-100 text-text-primary"
       >
         {options.map((opt) => (
-          <MenuItem key={opt.value} value={opt.value}>
+          <option key={opt.value} value={opt.value}>
             {opt.label}
-          </MenuItem>
+          </option>
         ))}
-      </Select>
+      </select>
     )
   }
 
   return (
-    <TextField
-      inputRef={inputRef}
-      size="small"
+    <input
+      ref={inputRef as React.RefObject<HTMLInputElement>}
       type={type === 'number' ? 'number' : type === 'date' ? 'date' : 'text'}
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
       onBlur={commit}
       onKeyDown={handleKeyDown}
-      fullWidth
-      variant="outlined"
-      sx={{
-        '& .MuiOutlinedInput-root': { py: 0, fontSize: '0.875rem' },
-      }}
+      className="w-full px-2 py-1 text-sm border border-primary-500 rounded-[--radius-sm] outline-none bg-white dark:bg-surface-100 text-text-primary"
     />
   )
 }

@@ -13,7 +13,7 @@ export const useUiStore = create<UiState>()(
   persist(
     (set) => ({
       sidebarCollapsed: false,
-      themeMode: 'dark',
+      themeMode: 'light',
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       setThemeMode: (mode) => set({ themeMode: mode }),
       toggleTheme: () =>

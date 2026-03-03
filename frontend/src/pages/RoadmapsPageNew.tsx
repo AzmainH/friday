@@ -1,23 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
-import Grid from '@mui/material/Grid2'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import CardActionArea from '@mui/material/CardActionArea'
-import Button from '@mui/material/Button'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import TextField from '@mui/material/TextField'
-import Chip from '@mui/material/Chip'
-import Skeleton from '@mui/material/Skeleton'
-import Alert from '@mui/material/Alert'
-import AddIcon from '@mui/icons-material/Add'
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
+import { Plus, Calendar } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import { useRoadmapPlans, useCreateRoadmap } from '@/hooks/useRoadmap'
 import { formatDate } from '@/utils/formatters'
 
@@ -65,164 +50,177 @@ export default function RoadmapsPageNew() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div>
       {/* Page header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h4" fontWeight={700}>
-          Roadmaps
-        </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDialogOpen(true)}>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-text-primary">Roadmaps</h2>
+        <button
+          onClick={() => setDialogOpen(true)}
+          className="inline-flex items-center gap-2 rounded-[--radius-sm] bg-primary-500 px-4 py-2 text-sm font-medium text-white shadow-[--shadow-sm] hover:bg-primary-600 transition-colors"
+        >
+          <Plus className="h-4 w-4" />
           New Roadmap
-        </Button>
-      </Box>
+        </button>
+      </div>
 
       {/* Error state */}
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-[--radius-sm] mb-4">
           Failed to load roadmaps: {error.message}
-        </Alert>
+        </div>
       )}
 
       {/* Loading skeleton */}
       {isLoading && (
-        <Grid container spacing={2}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {Array.from({ length: 4 }, (_, i) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
-              <Card>
-                <CardContent>
-                  <Skeleton variant="text" width="70%" height={28} />
-                  <Skeleton variant="text" width="50%" height={20} sx={{ mb: 1 }} />
-                  <Skeleton variant="rectangular" height={40} sx={{ borderRadius: 1 }} />
-                </CardContent>
-              </Card>
-            </Grid>
+            <div
+              key={i}
+              className="rounded-[--radius-md] border border-surface-200 bg-white dark:bg-dark-surface p-4"
+            >
+              <div className="skeleton-shimmer h-6 w-[70%] rounded mb-2" />
+              <div className="skeleton-shimmer h-4 w-[50%] rounded mb-3" />
+              <div className="skeleton-shimmer h-10 w-full rounded" />
+            </div>
           ))}
-        </Grid>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && plans && plans.length === 0 && (
+        <div className="p-12 text-center rounded-[--radius-lg] bg-white dark:bg-dark-surface border border-surface-200">
+          <p className="text-text-secondary mb-4">
+            No roadmaps yet. Create one to start planning across projects.
+          </p>
+          <button
+            onClick={() => setDialogOpen(true)}
+            className="inline-flex items-center gap-2 rounded-[--radius-sm] border border-primary-500 text-primary-600 px-4 py-2 text-sm font-medium hover:bg-primary-50 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Create Your First Roadmap
+          </button>
+        </div>
       )}
 
       {/* Roadmap cards */}
-      {!isLoading && plans && plans.length === 0 && (
-        <Box
-          sx={{
-            p: 6,
-            textAlign: 'center',
-            borderRadius: 3,
-            bgcolor: 'background.paper',
-            border: '1px solid',
-            borderColor: 'divider',
-          }}
-        >
-          <Typography variant="body1" color="text.secondary" gutterBottom>
-            No roadmaps yet. Create one to start planning across projects.
-          </Typography>
-          <Button variant="outlined" startIcon={<AddIcon />} onClick={() => setDialogOpen(true)}>
-            Create Your First Roadmap
-          </Button>
-        </Box>
-      )}
-
       {!isLoading && plans && plans.length > 0 && (
-        <Grid container spacing={2}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {plans.map((plan) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={plan.id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  transition: 'box-shadow 0.2s',
-                  '&:hover': { boxShadow: 4 },
-                }}
-              >
-                <CardActionArea onClick={() => navigate(`/roadmaps/${plan.id}`)}>
-                  <CardContent>
-                    <Typography variant="h6" fontWeight={600} gutterBottom noWrap>
-                      {plan.name}
-                    </Typography>
+            <div
+              key={plan.id}
+              onClick={() => navigate(`/roadmaps/${plan.id}`)}
+              className="rounded-[--radius-md] border border-surface-200 bg-white dark:bg-dark-surface shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full"
+            >
+              <div className="p-4">
+                <h3 className="text-base font-semibold text-text-primary truncate mb-1">
+                  {plan.name}
+                </h3>
 
-                    {plan.description && (
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                          mb: 1.5,
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                        }}
-                      >
-                        {plan.description}
-                      </Typography>
-                    )}
+                {plan.description && (
+                  <p className="text-sm text-text-secondary mb-3 line-clamp-2">
+                    {plan.description}
+                  </p>
+                )}
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                      <CalendarTodayIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                      <Typography variant="caption" color="text.secondary">
-                        {formatDate(plan.start_date)} &mdash; {formatDate(plan.end_date)}
-                      </Typography>
-                    </Box>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <Calendar className="h-4 w-4 text-text-secondary" />
+                  <span className="text-xs text-text-secondary">
+                    {formatDate(plan.start_date)} &mdash; {formatDate(plan.end_date)}
+                  </span>
+                </div>
 
-                    <Box sx={{ mt: 1.5 }}>
-                      <Chip label="Roadmap" size="small" variant="outlined" color="primary" />
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
+                <div className="mt-3">
+                  <span className="inline-flex items-center rounded-full border border-primary-300 bg-primary-50 text-primary-700 px-2.5 py-0.5 text-xs font-medium">
+                    Roadmap
+                  </span>
+                </div>
+              </div>
+            </div>
           ))}
-        </Grid>
+        </div>
       )}
 
       {/* ---- Create Roadmap Dialog ---- */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Create Roadmap</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-            <TextField
-              autoFocus
-              fullWidth
-              label="Name"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            />
-            <TextField
-              fullWidth
-              multiline
-              minRows={2}
-              label="Description"
-              value={form.description}
-              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            />
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField
-                fullWidth
-                type="date"
-                label="Start Date"
-                value={form.start_date}
-                onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))}
-                slotProps={{ inputLabel: { shrink: true } }}
-              />
-              <TextField
-                fullWidth
-                type="date"
-                label="End Date"
-                value={form.end_date}
-                onChange={(e) => setForm((f) => ({ ...f, end_date: e.target.value }))}
-                slotProps={{ inputLabel: { shrink: true } }}
-              />
-            </Box>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleCreate}
-            disabled={!form.name.trim() || createRoadmap.isPending}
-          >
-            {createRoadmap.isPending ? 'Creating...' : 'Create'}
-          </Button>
-        </DialogActions>
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} className="relative z-50">
+        {/* Backdrop */}
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+
+        {/* Dialog positioning */}
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="w-full max-w-md rounded-[--radius-md] bg-white dark:bg-dark-surface shadow-[--shadow-lg] border border-surface-200">
+            <DialogTitle className="text-lg font-semibold text-text-primary px-6 pt-6 pb-2">
+              Create Roadmap
+            </DialogTitle>
+
+            <div className="px-6 py-4 flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Name</label>
+                <input
+                  autoFocus
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  className="w-full rounded-[--radius-sm] border border-surface-300 bg-white dark:bg-dark-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                  placeholder="Roadmap name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Description</label>
+                <textarea
+                  rows={2}
+                  value={form.description}
+                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                  className="w-full rounded-[--radius-sm] border border-surface-300 bg-white dark:bg-dark-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors resize-none"
+                  placeholder="Optional description"
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">Start Date</label>
+                  <input
+                    type="date"
+                    value={form.start_date}
+                    onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))}
+                    className="w-full rounded-[--radius-sm] border border-surface-300 bg-white dark:bg-dark-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">End Date</label>
+                  <input
+                    type="date"
+                    value={form.end_date}
+                    onChange={(e) => setForm((f) => ({ ...f, end_date: e.target.value }))}
+                    className="w-full rounded-[--radius-sm] border border-surface-300 bg-white dark:bg-dark-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 px-6 pb-6">
+              <button
+                onClick={() => setDialogOpen(false)}
+                className="rounded-[--radius-sm] px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-surface-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={!form.name.trim() || createRoadmap.isPending}
+                className={cn(
+                  'rounded-[--radius-sm] px-4 py-2 text-sm font-medium text-white shadow-[--shadow-sm] transition-colors',
+                  !form.name.trim() || createRoadmap.isPending
+                    ? 'bg-primary-300 cursor-not-allowed'
+                    : 'bg-primary-500 hover:bg-primary-600'
+                )}
+              >
+                {createRoadmap.isPending ? 'Creating...' : 'Create'}
+              </button>
+            </div>
+          </DialogPanel>
+        </div>
       </Dialog>
-    </Container>
+    </div>
   )
 }

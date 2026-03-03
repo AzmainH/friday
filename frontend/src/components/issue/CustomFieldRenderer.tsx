@@ -1,12 +1,4 @@
-import TextField from '@mui/material/TextField'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import Checkbox from '@mui/material/Checkbox'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Chip from '@mui/material/Chip'
-import Box from '@mui/material/Box'
-import OutlinedInput from '@mui/material/OutlinedInput'
-import type { SelectChangeEvent } from '@mui/material/Select'
+import { cn } from '@/lib/cn'
 
 interface CustomField {
   name: string
@@ -20,148 +12,172 @@ interface CustomFieldRendererProps {
   onChange: (value: unknown) => void
 }
 
+const inputBase =
+  'w-full px-3 py-1.5 text-sm border border-surface-200 rounded-[--radius-sm] bg-white dark:bg-dark-surface focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-colors'
+
 export default function CustomFieldRenderer({ field, onChange }: CustomFieldRendererProps) {
   const { name, field_type, options = [], value } = field
 
   switch (field_type) {
     case 'text':
       return (
-        <TextField
-          label={name}
-          value={(value as string) ?? ''}
-          onChange={(e) => onChange(e.target.value)}
-          size="small"
-          fullWidth
-          variant="outlined"
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">{name}</label>
+          <input
+            type="text"
+            value={(value as string) ?? ''}
+            onChange={(e) => onChange(e.target.value)}
+            className={inputBase}
+          />
+        </div>
       )
 
     case 'number':
       return (
-        <TextField
-          label={name}
-          type="number"
-          value={(value as number) ?? ''}
-          onChange={(e) => {
-            const num = e.target.value === '' ? null : Number(e.target.value)
-            onChange(num)
-          }}
-          size="small"
-          fullWidth
-          variant="outlined"
-          slotProps={{
-            htmlInput: { step: 'any' },
-          }}
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">{name}</label>
+          <input
+            type="number"
+            value={(value as number) ?? ''}
+            onChange={(e) => {
+              const num = e.target.value === '' ? null : Number(e.target.value)
+              onChange(num)
+            }}
+            step="any"
+            className={inputBase}
+          />
+        </div>
       )
 
     case 'date':
       return (
-        <TextField
-          label={name}
-          type="date"
-          value={(value as string) ?? ''}
-          onChange={(e) => onChange(e.target.value || null)}
-          size="small"
-          fullWidth
-          variant="outlined"
-          slotProps={{
-            inputLabel: { shrink: true },
-          }}
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">{name}</label>
+          <input
+            type="date"
+            value={(value as string) ?? ''}
+            onChange={(e) => onChange(e.target.value || null)}
+            className={inputBase}
+          />
+        </div>
       )
 
     case 'select':
       return (
-        <TextField
-          label={name}
-          select
-          value={(value as string) ?? ''}
-          onChange={(e) => onChange(e.target.value || null)}
-          size="small"
-          fullWidth
-          variant="outlined"
-        >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          {options.map((opt) => (
-            <MenuItem key={opt} value={opt}>
-              {opt}
-            </MenuItem>
-          ))}
-        </TextField>
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">{name}</label>
+          <select
+            value={(value as string) ?? ''}
+            onChange={(e) => onChange(e.target.value || null)}
+            className={inputBase}
+          >
+            <option value="">None</option>
+            {options.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        </div>
       )
 
     case 'multi_select': {
       const selected = (value as string[]) ?? []
+
+      const toggleOption = (opt: string) => {
+        if (selected.includes(opt)) {
+          onChange(selected.filter((v) => v !== opt))
+        } else {
+          onChange([...selected, opt])
+        }
+      }
+
       return (
-        <Select
-          label={name}
-          multiple
-          value={selected}
-          onChange={(e: SelectChangeEvent<string[]>) => {
-            const val = e.target.value
-            onChange(typeof val === 'string' ? val.split(',') : val)
-          }}
-          size="small"
-          fullWidth
-          input={<OutlinedInput label={name} />}
-          renderValue={(sel) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {(sel as string[]).map((v) => (
-                <Chip key={v} label={v} size="small" />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">{name}</label>
+          {selected.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {selected.map((v) => (
+                <span
+                  key={v}
+                  className="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-surface-100 text-text-primary"
+                >
+                  {v}
+                  <button
+                    type="button"
+                    onClick={() => toggleOption(v)}
+                    className="ml-1 text-text-tertiary hover:text-text-primary"
+                  >
+                    &times;
+                  </button>
+                </span>
               ))}
-            </Box>
+            </div>
           )}
-        >
-          {options.map((opt) => (
-            <MenuItem key={opt} value={opt}>
-              {opt}
-            </MenuItem>
-          ))}
-        </Select>
+          <div className="border border-surface-200 rounded-[--radius-sm] max-h-40 overflow-y-auto">
+            {options.map((opt) => {
+              const isSelected = selected.includes(opt)
+              return (
+                <label
+                  key={opt}
+                  className={cn(
+                    'flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer hover:bg-surface-50 transition-colors',
+                    isSelected && 'bg-primary-50',
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => toggleOption(opt)}
+                    className="rounded accent-primary-500"
+                  />
+                  <span className="text-text-primary">{opt}</span>
+                </label>
+              )
+            })}
+          </div>
+        </div>
       )
     }
 
     case 'checkbox':
       return (
-        <FormControlLabel
-          label={name}
-          control={
-            <Checkbox
-              checked={Boolean(value)}
-              onChange={(e) => onChange(e.target.checked)}
-              size="small"
-            />
-          }
-        />
+        <label className="inline-flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={Boolean(value)}
+            onChange={(e) => onChange(e.target.checked)}
+            className="rounded accent-primary-500"
+          />
+          <span className="text-sm text-text-primary">{name}</span>
+        </label>
       )
 
     case 'url':
       return (
-        <TextField
-          label={name}
-          type="url"
-          value={(value as string) ?? ''}
-          onChange={(e) => onChange(e.target.value)}
-          size="small"
-          fullWidth
-          variant="outlined"
-          placeholder="https://..."
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">{name}</label>
+          <input
+            type="url"
+            value={(value as string) ?? ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="https://..."
+            className={inputBase}
+          />
+        </div>
       )
 
     default:
       return (
-        <TextField
-          label={name}
-          value={String(value ?? '')}
-          onChange={(e) => onChange(e.target.value)}
-          size="small"
-          fullWidth
-          variant="outlined"
-        />
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1">{name}</label>
+          <input
+            type="text"
+            value={String(value ?? '')}
+            onChange={(e) => onChange(e.target.value)}
+            className={inputBase}
+          />
+        </div>
       )
   }
 }

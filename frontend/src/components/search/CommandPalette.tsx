@@ -1,23 +1,8 @@
-import { useEffect, useCallback, useRef, useMemo } from 'react'
+import { useEffect, useCallback, useRef, useMemo, Fragment } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Dialog from '@mui/material/Dialog'
-import DialogContent from '@mui/material/DialogContent'
-import InputBase from '@mui/material/InputBase'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import List from '@mui/material/List'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import Divider from '@mui/material/Divider'
-import CircularProgress from '@mui/material/CircularProgress'
-import Chip from '@mui/material/Chip'
-import SearchIcon from '@mui/icons-material/Search'
-import BugReportIcon from '@mui/icons-material/BugReport'
-import FolderIcon from '@mui/icons-material/Folder'
-import CommentIcon from '@mui/icons-material/Comment'
-import ArticleIcon from '@mui/icons-material/Article'
-import HistoryIcon from '@mui/icons-material/History'
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react'
+import { Search, Bug, Folder, MessageSquare, FileText, History } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import { useSearchStore } from '@/stores/searchStore'
 import { useGlobalSearch, type SearchResult } from '@/hooks/useGlobalSearch'
 
@@ -29,10 +14,10 @@ const ENTITY_TYPE_LABELS: Record<string, string> = {
 }
 
 const ENTITY_TYPE_ICONS: Record<string, React.ReactNode> = {
-  issue: <BugReportIcon fontSize="small" />,
-  project: <FolderIcon fontSize="small" />,
-  comment: <CommentIcon fontSize="small" />,
-  wiki_page: <ArticleIcon fontSize="small" />,
+  issue: <Bug className="h-4 w-4" />,
+  project: <Folder className="h-4 w-4" />,
+  comment: <MessageSquare className="h-4 w-4" />,
+  wiki_page: <FileText className="h-4 w-4" />,
 }
 
 const SECTION_ORDER = ['issue', 'project', 'comment', 'wiki_page']
@@ -171,167 +156,154 @@ export default function CommandPalette() {
   let runningIndex = 0
 
   return (
-    <Dialog
-      open={isOpen}
-      onClose={reset}
-      fullWidth
-      maxWidth="sm"
-      PaperProps={{
-        sx: {
-          position: 'fixed',
-          top: '15%',
-          m: 0,
-          borderRadius: 2,
-          maxHeight: '60vh',
-        },
-      }}
-      slotProps={{
-        backdrop: {
-          sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
-        },
-      }}
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          px: 2,
-          py: 1,
-          gap: 1,
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        {isSearching ? (
-          <CircularProgress size={20} />
-        ) : (
-          <SearchIcon sx={{ color: 'text.secondary' }} />
-        )}
-        <InputBase
-          inputRef={inputRef}
-          autoFocus
-          fullWidth
-          placeholder="Search issues, projects, wiki..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
-          sx={{ fontSize: '1rem' }}
-        />
-        <Chip
-          label="ESC"
-          size="small"
-          variant="outlined"
-          sx={{ fontSize: '0.7rem', height: 22 }}
-        />
-      </Box>
+    <Transition show={isOpen} as={Fragment}>
+      <Dialog onClose={reset} className="relative z-50">
+        <TransitionChild
+          as={Fragment}
+          enter="ease-out duration-200"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-150"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+        </TransitionChild>
 
-      <DialogContent sx={{ p: 0, overflow: 'auto' }}>
-        {showRecents && (
-          <Box sx={{ p: 2 }}>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ px: 1, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}
-            >
-              Recent searches
-            </Typography>
-            <List dense sx={{ mt: 0.5 }}>
-              {recentSearches.map((search) => (
-                <ListItemButton
-                  key={search}
-                  onClick={() => handleRecentClick(search)}
-                  sx={{ borderRadius: 1 }}
-                >
-                  <ListItemIcon sx={{ minWidth: 36 }}>
-                    <HistoryIcon fontSize="small" color="action" />
-                  </ListItemIcon>
-                  <ListItemText primary={search} />
-                </ListItemButton>
-              ))}
-            </List>
-          </Box>
-        )}
+        <div className="fixed inset-0 flex justify-center" style={{ paddingTop: '15%' }}>
+          <TransitionChild
+            as={Fragment}
+            enter="ease-out duration-200"
+            enterFrom="opacity-0 scale-95"
+            enterTo="opacity-100 scale-100"
+            leave="ease-in duration-150"
+            leaveFrom="opacity-100 scale-100"
+            leaveTo="opacity-0 scale-95"
+          >
+            <DialogPanel className="w-full max-w-lg rounded-xl border border-surface-200 bg-white shadow-2xl dark:bg-dark-surface dark:border-dark-border overflow-hidden" style={{ maxHeight: '60vh', alignSelf: 'flex-start' }}>
+              {/* Search input bar */}
+              <div className="flex items-center gap-2 px-4 py-2 border-b border-surface-200 dark:border-dark-border">
+                {isSearching ? (
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-surface-300 border-t-primary-500" />
+                ) : (
+                  <Search className="h-5 w-5 text-text-secondary" />
+                )}
+                <input
+                  ref={inputRef}
+                  autoFocus
+                  className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-secondary focus:outline-none"
+                  placeholder="Search issues, projects, wiki..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+                <span className="inline-flex items-center rounded border border-surface-300 px-1.5 py-0.5 text-[0.7rem] text-text-secondary dark:border-dark-border">
+                  ESC
+                </span>
+              </div>
 
-        {showResults && total === 0 && !isSearching && (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              No results found for &quot;{query}&quot;
-            </Typography>
-          </Box>
-        )}
+              {/* Content area */}
+              <div className="overflow-auto" style={{ maxHeight: 'calc(60vh - 48px)' }}>
+                {showRecents && (
+                  <div className="p-4">
+                    <span className="px-1 text-xs font-semibold uppercase tracking-wide text-text-secondary">
+                      Recent searches
+                    </span>
+                    <div className="mt-1 space-y-0.5">
+                      {recentSearches.map((search) => (
+                        <button
+                          key={search}
+                          onClick={() => handleRecentClick(search)}
+                          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-text-primary hover:bg-surface-100 dark:hover:bg-dark-border transition-colors"
+                        >
+                          <History className="h-4 w-4 text-text-secondary" />
+                          <span>{search}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-        {showResults && total > 0 && (
-          <List dense sx={{ py: 1 }}>
-            {SECTION_ORDER.map((type) => {
-              const results = grouped[type]
-              if (!results || results.length === 0) return null
+                {showResults && total === 0 && !isSearching && (
+                  <div className="p-8 text-center">
+                    <p className="text-sm text-text-secondary">
+                      No results found for &quot;{query}&quot;
+                    </p>
+                  </div>
+                )}
 
-              const sectionStartIndex = runningIndex
-              const section = (
-                <Box key={type}>
-                  {sectionStartIndex > 0 && <Divider />}
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{
-                      px: 2,
-                      pt: 1.5,
-                      pb: 0.5,
-                      display: 'block',
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      letterSpacing: 0.5,
-                    }}
-                  >
-                    {ENTITY_TYPE_LABELS[type] ?? type}
-                  </Typography>
-                  {results.map((result) => {
-                    const itemIndex = runningIndex
-                    runningIndex++
-                    return (
-                      <ListItemButton
-                        key={`${result.entity_type}-${result.entity_id}`}
-                        selected={selectedIndex === itemIndex}
-                        onClick={() => handleSelect(result)}
-                        sx={{ mx: 1, borderRadius: 1 }}
-                      >
-                        <ListItemIcon sx={{ minWidth: 36 }}>
-                          {ENTITY_TYPE_ICONS[result.entity_type] ?? (
-                            <SearchIcon fontSize="small" />
+                {showResults && total > 0 && (
+                  <div className="py-1">
+                    {SECTION_ORDER.map((type) => {
+                      const results = grouped[type]
+                      if (!results || results.length === 0) return null
+
+                      const sectionStartIndex = runningIndex
+                      const section = (
+                        <div key={type}>
+                          {sectionStartIndex > 0 && (
+                            <hr className="border-surface-200 dark:border-dark-border" />
                           )}
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={result.title}
-                          secondary={result.subtitle}
-                          primaryTypographyProps={{ noWrap: true }}
-                          secondaryTypographyProps={{ noWrap: true }}
-                        />
-                        {selectedIndex === itemIndex && (
-                          <Chip
-                            label="ENTER"
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontSize: '0.65rem', height: 20, ml: 1 }}
-                          />
-                        )}
-                      </ListItemButton>
-                    )
-                  })}
-                </Box>
-              )
-              return section
-            })}
-          </List>
-        )}
+                          <span className="block px-3 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide text-text-secondary">
+                            {ENTITY_TYPE_LABELS[type] ?? type}
+                          </span>
+                          {results.map((result) => {
+                            const itemIndex = runningIndex
+                            runningIndex++
+                            return (
+                              <button
+                                key={`${result.entity_type}-${result.entity_id}`}
+                                onClick={() => handleSelect(result)}
+                                className={cn(
+                                  'flex w-full items-center gap-2 mx-1 rounded-md px-2 py-1.5 text-left transition-colors',
+                                  selectedIndex === itemIndex
+                                    ? 'bg-primary-50 dark:bg-primary-900/20'
+                                    : 'hover:bg-surface-100 dark:hover:bg-dark-border',
+                                )}
+                                style={{ width: 'calc(100% - 8px)' }}
+                              >
+                                <span className="flex-shrink-0 text-text-secondary">
+                                  {ENTITY_TYPE_ICONS[result.entity_type] ?? (
+                                    <Search className="h-4 w-4" />
+                                  )}
+                                </span>
+                                <span className="flex-1 min-w-0">
+                                  <span className="block truncate text-sm text-text-primary">
+                                    {result.title}
+                                  </span>
+                                  {result.subtitle && (
+                                    <span className="block truncate text-xs text-text-secondary">
+                                      {result.subtitle}
+                                    </span>
+                                  )}
+                                </span>
+                                {selectedIndex === itemIndex && (
+                                  <span className="inline-flex items-center rounded border border-surface-300 px-1 py-0.5 text-[0.65rem] text-text-secondary dark:border-dark-border ml-1 flex-shrink-0">
+                                    ENTER
+                                  </span>
+                                )}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )
+                      return section
+                    })}
+                  </div>
+                )}
 
-        {!showRecents && !showResults && (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              Start typing to search...
-            </Typography>
-          </Box>
-        )}
-      </DialogContent>
-    </Dialog>
+                {!showRecents && !showResults && (
+                  <div className="p-8 text-center">
+                    <p className="text-sm text-text-secondary">
+                      Start typing to search...
+                    </p>
+                  </div>
+                )}
+              </div>
+            </DialogPanel>
+          </TransitionChild>
+        </div>
+      </Dialog>
+    </Transition>
   )
 }

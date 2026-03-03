@@ -1,10 +1,9 @@
 import { useEffect, useRef, type FC } from 'react'
-import Box from '@mui/material/Box'
-import { useTheme } from '@mui/material/styles'
 import { gantt } from 'dhtmlx-gantt'
 import 'dhtmlx-gantt/codebase/dhtmlxgantt.css'
 import type { Issue } from '@/types/api'
 import { configureGantt } from '@/components/gantt/GanttTheme'
+import { useUiStore } from '@/stores/uiStore'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -58,8 +57,7 @@ function formatGanttDate(d: Date): string {
 
 const IssueTimeline: FC<IssueTimelineProps> = ({ issues, onTaskUpdate }) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const theme = useTheme()
-  const isDark = theme.palette.mode === 'dark'
+  const isDark = useUiStore((s) => s.themeMode === 'dark')
   const initializedRef = useRef(false)
 
   // Initialize gantt once
@@ -102,8 +100,8 @@ const IssueTimeline: FC<IssueTimelineProps> = ({ issues, onTaskUpdate }) => {
       'onAfterTaskDrag',
       (id: string | number, _mode: unknown, _e: unknown) => {
         const task = gantt.getTask(id)
-        const startStr = formatGanttDate(task.start_date)
-        const endStr = formatGanttDate(task.end_date)
+        const startStr = formatGanttDate(task.start_date as Date)
+        const endStr = formatGanttDate(task.end_date as Date)
         onTaskUpdate(String(id), startStr, endStr)
       },
     )
@@ -114,18 +112,9 @@ const IssueTimeline: FC<IssueTimelineProps> = ({ issues, onTaskUpdate }) => {
   }, [onTaskUpdate])
 
   return (
-    <Box
+    <div
       ref={containerRef}
-      sx={{
-        width: '100%',
-        height: '100%',
-        minHeight: 500,
-        '& .gantt_container': {
-          borderRadius: 1,
-          border: '1px solid',
-          borderColor: 'divider',
-        },
-      }}
+      className="w-full h-full min-h-[500px] [&_.gantt_container]:rounded-[--radius-sm] [&_.gantt_container]:border [&_.gantt_container]:border-surface-200"
     />
   )
 }

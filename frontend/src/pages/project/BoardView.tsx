@@ -1,9 +1,5 @@
 import { useState, useCallback, useMemo } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Skeleton from '@mui/material/Skeleton'
-import Alert from '@mui/material/Alert'
-import ViewColumnIcon from '@mui/icons-material/ViewColumn'
+import { Columns3 } from 'lucide-react'
 import {
   DndContext,
   DragOverlay,
@@ -22,6 +18,7 @@ import { useIssuesByStatus } from '@/hooks/useIssuesByStatus'
 import { useMoveIssue } from '@/hooks/useIssueMutation'
 import BoardColumn from '@/components/board/BoardColumn'
 import DragOverlayCard from '@/components/board/DragOverlayCard'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 /**
  * Main Kanban board page.
@@ -162,92 +159,68 @@ export default function BoardView() {
   // --- Empty state: no project selected ---
   if (!currentProject) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '60vh',
-          gap: 2,
-        }}
-      >
-        <ViewColumnIcon sx={{ fontSize: 64, color: 'text.disabled' }} />
-        <Typography variant="h6" color="text.secondary">
-          Select a project to view the board
-        </Typography>
-        <Typography variant="body2" color="text.disabled">
-          Choose a project from the sidebar to see its Kanban board.
-        </Typography>
-      </Box>
+      <EmptyState
+        icon={Columns3}
+        title="Select a project to view the board"
+        description="Choose a project from the sidebar to see its Kanban board."
+        className="h-[60vh]"
+      />
     )
   }
 
   // --- Error state ---
   if (error) {
     return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="error">
+      <div className="p-3">
+        <div className="px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-[--radius-sm]">
           Failed to load board: {error.message}
-        </Alert>
-      </Box>
+        </div>
+      </div>
     )
   }
 
   // --- Loading skeleton ---
   if (isLoading) {
     return (
-      <Box sx={{ p: 2 }}>
+      <div className="p-2">
         {/* Board header skeleton */}
-        <Skeleton variant="text" width={200} height={36} sx={{ mb: 2 }} />
+        <div className="skeleton-shimmer h-9 w-[200px] rounded mb-2" />
 
         {/* Column skeletons */}
-        <Box sx={{ display: 'flex', gap: 1.5, overflowX: 'auto' }}>
+        <div className="flex gap-3 overflow-x-auto">
           {Array.from({ length: Math.max(statuses.length, 3) }, (_, i) => (
-            <Box
+            <div
               key={i}
-              sx={{
-                minWidth: 280,
-                width: 280,
-                flexShrink: 0,
-                borderRadius: 2,
-                border: '1px solid',
-                borderColor: 'divider',
-                overflow: 'hidden',
-              }}
+              className="min-w-[280px] w-[280px] shrink-0 rounded-[--radius-md] border border-surface-200 overflow-hidden"
             >
               {/* Column header skeleton */}
-              <Box sx={{ px: 1.5, py: 1.25, borderBottom: '1px solid', borderColor: 'divider' }}>
-                <Skeleton variant="text" width="60%" height={24} />
-              </Box>
+              <div className="px-3 py-2.5 border-b border-surface-200">
+                <div className="skeleton-shimmer h-6 w-[60%] rounded" />
+              </div>
 
               {/* Card skeletons */}
-              <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <div className="p-2 flex flex-col gap-2">
                 {Array.from({ length: 3 - i }, (_, j) => (
-                  <Skeleton
+                  <div
                     key={j}
-                    variant="rectangular"
-                    height={80}
-                    sx={{ borderRadius: 1.5 }}
+                    className="skeleton-shimmer h-20 rounded-[--radius-sm]"
                   />
                 ))}
-              </Box>
-            </Box>
+              </div>
+            </div>
           ))}
-        </Box>
-      </Box>
+        </div>
+      </div>
     )
   }
 
   // --- Main board ---
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div className="h-full flex flex-col">
       {/* Board header */}
-      <Box sx={{ px: 2, pt: 2, pb: 1 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          Board
-        </Typography>
-      </Box>
+      <div className="px-4 pt-4 pb-2">
+        <h2 className="text-lg font-semibold text-text-primary">Board</h2>
+      </div>
 
       {/* Board columns (horizontally scrollable) */}
       <DndContext
@@ -257,18 +230,7 @@ export default function BoardView() {
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <Box
-          sx={{
-            flex: 1,
-            display: 'flex',
-            gap: 1.5,
-            px: 2,
-            pb: 2,
-            overflowX: 'auto',
-            overflowY: 'hidden',
-            alignItems: 'flex-start',
-          }}
-        >
+        <div className="flex-1 flex gap-3 px-4 pb-4 overflow-x-auto overflow-y-hidden items-start">
           {sortedStatuses.map((status) => (
             <BoardColumn
               key={status.id}
@@ -279,27 +241,19 @@ export default function BoardView() {
           ))}
 
           {sortedStatuses.length === 0 && (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '100%',
-                py: 6,
-              }}
-            >
-              <Typography variant="body1" color="text.secondary">
+            <div className="flex items-center justify-center w-full py-6">
+              <p className="text-base text-text-secondary">
                 No workflow statuses configured for this project.
-              </Typography>
-            </Box>
+              </p>
+            </div>
           )}
-        </Box>
+        </div>
 
         {/* Drag overlay — rendered outside the normal flow */}
         <DragOverlay dropAnimation={null}>
           {activeIssue ? <DragOverlayCard issue={activeIssue} /> : null}
         </DragOverlay>
       </DndContext>
-    </Box>
+    </div>
   )
 }

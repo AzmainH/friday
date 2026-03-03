@@ -1,24 +1,7 @@
 import { useState, useCallback } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Checkbox from '@mui/material/Checkbox'
-import Chip from '@mui/material/Chip'
-import FormControl from '@mui/material/FormControl'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import IconButton from '@mui/material/IconButton'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import Select, { type SelectChangeEvent } from '@mui/material/Select'
-import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
-import AddIcon from '@mui/icons-material/Add'
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import { Plus, ArrowUp, ArrowDown, Trash2 } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { Button } from '@/components/ui/Button'
 import type { FormField, FormFieldOption } from '@/hooks/useIntakeForms'
 
 // ---------------------------------------------------------------------------
@@ -64,51 +47,60 @@ function createEmptyField(): FormField {
 // ---------------------------------------------------------------------------
 
 function FieldPreview({ field }: { field: FormField }) {
+  const labelText = field.label || 'Untitled'
+
   switch (field.type) {
     case 'textarea':
       return (
-        <TextField
-          label={field.label || 'Untitled'}
-          placeholder={field.placeholder}
-          required={field.required}
-          multiline
-          rows={3}
-          fullWidth
-          size="small"
-          disabled
-        />
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-1">
+            {labelText}{field.required && <span className="text-red-500 ml-0.5">*</span>}
+          </label>
+          <textarea
+            placeholder={field.placeholder}
+            rows={3}
+            disabled
+            className="w-full rounded-lg border border-surface-200 bg-surface-50 px-3 py-2 text-sm text-text-secondary cursor-not-allowed dark:bg-dark-surface dark:border-dark-border"
+          />
+        </div>
       )
     case 'select':
       return (
-        <FormControl fullWidth size="small" disabled>
-          <InputLabel>{field.label || 'Untitled'}</InputLabel>
-          <Select label={field.label || 'Untitled'} value="">
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-1">
+            {labelText}{field.required && <span className="text-red-500 ml-0.5">*</span>}
+          </label>
+          <select
+            disabled
+            className="w-full rounded-lg border border-surface-200 bg-surface-50 px-3 py-2 text-sm text-text-secondary cursor-not-allowed dark:bg-dark-surface dark:border-dark-border"
+          >
+            <option value="">Select...</option>
             {field.options?.map((opt) => (
-              <MenuItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </MenuItem>
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
-          </Select>
-        </FormControl>
+          </select>
+        </div>
       )
     case 'checkbox':
       return (
-        <FormControlLabel
-          control={<Checkbox disabled />}
-          label={field.label || 'Untitled'}
-        />
+        <label className="flex items-center gap-2">
+          <input type="checkbox" disabled className="h-4 w-4 rounded border-surface-300" />
+          <span className="text-sm text-text-primary">{labelText}</span>
+        </label>
       )
     default:
       return (
-        <TextField
-          label={field.label || 'Untitled'}
-          placeholder={field.placeholder}
-          required={field.required}
-          type={field.type}
-          fullWidth
-          size="small"
-          disabled
-        />
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-1">
+            {labelText}{field.required && <span className="text-red-500 ml-0.5">*</span>}
+          </label>
+          <input
+            type={field.type}
+            placeholder={field.placeholder}
+            disabled
+            className="w-full rounded-lg border border-surface-200 bg-surface-50 px-3 py-2 text-sm text-text-secondary cursor-not-allowed dark:bg-dark-surface dark:border-dark-border"
+          />
+        </div>
       )
   }
 }
@@ -118,7 +110,7 @@ function FieldPreview({ field }: { field: FormField }) {
 // ---------------------------------------------------------------------------
 
 export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
-  const [tab, setTab] = useState(0) // 0 = edit, 1 = preview
+  const [tab, setTab] = useState<0 | 1>(0) // 0 = edit, 1 = preview
 
   const addField = useCallback(() => {
     onChange([...fields, createEmptyField()])
@@ -163,161 +155,180 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
   )
 
   return (
-    <Box>
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
-        <Tab label="Edit Fields" />
-        <Tab label="Preview" />
-      </Tabs>
+    <div>
+      {/* Toggle buttons */}
+      <div className="flex gap-1 border-b border-surface-200 mb-4">
+        <button
+          type="button"
+          onClick={() => setTab(0)}
+          className={cn(
+            'px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors focus:outline-none',
+            tab === 0
+              ? 'border-primary-500 text-primary-600'
+              : 'border-transparent text-text-secondary hover:text-text-primary hover:border-surface-300',
+          )}
+        >
+          Edit Fields
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab(1)}
+          className={cn(
+            'px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors focus:outline-none',
+            tab === 1
+              ? 'border-primary-500 text-primary-600'
+              : 'border-transparent text-text-secondary hover:text-text-primary hover:border-surface-300',
+          )}
+        >
+          Preview
+        </button>
+      </div>
 
       {/* Edit tab */}
       {tab === 0 && (
-        <Box>
+        <div>
           {fields.length === 0 && (
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              No fields yet. Click "Add Field" to start building your form.
-            </Typography>
+            <p className="text-sm text-text-secondary mb-4">
+              No fields yet. Click &quot;Add Field&quot; to start building your form.
+            </p>
           )}
 
           {fields.map((field, index) => (
-            <Card
+            <div
               key={field.id}
-              variant="outlined"
-              sx={{ mb: 2, borderRadius: 2 }}
+              className="border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface mb-4"
             >
-              <CardContent>
-                <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+              <div className="p-4">
+                <div className="flex gap-3 mb-3">
                   {/* Field label */}
-                  <TextField
-                    size="small"
-                    label="Field Label"
-                    value={field.label}
-                    onChange={(e) => updateField(field.id, { label: e.target.value })}
-                    sx={{ flex: 1 }}
-                  />
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-text-secondary mb-1">Field Label</label>
+                    <input
+                      type="text"
+                      value={field.label}
+                      onChange={(e) => updateField(field.id, { label: e.target.value })}
+                      className="w-full rounded-lg border border-surface-200 bg-white px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
+                    />
+                  </div>
 
                   {/* Field type */}
-                  <FormControl size="small" sx={{ minWidth: 160 }}>
-                    <InputLabel>Type</InputLabel>
-                    <Select
+                  <div className="min-w-[160px]">
+                    <label className="block text-xs font-medium text-text-secondary mb-1">Type</label>
+                    <select
                       value={field.type}
-                      label="Type"
-                      onChange={(e: SelectChangeEvent) =>
+                      onChange={(e) =>
                         updateField(field.id, { type: e.target.value as FormField['type'] })
                       }
+                      className="w-full rounded-lg border border-surface-200 bg-white px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
                     >
                       {FIELD_TYPES.map((t) => (
-                        <MenuItem key={t.value} value={t.value}>
+                        <option key={t.value} value={t.value}>
                           {t.label}
-                        </MenuItem>
+                        </option>
                       ))}
-                    </Select>
-                  </FormControl>
+                    </select>
+                  </div>
 
                   {/* Required toggle */}
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={field.required ?? false}
-                        onChange={(e) => updateField(field.id, { required: e.target.checked })}
-                        size="small"
-                      />
-                    }
-                    label="Required"
-                  />
-                </Box>
+                  <label className="flex items-center gap-2 self-end pb-0.5">
+                    <input
+                      type="checkbox"
+                      checked={field.required ?? false}
+                      onChange={(e) => updateField(field.id, { required: e.target.checked })}
+                      className="h-4 w-4 rounded border-surface-300"
+                    />
+                    <span className="text-sm text-text-primary">Required</span>
+                  </label>
+                </div>
 
                 {/* Placeholder */}
-                <TextField
-                  size="small"
-                  label="Placeholder"
-                  value={field.placeholder ?? ''}
-                  onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
-                  fullWidth
-                  sx={{ mb: 2 }}
-                />
+                <div className="mb-3">
+                  <label className="block text-xs font-medium text-text-secondary mb-1">Placeholder</label>
+                  <input
+                    type="text"
+                    value={field.placeholder ?? ''}
+                    onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
+                    className="w-full rounded-lg border border-surface-200 bg-white px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
+                  />
+                </div>
 
                 {/* Options for select type */}
                 {field.type === 'select' && (
-                  <TextField
-                    size="small"
-                    label="Options (one per line)"
-                    multiline
-                    rows={3}
-                    value={field.options?.map((o) => o.label).join('\n') ?? ''}
-                    onChange={(e) => updateOptions(field.id, e.target.value)}
-                    fullWidth
-                    sx={{ mb: 1 }}
-                  />
+                  <div className="mb-3">
+                    <label className="block text-xs font-medium text-text-secondary mb-1">Options (one per line)</label>
+                    <textarea
+                      rows={3}
+                      value={field.options?.map((o) => o.label).join('\n') ?? ''}
+                      onChange={(e) => updateOptions(field.id, e.target.value)}
+                      className="w-full rounded-lg border border-surface-200 bg-white px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 dark:bg-dark-surface dark:border-dark-border"
+                    />
+                  </div>
                 )}
 
                 {/* Actions */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Chip
-                    label={`#${index + 1} ${FIELD_TYPES.find((t) => t.value === field.type)?.label ?? field.type}`}
-                    size="small"
-                    variant="outlined"
-                  />
-                  <Box>
-                    <IconButton
-                      size="small"
+                <div className="flex justify-between items-center">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-surface-200 text-text-secondary">
+                    #{index + 1} {FIELD_TYPES.find((t) => t.value === field.type)?.label ?? field.type}
+                  </span>
+                  <div className="flex gap-0.5">
+                    <button
+                      type="button"
+                      className="p-1 rounded text-text-secondary hover:bg-surface-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       onClick={() => moveField(index, -1)}
                       disabled={index === 0}
                     >
-                      <ArrowUpwardIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
+                      <ArrowUp className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      className="p-1 rounded text-text-secondary hover:bg-surface-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       onClick={() => moveField(index, 1)}
                       disabled={index === fields.length - 1}
                     >
-                      <ArrowDownwardIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      color="error"
+                      <ArrowDown className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      className="p-1 rounded text-red-500 hover:bg-red-50 transition-colors"
                       onClick={() => removeField(field.id)}
                     >
-                      <DeleteOutlineIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           ))}
 
-          <Button startIcon={<AddIcon />} onClick={addField}>
+          <Button
+            variant="ghost"
+            leftIcon={<Plus className="h-4 w-4" />}
+            onClick={addField}
+          >
             Add Field
           </Button>
-        </Box>
+        </div>
       )}
 
       {/* Preview tab */}
       {tab === 1 && (
-        <Box
-          sx={{
-            p: 3,
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 2,
-            bgcolor: 'background.paper',
-          }}
-        >
+        <div className="p-6 border border-surface-200 rounded-[--radius-md] bg-white dark:bg-dark-surface">
           {fields.length === 0 ? (
-            <Typography variant="body2" color="text.secondary" textAlign="center">
+            <p className="text-sm text-text-secondary text-center">
               No fields to preview.
-            </Typography>
+            </p>
           ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            <div className="flex flex-col gap-5">
               {fields.map((field) => (
                 <FieldPreview key={field.id} field={field} />
               ))}
-              <Button variant="contained" disabled sx={{ alignSelf: 'flex-start' }}>
+              <Button variant="primary" disabled className="self-start">
                 Submit
               </Button>
-            </Box>
+            </div>
           )}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }

@@ -1,15 +1,40 @@
-import { useState, useCallback } from 'react'
-import { Outlet } from 'react-router-dom'
-import Box from '@mui/material/Box'
-import useMediaQuery from '@mui/material/useMediaQuery'
-import { useTheme } from '@mui/material/styles'
-import Sidebar, { EXPANDED_WIDTH, COLLAPSED_WIDTH } from '@/layouts/Sidebar'
+import { useState, useCallback, useEffect } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
+import Sidebar from '@/layouts/Sidebar'
 import TopBar from '@/layouts/TopBar'
 import { useUiStore } from '@/stores/uiStore'
+import { cn } from '@/lib/cn'
+
+const EXPANDED_WIDTH = 240
+const COLLAPSED_WIDTH = 64
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    setIsMobile(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+  return isMobile
+}
+
+const pageVariants = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -4 },
+}
+
+const pageTransition = {
+  duration: 0.15,
+  ease: 'easeOut' as const,
+}
 
 export default function AppShell() {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const isMobile = useIsMobile()
+  const location = useLocation()
   const collapsed = useUiStore((s) => s.sidebarCollapsed)
   const toggleSidebar = useUiStore((s) => s.toggleSidebar)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -25,26 +50,35 @@ export default function AppShell() {
   const sidebarWidth = isMobile ? 0 : collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <div className="flex min-h-screen bg-surface-50">
       <Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
 
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          width: `calc(100% - ${sidebarWidth}px)`,
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-          transition: 'width 225ms cubic-bezier(0.4, 0, 0.6, 1)',
-        }}
+      <main
+        className={cn(
+          'flex-1 flex flex-col min-h-screen transition-[margin-left] duration-[225ms] ease-[cubic-bezier(0.4,0,0.6,1)]',
+        )}
+        style={{ marginLeft: isMobile ? 0 : sidebarWidth }}
       >
         <TopBar onMenuClick={handleMenuClick} />
 
-        <Box sx={{ flex: 1, overflow: 'auto' }}>
-          <Outlet />
-        </Box>
-      </Box>
-    </Box>
+        <div className="flex-1 overflow-auto">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname.split('/').slice(0, 3).join('/')}
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={pageTransition}
+              className="min-h-full"
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </main>
+    </div>
   )
 }
+
+export { EXPANDED_WIDTH, COLLAPSED_WIDTH, useIsMobile }
