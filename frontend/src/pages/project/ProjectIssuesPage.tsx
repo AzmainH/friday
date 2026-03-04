@@ -10,6 +10,7 @@ import ViewSwitcher, { type ViewType } from '@/components/views/ViewSwitcher'
 import SavedViewSelector from '@/components/views/SavedViewSelector'
 import FilterBar from '@/components/views/FilterBar'
 import IssueCreateModal from '@/components/issue/IssueCreateModal'
+import IssueDetailPanel from '@/components/issue/IssueDetailPanel'
 
 // ---------------------------------------------------------------------------
 // Lazy-loaded view panels
@@ -47,6 +48,7 @@ export default function ProjectIssuesPage() {
   const issueTypes = useProjectStore((s) => s.issueTypes)
 
   const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [detailIssueId, setDetailIssueId] = useState<string | null>(null)
 
   const projectId = currentProject?.id
   const { data: members = [] } = useProjectMembers(projectId)
@@ -83,19 +85,21 @@ export default function ProjectIssuesPage() {
   )
 
   const handleOpenCreate = useCallback(() => setCreateModalOpen(true), [])
+  const handleIssueClick = useCallback((id: string) => setDetailIssueId(id), [])
+  const handleDetailClose = useCallback(() => setDetailIssueId(null), [])
 
   // ---- Active view panel ----
   const viewPanel = useMemo(() => {
     switch (currentView) {
       case 'timeline':
-        return <TimelineView />
+        return <TimelineView onIssueClick={handleIssueClick} />
       case 'table':
-        return <TableView />
+        return <TableView onIssueClick={handleIssueClick} />
       case 'board':
       default:
-        return <BoardView onAddIssue={handleOpenCreate} />
+        return <BoardView onAddIssue={handleOpenCreate} onIssueClick={handleIssueClick} />
     }
-  }, [currentView, handleOpenCreate])
+  }, [currentView, handleOpenCreate, handleIssueClick])
 
   return (
     <div className="flex h-full flex-col p-4 md:p-6">
@@ -150,6 +154,13 @@ export default function ProjectIssuesPage() {
           labels={labels}
         />
       )}
+
+      {/* ---- Issue detail slide-over ---- */}
+      <IssueDetailPanel
+        issueId={detailIssueId}
+        open={detailIssueId !== null}
+        onClose={handleDetailClose}
+      />
     </div>
   )
 }

@@ -12,6 +12,7 @@ import { useUiStore } from '@/stores/uiStore'
 export interface IssueTimelineProps {
   issues: Issue[]
   onTaskUpdate?: (id: string, startDate: string, endDate: string) => void
+  onTaskClick?: (id: string) => void
 }
 
 // ---------------------------------------------------------------------------
@@ -55,7 +56,7 @@ function formatGanttDate(d: Date): string {
 // Component
 // ---------------------------------------------------------------------------
 
-const IssueTimeline: FC<IssueTimelineProps> = ({ issues, onTaskUpdate }) => {
+const IssueTimeline: FC<IssueTimelineProps> = ({ issues, onTaskUpdate, onTaskClick }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const isDark = useUiStore((s) => s.themeMode === 'dark')
   const initializedRef = useRef(false)
@@ -110,6 +111,23 @@ const IssueTimeline: FC<IssueTimelineProps> = ({ issues, onTaskUpdate }) => {
       gantt.detachEvent(eventId)
     }
   }, [onTaskUpdate])
+
+  // Attach click event for task detail
+  useEffect(() => {
+    if (!onTaskClick) return
+
+    const eventId = gantt.attachEvent(
+      'onTaskClick',
+      (id: string | number) => {
+        onTaskClick(String(id))
+        return true
+      },
+    )
+
+    return () => {
+      gantt.detachEvent(eventId)
+    }
+  }, [onTaskClick])
 
   return (
     <div

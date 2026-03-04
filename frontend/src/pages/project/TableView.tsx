@@ -24,7 +24,11 @@ const COLUMN_LABELS: Record<string, string> = {
   created_at: 'Created',
 }
 
-export default function TableView() {
+interface TableViewProps {
+  onIssueClick?: (id: string) => void
+}
+
+export default function TableView({ onIssueClick }: TableViewProps) {
   const queryClient = useQueryClient()
   const currentProject = useProjectStore((s) => s.currentProject)
   const projectId = currentProject?.id ?? ''
@@ -113,9 +117,8 @@ export default function TableView() {
   const clearSelection = useCallback(() => setRowSelection({}), [])
 
   const handleIssueClick = useCallback((id: string) => {
-    // Navigate to issue detail -- can be wired to router later
-    console.log('Navigate to issue:', id)
-  }, [])
+    onIssueClick?.(id)
+  }, [onIssueClick])
 
   // ---- Render ----
 
