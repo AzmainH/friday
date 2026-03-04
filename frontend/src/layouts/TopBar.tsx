@@ -1,11 +1,13 @@
-import { Menu, Sun, Moon, Bell, Search } from 'lucide-react'
+import { Menu, Sun, Moon, Bell, Search, Sparkles } from 'lucide-react'
 import { useUiStore } from '@/stores/uiStore'
 
 interface TopBarProps {
   onMenuClick: () => void
+  onAIToggle?: () => void
+  aiPanelOpen?: boolean
 }
 
-export default function TopBar({ onMenuClick }: TopBarProps) {
+export default function TopBar({ onMenuClick, onAIToggle, aiPanelOpen }: TopBarProps) {
   const themeMode = useUiStore((s) => s.themeMode)
   const toggleTheme = useUiStore((s) => s.toggleTheme)
 
@@ -42,6 +44,21 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
           >
             {themeMode === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
+
+          {/* AI Copilot toggle */}
+          {onAIToggle && (
+            <button
+              onClick={onAIToggle}
+              className={`p-2 rounded-[--radius-sm] transition-colors ${
+                aiPanelOpen
+                  ? 'bg-[#009688]/10 text-[#009688]'
+                  : 'text-text-secondary hover:bg-surface-100 hover:text-text-primary'
+              }`}
+              aria-label={aiPanelOpen ? 'Close AI assistant' : 'Open AI assistant'}
+            >
+              <Sparkles size={18} />
+            </button>
+          )}
 
           {/* Notifications */}
           <button

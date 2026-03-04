@@ -11,6 +11,7 @@ from app.tasks.document_import import analyze_documents, create_project_from_doc
 from app.tasks.import_export import export_csv, import_csv
 from app.tasks.recurring import process_recurring_tasks
 from app.tasks.scheduling import run_auto_schedule
+from app.tasks.notification_tasks import send_daily_digest, send_email_notification
 from app.tasks.sla import check_sla_breaches
 
 
@@ -35,10 +36,13 @@ class WorkerSettings:
         export_csv,
         analyze_documents,
         create_project_from_documents,
+        send_email_notification,
+        send_daily_digest,
     ]
     cron_jobs = [
         cron(process_recurring_tasks, hour={0, 6, 12, 18}),
         cron(check_sla_breaches, minute={0, 15, 30, 45}),
+        cron(send_daily_digest, hour={8}),
     ]
     redis_settings = get_redis_settings()
     max_jobs = 10

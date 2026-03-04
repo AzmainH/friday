@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from uuid import UUID
 
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ConflictException, NotFoundException
@@ -7,18 +10,44 @@ from app.models.issue import Issue
 from app.repositories.issue import IssueRepository
 from app.repositories.workflow import WorkflowRepository, WorkflowStatusRepository
 from app.services.activity import log_activity
+from app.services.event_bus import EventBus
 from app.services.issue_key import IssueKeyService
 from app.services.workflow import WorkflowEngine
 
 
 class IssueService:
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession, redis: Redis | None = None):
         self.repo = IssueRepository(session)
         self.workflow_repo = WorkflowRepository(session)
         self.status_repo = WorkflowStatusRepository(session)
         self.key_service = IssueKeyService(session)
         self.workflow_engine = WorkflowEngine(session)
         self.session = session
+        self._event_bus = EventBus(redis) if redis else None
+
+    async def _publish(
+        self,
+        event_type: str,
+        issue: Issue,
+        *,
+        user_id: UUID | None = None,
+    ) -> None:
+        """Publish a real-time event for an issue change (fire-and-forget)."""
+        if not self._event_bus:
+            return
+        try:
+            await self._event_bus.publish_project_event(
+                project_id=str(issue.project_id),
+                event_type=event_type,
+                payload={
+                    "issue_id": str(issue.id),
+                    "issue_key": getattr(issue, "issue_key", None),
+                    "summary": getattr(issue, "summary", None),
+                },
+                user_id=str(user_id) if user_id else None,
+            )
+        except Exception:
+            pass  # Never let event publishing break the main flow
 
     async def get_issue(self, issue_id: UUID) -> Issue:
         issue = await self.repo.get_with_relations(issue_id)
@@ -95,6 +124,8 @@ class IssueService:
             action="created",
         )
 
+        await self._publish("issue_created", issue, user_id=created_by or reporter_id)
+
         return issue
 
     async def update_issue(
@@ -134,6 +165,9 @@ class IssueService:
         )
         if not updated:
             raise NotFoundException("Issue not found")
+
+        await self._publish("issue_updated", updated, user_id=updated_by)
+
         return updated
 
     async def transition_issue(
@@ -164,6 +198,8 @@ class IssueService:
             old_value=old_status_name,
             new_value=new_status.name,
         )
+
+        await self._publish("issue_updated", updated, user_id=updated_by)
 
         return updated
 
@@ -196,7 +232,12 @@ class IssueService:
     async def delete_issue(
         self, issue_id: UUID, *, deleted_by: UUID | None = None
     ) -> bool:
+        # Fetch issue before deletion for event payload
+        issue = await self.get_issue(issue_id)
         deleted = await self.repo.soft_delete(issue_id, deleted_by=deleted_by)
         if not deleted:
             raise NotFoundException("Issue not found")
+
+        await self._publish("issue_deleted", issue, user_id=deleted_by)
+
         return True

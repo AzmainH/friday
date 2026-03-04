@@ -3,7 +3,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import get_current_user_id, get_db
+from redis.asyncio import Redis
+
+from app.core.deps import get_current_user_id, get_db, get_redis
 from app.schemas.base import CursorPage, MessageResponse, PaginationMeta
 from app.schemas.issue import (
     IssueBulkResponse,
@@ -76,8 +78,9 @@ async def create_issue(
     body: IssueCreate,
     session: AsyncSession = Depends(get_db),
     user_id: UUID = Depends(get_current_user_id),
+    redis: Redis = Depends(get_redis),
 ):
-    service = IssueService(session)
+    service = IssueService(session, redis=redis)
     data = body.model_dump()
     return await service.create_issue(
         project_id, data, reporter_id=user_id, created_by=user_id
@@ -135,8 +138,9 @@ async def update_issue(
     body: IssueUpdate,
     session: AsyncSession = Depends(get_db),
     user_id: UUID = Depends(get_current_user_id),
+    redis: Redis = Depends(get_redis),
 ):
-    service = IssueService(session)
+    service = IssueService(session, redis=redis)
     return await service.update_issue(
         issue_id,
         body.model_dump(exclude_unset=True),
@@ -149,7 +153,8 @@ async def delete_issue(
     issue_id: UUID,
     session: AsyncSession = Depends(get_db),
     user_id: UUID = Depends(get_current_user_id),
+    redis: Redis = Depends(get_redis),
 ):
-    service = IssueService(session)
+    service = IssueService(session, redis=redis)
     await service.delete_issue(issue_id, deleted_by=user_id)
     return MessageResponse(message="Issue deleted")

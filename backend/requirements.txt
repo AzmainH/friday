@@ -10,6 +10,7 @@ structlog
 redis[hiredis]
 arq
 httpx
+prometheus-client
 python-multipart
 watchfiles
 weasyprint
