@@ -45,6 +45,22 @@ export function useTriggerAI() {
 }
 
 // ---------------------------------------------------------------------------
+// Chat mutation
+// ---------------------------------------------------------------------------
+
+/** Send a message to the AI copilot and get an immediate response */
+export function useAIChat(projectId: string) {
+  return useMutation<{ response: string; project_id: string }, Error, string>({
+    mutationFn: async (message: string) => {
+      const { data } = await client.post(`/projects/${projectId}/ai/chat`, {
+        message,
+      })
+      return data
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
 // Polling hook
 // ---------------------------------------------------------------------------
 

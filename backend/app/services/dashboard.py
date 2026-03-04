@@ -5,6 +5,7 @@ from uuid import UUID
 from sqlalchemy import and_, case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.cache import CacheService
 from app.core.errors import NotFoundException
 from app.models.issue import Issue
 from app.models.issue_relation import IssueActivityLog
@@ -16,18 +17,27 @@ from app.repositories.dashboard import (
     SavedReportRepository,
 )
 
+DASHBOARD_CACHE_TTL = 60  # 60 seconds
+
 
 # ── Dashboard Service ────────────────────────────────────────────
 
 
 class DashboardService:
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession, cache: CacheService | None = None):
         self.session = session
+        self.cache = cache
         self.dashboard_repo = CustomDashboardRepository(session)
 
     # ── Personal Dashboard ───────────────────────────────────────
 
     async def get_personal_dashboard(self, user_id: UUID) -> dict[str, Any]:
+        cache_key = f"dashboard:personal:{user_id}"
+        if self.cache:
+            cached = await self.cache.get(cache_key)
+            if cached is not None:
+                return cached
+
         now = datetime.now(timezone.utc)
         week_end = now + timedelta(days=(7 - now.weekday()))
 
@@ -126,17 +136,26 @@ class DashboardService:
             for r in projects_result.all()
         ]
 
-        return {
+        result = {
             "assigned_to_me": total,
             "overdue": overdue,
             "due_this_week": due_this_week,
             "recent_activity": recent_activity,
             "my_projects": my_projects,
         }
+        if self.cache:
+            await self.cache.set(cache_key, result, ttl=DASHBOARD_CACHE_TTL)
+        return result
 
     # ── Project Dashboard ────────────────────────────────────────
 
     async def get_project_dashboard(self, project_id: UUID) -> dict[str, Any]:
+        cache_key = f"dashboard:project:{project_id}"
+        if self.cache:
+            cached = await self.cache.get(cache_key)
+            if cached is not None:
+                return cached
+
         now = datetime.now(timezone.utc)
 
         # Issue counts by status category
@@ -263,7 +282,7 @@ class DashboardService:
             for r in velocity_result.all()
         ]
 
-        return {
+        result = {
             "issue_counts_by_status": issue_counts_by_status,
             "issue_counts_by_priority": issue_counts_by_priority,
             "progress_pct": progress_pct,
@@ -271,12 +290,21 @@ class DashboardService:
             "burndown_data": burndown_data,
             "velocity_data": velocity_data,
         }
+        if self.cache:
+            await self.cache.set(cache_key, result, ttl=DASHBOARD_CACHE_TTL)
+        return result
 
     # ── Portfolio Dashboard ──────────────────────────────────────
 
     async def get_portfolio_dashboard(
         self, workspace_id: UUID
     ) -> dict[str, Any]:
+        cache_key = f"dashboard:portfolio:{workspace_id}"
+        if self.cache:
+            cached = await self.cache.get(cache_key)
+            if cached is not None:
+                return cached
+
         # Projects by status
         proj_status_q = (
             select(
@@ -337,12 +365,15 @@ class DashboardService:
             (done_issues / total_issues * 100.0) if total_issues > 0 else 0.0, 2
         )
 
-        return {
+        result = {
             "projects_by_status": projects_by_status,
             "projects_by_rag": projects_by_rag,
             "total_issues": total_issues,
             "completion_rate": completion_rate,
         }
+        if self.cache:
+            await self.cache.set(cache_key, result, ttl=DASHBOARD_CACHE_TTL)
+        return result
 
     # ── Custom Dashboard CRUD ────────────────────────────────────
 

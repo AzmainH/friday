@@ -20,6 +20,22 @@ class Settings(BaseSettings):
     BULK_RATE_LIMIT_PER_MINUTE: int = 20
     UPLOAD_DIR: str = "/app/uploads"
 
+    # Storage
+    STORAGE_BACKEND: str = "local"  # "local" or "s3"
+    S3_BUCKET: str = ""
+    S3_REGION: str = "us-east-1"
+    S3_ENDPOINT: str = ""  # For MinIO/LocalStack
+
+    # Email
+    EMAIL_ENABLED: bool = False
+    SMTP_HOST: str = "localhost"
+    SMTP_PORT: int = 587
+    SMTP_USE_TLS: bool = True
+    SMTP_USERNAME: str = ""
+    SMTP_PASSWORD: str = ""
+    EMAIL_FROM: str = "friday@example.com"
+    APP_URL: str = "http://localhost:3000"
+
     model_config = {
         "env_file": ".env",
         "case_sensitive": True,

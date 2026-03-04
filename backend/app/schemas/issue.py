@@ -20,6 +20,7 @@ class IssueCreate(IssueBase):
     assignee_id: UUID | None = None
     parent_issue_id: UUID | None = None
     milestone_id: UUID | None = None
+    sprint_id: UUID | None = None
     estimated_hours: float | None = None
     story_points: int | None = None
     planned_start: date | None = None
@@ -37,6 +38,7 @@ class IssueUpdate(BaseModel):
     status_id: UUID | None = None
     parent_issue_id: UUID | None = None
     milestone_id: UUID | None = None
+    sprint_id: UUID | None = None
     estimated_hours: float | None = None
     story_points: int | None = None
     rag_status: str | None = None
@@ -59,6 +61,7 @@ class IssueResponse(IssueBase):
     reporter_id: UUID | None
     parent_issue_id: UUID | None
     milestone_id: UUID | None
+    sprint_id: UUID | None
     estimated_hours: float | None
     actual_hours: float | None
     story_points: int | None

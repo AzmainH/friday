@@ -40,3 +40,18 @@ class AIRiskResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     risks: list[AIRiskItem]
+
+
+class AIChatRequest(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    message: str
+    context_type: str | None = None  # "project", "issue"
+    context_id: str | None = None
+
+
+class AIChatResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    response: str
+    project_id: str

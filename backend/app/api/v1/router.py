@@ -12,9 +12,11 @@ from app.api.v1.endpoints import (
     dashboards,
     decisions,
     document_import,
+    evm,
     favorites,
     health,
     import_export,
+    integrations,
     intake,
     issue_links,
     issue_types,
@@ -28,11 +30,14 @@ from app.api.v1.endpoints import (
     raci,
     recent_items,
     recurring,
+    resource_planning,
+    risks,
     roadmaps,
     roles,
     saved_views,
     scheduling,
     search,
+    sprints,
     sla,
     stakeholders,
     task_status_ep,
@@ -42,6 +47,7 @@ from app.api.v1.endpoints import (
     uploads,
     users,
     versions,
+    webhooks,
     wiki,
     workflows,
     workspaces,
@@ -85,9 +91,11 @@ api_v1_router.include_router(decisions.router)
 api_v1_router.include_router(stakeholders.router)
 api_v1_router.include_router(roadmaps.router)
 api_v1_router.include_router(scheduling.router)
+api_v1_router.include_router(sprints.router)
 api_v1_router.include_router(portfolio.router)
 api_v1_router.include_router(search.router)
 api_v1_router.include_router(recurring.router)
+api_v1_router.include_router(risks.router)
 api_v1_router.include_router(sla.router)
 api_v1_router.include_router(intake.router)
 api_v1_router.include_router(approvals.router)
@@ -97,4 +105,10 @@ api_v1_router.include_router(automations.router)
 api_v1_router.include_router(ai.router)
 api_v1_router.include_router(import_export.router)
 api_v1_router.include_router(document_import.router)
+api_v1_router.include_router(integrations.router)
+api_v1_router.include_router(webhooks.router)
 api_v1_router.include_router(templates.router)
+
+# Resource planning & EVM
+api_v1_router.include_router(resource_planning.router)
+api_v1_router.include_router(evm.router)

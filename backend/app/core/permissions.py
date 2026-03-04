@@ -5,6 +5,7 @@ from fastapi import Depends, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.cache import CacheService, get_cache
 from app.core.deps import get_current_user_id, get_db
 from app.models import (
     OrgMember,
@@ -45,6 +46,12 @@ def require_permission(permission: str):
         workspace_id = path_params.get("workspace_id")
         org_id = path_params.get("org_id")
 
+        # Build cache service from request-scoped Redis
+        cache: CacheService | None = None
+        redis = getattr(request.app.state, "redis", None)
+        if redis:
+            cache = get_cache(redis)
+
         if project_id:
             result = await db.execute(
                 select(Project).where(Project.id == UUID(project_id))
@@ -71,21 +78,23 @@ def require_permission(permission: str):
         # Check org-level (org_admin wildcard grants all permissions)
         if org_id:
             if await _check_scope_permission(
-                db, user_id, "org", UUID(org_id), permission
+                db, user_id, "org", UUID(org_id), permission, cache=cache
             ):
                 return user_id
 
         # Check workspace-level
         if workspace_id:
             if await _check_scope_permission(
-                db, user_id, "workspace", UUID(workspace_id), permission
+                db, user_id, "workspace", UUID(workspace_id), permission,
+                cache=cache,
             ):
                 return user_id
 
         # Check project-level
         if project_id:
             if await _check_scope_permission(
-                db, user_id, "project", UUID(project_id), permission
+                db, user_id, "project", UUID(project_id), permission,
+                cache=cache,
             ):
                 return user_id
 
@@ -106,12 +115,25 @@ async def _check_scope_permission(
     scope: str,
     scope_id: UUID,
     permission: str,
+    *,
+    cache: CacheService | None = None,
 ) -> bool:
     """Check if *user_id* has *permission* at the given scope level.
 
     A role with the wildcard ``"*"`` permission automatically satisfies any
     permission check (used by admin roles).
+
+    Results are cached in Redis for 300 seconds (5 minutes) when a cache
+    instance is provided.
     """
+    cache_key = f"perm:{user_id}:{scope}:{scope_id}:{permission}"
+
+    # Check cache first
+    if cache:
+        cached = await cache.get(cache_key)
+        if cached is not None:
+            return bool(cached)
+
     if scope == "org":
         member_query = select(OrgMember).where(
             OrgMember.org_id == scope_id,
@@ -131,6 +153,8 @@ async def _check_scope_permission(
     result = await db.execute(member_query)
     member = result.scalar_one_or_none()
     if not member:
+        if cache:
+            await cache.set(cache_key, False, ttl=300)
         return False
 
     perm_query = select(RolePermission).where(
@@ -138,4 +162,9 @@ async def _check_scope_permission(
         RolePermission.permission.in_([permission, "*"]),
     )
     result = await db.execute(perm_query)
-    return result.scalar_one_or_none() is not None
+    has_perm = result.scalar_one_or_none() is not None
+
+    if cache:
+        await cache.set(cache_key, has_perm, ttl=300)
+
+    return has_perm

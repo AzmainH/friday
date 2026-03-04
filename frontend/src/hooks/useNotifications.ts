@@ -13,7 +13,8 @@ export function useNotifications() {
       })
       return data
     },
-    refetchInterval: 30_000,
+    // Polling removed — real-time updates are driven by WebSocket
+    // invalidation via useWebSocket() hook (event: notification_created).
   })
 
   const unreadCount = query.data?.length ?? 0

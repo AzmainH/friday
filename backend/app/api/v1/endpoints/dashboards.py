@@ -1,9 +1,11 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import get_current_user_id, get_db
+from app.core.cache import get_cache
+from app.core.deps import get_current_user_id, get_db, get_redis
 from app.schemas.base import CursorPage, MessageResponse, PaginationMeta
 from app.schemas.dashboard import (
     CustomDashboardCreate,
@@ -44,8 +46,9 @@ def _build_page(result: dict) -> CursorPage:
 async def get_personal_dashboard(
     session: AsyncSession = Depends(get_db),
     user_id: UUID = Depends(get_current_user_id),
+    redis: Redis = Depends(get_redis),
 ):
-    service = DashboardService(session)
+    service = DashboardService(session, cache=get_cache(redis))
     return await service.get_personal_dashboard(user_id)
 
 
@@ -59,8 +62,9 @@ async def get_personal_dashboard(
 async def get_project_dashboard(
     project_id: UUID,
     session: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
 ):
-    service = DashboardService(session)
+    service = DashboardService(session, cache=get_cache(redis))
     return await service.get_project_dashboard(project_id)
 
 
@@ -74,8 +78,9 @@ async def get_project_dashboard(
 async def get_portfolio_dashboard(
     workspace_id: UUID,
     session: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
 ):
-    service = DashboardService(session)
+    service = DashboardService(session, cache=get_cache(redis))
     return await service.get_portfolio_dashboard(workspace_id)
 
 

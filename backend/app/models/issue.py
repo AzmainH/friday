@@ -96,6 +96,12 @@ class Issue(BaseModel, AuditMixin, SoftDeleteMixin):
     planned_end: Mapped[date | None] = mapped_column(Date, nullable=True)
     actual_start: Mapped[date | None] = mapped_column(Date, nullable=True)
     actual_end: Mapped[date | None] = mapped_column(Date, nullable=True)
+    sprint_id: Mapped[UUID | None] = mapped_column(
+        pg.UUID(as_uuid=True),
+        ForeignKey("sprints.id"),
+        nullable=True,
+        index=True,
+    )
     sort_order: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
     search_vector = Column(TSVECTOR)
 
@@ -108,6 +114,7 @@ class Issue(BaseModel, AuditMixin, SoftDeleteMixin):
         "Issue", remote_side="Issue.id", foreign_keys=[parent_issue_id]
     )
     children = relationship("Issue", foreign_keys=[parent_issue_id])
+    sprint = relationship("Sprint", back_populates="issues")
     comments = relationship("IssueComment", back_populates="issue")
     labels = relationship("Label", secondary="issue_labels")
     watchers = relationship("User", secondary="issue_watchers")

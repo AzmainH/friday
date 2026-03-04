@@ -12,6 +12,8 @@ const KnowledgePage = lazy(() => import('@/pages/KnowledgePage'))
 const KnowledgePageDetail = lazy(() => import('@/pages/KnowledgePageDetail'))
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
+const ResourcePlanningPage = lazy(() => import('@/pages/ResourcePlanningPage'))
+const ExecutiveDashboardPage = lazy(() => import('@/pages/ExecutiveDashboardPage'))
 
 // Project-scoped pages
 const ProjectIssuesPage = lazy(() => import('@/pages/project/ProjectIssuesPage'))
@@ -30,9 +32,12 @@ const AutomationsPage = lazy(() => import('@/pages/project/AutomationsPage'))
 const IntakeFormsPage = lazy(() => import('@/pages/project/IntakeFormsPage'))
 const ApprovalsPage = lazy(() => import('@/pages/project/ApprovalsPage'))
 const ImportExportPage = lazy(() => import('@/pages/project/ImportExportPage'))
+const IntegrationsPage = lazy(() => import('@/pages/project/IntegrationsPage'))
 const ProjectCreationWizard = lazy(() => import('@/pages/project/ProjectCreationWizard'))
 const DocumentImportWizard = lazy(() => import('@/pages/project/DocumentImportWizard'))
 const ProjectReportsPage = lazy(() => import('@/pages/project/ReportsPage'))
+const SprintPage = lazy(() => import('@/pages/project/SprintPage'))
+const RisksPage = lazy(() => import('@/pages/project/RisksPage'))
 
 function LazyFallback() {
   return (
@@ -84,13 +89,18 @@ export const router = createBrowserRouter([
           { path: 'intake', element: withSuspense(IntakeFormsPage) },
           { path: 'approvals', element: withSuspense(ApprovalsPage) },
           { path: 'import-export', element: withSuspense(ImportExportPage) },
+          { path: 'integrations', element: withSuspense(IntegrationsPage) },
           { path: 'reports', element: withSuspense(ProjectReportsPage) },
+          { path: 'sprints', element: withSuspense(SprintPage) },
+          { path: 'risks', element: withSuspense(RisksPage) },
         ],
       },
 
       // Planning (combined: roadmaps + portfolio + releases)
       { path: 'planning', element: withSuspense(PlanningPage) },
       { path: 'planning/roadmaps/:planId', element: withSuspense(RoadmapDetailPage) },
+      { path: 'planning/resources', element: withSuspense(ResourcePlanningPage) },
+      { path: 'planning/executive', element: withSuspense(ExecutiveDashboardPage) },
 
       // Knowledge (wiki)
       { path: 'knowledge', element: withSuspense(KnowledgePage) },

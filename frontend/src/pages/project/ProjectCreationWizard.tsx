@@ -10,12 +10,15 @@ import { Combobox } from '@/components/ui/Combobox'
 import { Select } from '@/components/ui/Select'
 import {
   LayoutDashboard, Bug, Rocket, Kanban, Settings, Trash2, CheckCircle2,
-  FolderKanban, Users, Tag, GitBranch,
+  FolderKanban, Users, Tag, GitBranch, FileText, FolderOpen,
 } from 'lucide-react'
 import client from '@/api/client'
 import { useUsers } from '@/hooks/useProjectSettings'
 import { useOrgStore } from '@/stores/orgStore'
 import type { User } from '@/types/api'
+import TemplateGallery from '@/components/templates/TemplateGallery'
+import UseTemplateDialog from '@/components/templates/UseTemplateDialog'
+import type { ProjectTemplate } from '@/hooks/useTemplates'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -150,6 +153,10 @@ export default function ProjectCreationWizard() {
   const navigate = useNavigate()
   const currentWorkspaceId = useOrgStore((s) => s.currentWorkspaceId)
   const { data: users = [] } = useUsers()
+
+  const [creationMode, setCreationMode] = useState<'scratch' | 'template'>('scratch')
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false)
+  const [selectedApiTemplate, setSelectedApiTemplate] = useState<ProjectTemplate | null>(null)
 
   const [activeStep, setActiveStep] = useState(0)
   const [submitting, setSubmitting] = useState(false)
@@ -570,6 +577,11 @@ export default function ProjectCreationWizard() {
     renderReviewStep,
   ]
 
+  const handleApiTemplateSelect = useCallback((template: ProjectTemplate) => {
+    setSelectedApiTemplate(template)
+    setTemplateDialogOpen(true)
+  }, [])
+
   const isLastStep = activeStep === STEPS.length - 1
 
   return (
@@ -578,6 +590,57 @@ export default function ProjectCreationWizard() {
         Create New Project
       </h1>
 
+      {/* Creation mode tabs */}
+      <div className="flex gap-3 mb-6">
+        <button
+          onClick={() => setCreationMode('scratch')}
+          className={cn(
+            'flex items-center gap-2 px-4 py-2.5 rounded-[--radius-md] text-sm font-medium border transition-colors',
+            creationMode === 'scratch'
+              ? 'bg-primary-50 text-primary-700 border-primary-200 dark:bg-primary-900/20 dark:text-primary-400 dark:border-primary-800'
+              : 'bg-white text-text-secondary border-surface-200 hover:bg-surface-50 dark:bg-surface-100 dark:border-surface-200',
+          )}
+        >
+          <FileText className="h-4 w-4" />
+          Start from scratch
+        </button>
+        <button
+          onClick={() => setCreationMode('template')}
+          className={cn(
+            'flex items-center gap-2 px-4 py-2.5 rounded-[--radius-md] text-sm font-medium border transition-colors',
+            creationMode === 'template'
+              ? 'bg-primary-50 text-primary-700 border-primary-200 dark:bg-primary-900/20 dark:text-primary-400 dark:border-primary-800'
+              : 'bg-white text-text-secondary border-surface-200 hover:bg-surface-50 dark:bg-surface-100 dark:border-surface-200',
+          )}
+        >
+          <FolderOpen className="h-4 w-4" />
+          Use a template
+        </button>
+      </div>
+
+      {/* Template gallery mode */}
+      {creationMode === 'template' && (
+        <>
+          <div className="bg-white dark:bg-surface-100 border border-surface-200 rounded-[--radius-lg] p-6 mb-6">
+            <h3 className="text-lg font-semibold text-text-primary mb-4">
+              Choose a Template
+            </h3>
+            <p className="text-sm text-text-secondary mb-4">
+              Browse server-defined templates to quickly set up a project with pre-configured settings.
+            </p>
+            <TemplateGallery onSelectTemplate={handleApiTemplateSelect} />
+          </div>
+          <UseTemplateDialog
+            template={selectedApiTemplate}
+            open={templateDialogOpen}
+            onClose={() => setTemplateDialogOpen(false)}
+          />
+        </>
+      )}
+
+      {/* Scratch wizard mode */}
+      {creationMode === 'scratch' && (
+        <>
       {/* Step indicator */}
       <div className="flex items-center justify-between mb-8">
         {STEPS.map((label, idx) => (
@@ -624,6 +687,8 @@ export default function ProjectCreationWizard() {
           {isLastStep ? (submitting ? 'Creating...' : 'Create Project') : 'Next'}
         </Button>
       </div>
+        </>
+      )}
     </div>
   )
 }

@@ -62,6 +62,7 @@ from app.models.milestone import GateApproval, Milestone
 from app.models.portfolio import CrossProjectDependency, Release, ReleaseProject
 from app.models.raci import RACIAssignment
 from app.models.recurring import RecurringRule
+from app.models.risk import Risk, RiskResponse
 from app.models.roadmap import (
     RoadmapPlan,
     RoadmapPlanProject,
@@ -69,9 +70,11 @@ from app.models.roadmap import (
     RoadmapScenarioOverride,
 )
 from app.models.schedule import ScheduleRun
+from app.models.sprint import Sprint, SprintStatus
 from app.models.sla import IssueSLAStatus, SLAPolicy
 from app.models.stakeholder import Stakeholder
 from app.models.template import ProjectTemplate
+from app.models.integration import Integration, IntegrationType, WebhookLog
 from app.models.wiki import WikiPage, WikiPageComment, WikiPageVersion, WikiSpace
 
 __all__ = [
@@ -159,4 +162,12 @@ __all__ = [
     "AutomationRule",
     "AutomationExecutionLog",
     "ProjectTemplate",
+    "Sprint",
+    "SprintStatus",
+    "Risk",
+    "RiskResponse",
+    # Integrations
+    "Integration",
+    "IntegrationType",
+    "WebhookLog",
 ]

@@ -23,6 +23,9 @@ import {
   ArrowLeftRight,
   Cog,
   X,
+  IterationCw,
+  Shield,
+  Plug,
 } from 'lucide-react'
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import { useUiStore } from '@/stores/uiStore'
@@ -42,6 +45,8 @@ const primaryNav: NavItem[] = [
   { label: 'Home', path: '/', icon: <Home size={20} /> },
   { label: 'Projects', path: '/projects', icon: <FolderKanban size={20} /> },
   { label: 'Planning', path: '/planning', icon: <Map size={20} /> },
+  { label: 'Resources', path: '/planning/resources', icon: <Users size={20} /> },
+  { label: 'Executive', path: '/planning/executive', icon: <BarChart3 size={20} /> },
   { label: 'Knowledge', path: '/knowledge', icon: <BookOpen size={20} /> },
   { label: 'Settings', path: '/settings', icon: <Settings size={20} /> },
 ]
@@ -52,8 +57,10 @@ const projectNav: NavItem[] = [
   { label: 'Timeline', path: 'timeline', icon: <GanttChart size={18} /> },
   { label: 'Milestones', path: 'milestones', icon: <Milestone size={18} /> },
   { label: 'Budget', path: 'budget', icon: <DollarSign size={18} /> },
+  { label: 'Sprints', path: 'sprints', icon: <IterationCw size={18} /> },
   { label: 'Decisions', path: 'decisions', icon: <Scale size={18} /> },
   { label: 'Stakeholders', path: 'stakeholders', icon: <Users size={18} /> },
+  { label: 'Risks', path: 'risks', icon: <Shield size={18} /> },
   { label: 'Time', path: 'time-tracking', icon: <Clock size={18} /> },
   { label: 'Dashboard', path: 'dashboard', icon: <BarChart3 size={18} /> },
   { label: 'Reports', path: 'reports', icon: <BarChart3 size={18} /> },
@@ -61,6 +68,7 @@ const projectNav: NavItem[] = [
   { label: 'Approvals', path: 'approvals', icon: <ShieldCheck size={18} /> },
   { label: 'Intake', path: 'intake', icon: <FileInput size={18} /> },
   { label: 'Import/Export', path: 'import-export', icon: <ArrowLeftRight size={18} /> },
+  { label: 'Integrations', path: 'integrations', icon: <Plug size={18} /> },
   { label: 'Settings', path: 'settings', icon: <Cog size={18} /> },
 ]
 
