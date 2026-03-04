@@ -15,12 +15,13 @@ interface BoardColumnProps {
   status: WorkflowStatus
   issues: Issue[]
   onAddIssue: () => void
+  onIssueClick?: (id: string) => void
 }
 
 /**
  * Wrapper that makes an individual card sortable within and across columns.
  */
-function SortableCard({ issue }: { issue: Issue }) {
+function SortableCard({ issue, onIssueClick }: { issue: Issue; onIssueClick?: (id: string) => void }) {
   const {
     attributes,
     listeners,
@@ -44,12 +45,12 @@ function SortableCard({ issue }: { issue: Issue }) {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <BoardCard issue={issue} isDragging={isDragging} />
+      <BoardCard issue={issue} isDragging={isDragging} onClick={() => onIssueClick?.(issue.id)} />
     </div>
   )
 }
 
-export default function BoardColumn({ status, issues, onAddIssue }: BoardColumnProps) {
+export default function BoardColumn({ status, issues, onAddIssue, onIssueClick }: BoardColumnProps) {
   const categoryColor = STATUS_CATEGORY_COLORS[status.category] ?? status.color
 
   // Make the column body a droppable target so cards can be dragged into empty columns
@@ -109,7 +110,7 @@ export default function BoardColumn({ status, issues, onAddIssue }: BoardColumnP
           strategy={verticalListSortingStrategy}
         >
           {issues.map((issue) => (
-            <SortableCard key={issue.id} issue={issue} />
+            <SortableCard key={issue.id} issue={issue} onIssueClick={onIssueClick} />
           ))}
         </SortableContext>
 

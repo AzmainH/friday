@@ -10,7 +10,11 @@ import FilterBar from '@/components/views/FilterBar'
 // Component
 // ---------------------------------------------------------------------------
 
-export default function TimelineView() {
+interface TimelineViewProps {
+  onIssueClick?: (id: string) => void
+}
+
+export default function TimelineView({ onIssueClick }: TimelineViewProps) {
   const { filters, setFilter: onFilterChange, clearFilters: onClearFilters } = useFilterState()
   const currentProject = useProjectStore((s) => s.currentProject)
   const statuses = useProjectStore((s) => s.statuses)
@@ -139,7 +143,7 @@ export default function TimelineView() {
 
       {!isLoading && !isError && issues.length > 0 && (
         <div className="flex-1 min-h-0">
-          <IssueTimeline issues={issues} onTaskUpdate={handleTaskUpdate} />
+          <IssueTimeline issues={issues} onTaskUpdate={handleTaskUpdate} onTaskClick={onIssueClick} />
         </div>
       )}
     </div>

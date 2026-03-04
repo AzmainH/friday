@@ -26,6 +26,7 @@ const DecisionsPage = lazy(() => import('@/pages/project/DecisionsPage'))
 const StakeholdersPage = lazy(() => import('@/pages/project/StakeholdersPage'))
 const DocumentsPage = lazy(() => import('@/pages/project/DocumentsPage'))
 const TimeTrackingPage = lazy(() => import('@/pages/project/TimeTrackingPage'))
+const IssueDetailPage = lazy(() => import('@/pages/project/IssueDetailPage'))
 const ProjectDashboard = lazy(() => import('@/pages/project/ProjectDashboard'))
 const ProjectSettingsPage = lazy(() => import('@/pages/project/SettingsPage'))
 const AutomationsPage = lazy(() => import('@/pages/project/AutomationsPage'))
@@ -74,6 +75,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: withSuspense(BoardView) },
           { path: 'issues', element: withSuspense(ProjectIssuesPage) },
+          { path: 'issues/:issueId', element: withSuspense(IssueDetailPage) },
           { path: 'board', element: withSuspense(BoardView) },
           { path: 'table', element: withSuspense(TableView) },
           { path: 'timeline', element: withSuspense(TimelineView) },

@@ -29,9 +29,10 @@ import { EmptyState } from '@/components/ui/EmptyState'
  */
 interface BoardViewProps {
   onAddIssue?: () => void
+  onIssueClick?: (id: string) => void
 }
 
-export default function BoardView({ onAddIssue }: BoardViewProps) {
+export default function BoardView({ onAddIssue, onIssueClick }: BoardViewProps) {
   const currentProject = useProjectStore((s) => s.currentProject)
   const statuses = useProjectStore((s) => s.statuses)
 
@@ -240,6 +241,7 @@ export default function BoardView({ onAddIssue }: BoardViewProps) {
               status={status}
               issues={columns.get(status.id) ?? []}
               onAddIssue={() => handleAddIssue(status.id)}
+              onIssueClick={onIssueClick}
             />
           ))}
 

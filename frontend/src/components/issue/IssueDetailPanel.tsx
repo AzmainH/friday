@@ -4,8 +4,10 @@ import {
   DialogBackdrop,
   DialogPanel,
 } from '@headlessui/react'
-import { X } from 'lucide-react'
+import { Maximize2, X } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/cn'
+import { useProjectStore } from '@/stores/projectStore'
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from '@/components/ui/Tabs'
 import { Divider } from '@/components/ui/Divider'
 import RichTextEditor from '@/components/editor/RichTextEditor'
@@ -21,6 +23,8 @@ interface IssueDetailPanelProps {
 }
 
 export default function IssueDetailPanel({ issueId, open, onClose }: IssueDetailPanelProps) {
+  const navigate = useNavigate()
+  const projectId = useProjectStore((s) => s.currentProject?.id)
   const { data: issue, isLoading } = useIssueDetail(issueId)
   const updateMutation = useIssueUpdate()
   const [activeTab, setActiveTab] = useState(0)
@@ -122,6 +126,25 @@ export default function IssueDetailPanel({ issueId, open, onClose }: IssueDetail
                 ) : null}
 
                 <div className="ml-2 flex shrink-0 items-center gap-1">
+                  {projectId && issueId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose()
+                        navigate(`/projects/${projectId}/issues/${issueId}`)
+                      }}
+                      className={cn(
+                        'rounded-[--radius-sm] p-1.5 text-text-secondary',
+                        'hover:bg-surface-100 hover:text-text-primary',
+                        'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
+                        'dark:hover:bg-surface-200',
+                      )}
+                      title="Open full page"
+                    >
+                      <Maximize2 className="h-4 w-4" />
+                      <span className="sr-only">Open full page</span>
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={onClose}

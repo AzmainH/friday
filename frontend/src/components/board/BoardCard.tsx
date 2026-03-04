@@ -5,18 +5,20 @@ import { PRIORITY_COLORS, truncate } from '@/utils/formatters'
 export interface BoardCardProps {
   issue: Issue
   isDragging?: boolean
+  onClick?: () => void
 }
 
-export default function BoardCard({ issue, isDragging = false }: BoardCardProps) {
+export default function BoardCard({ issue, isDragging = false, onClick }: BoardCardProps) {
   const priorityColor = PRIORITY_COLORS[issue.priority] ?? PRIORITY_COLORS.none
 
   return (
     <div
+      onClick={onClick}
       className={cn(
-        'cursor-grab rounded-[--radius-md] border bg-white dark:bg-surface-100 p-3 transition-all',
+        'rounded-[--radius-md] border bg-white dark:bg-surface-100 p-3 transition-all',
         isDragging
-          ? 'opacity-50 border-primary-500 shadow-lg'
-          : 'border-surface-200 shadow-sm hover:shadow-md hover:border-primary-300',
+          ? 'opacity-50 border-primary-500 shadow-lg cursor-grabbing'
+          : 'border-surface-200 shadow-sm hover:shadow-md hover:border-primary-300 cursor-pointer',
       )}
     >
       {/* Top row: issue key chip */}
