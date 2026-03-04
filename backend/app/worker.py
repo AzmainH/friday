@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.tasks.base import sample_task
 from app.tasks.ai import ai_risk_prediction, ai_smart_schedule, ai_summarize
 from app.tasks.automation import evaluate_automations
+from app.tasks.document_import import analyze_documents, create_project_from_documents
 from app.tasks.import_export import export_csv, import_csv
 from app.tasks.recurring import process_recurring_tasks
 from app.tasks.scheduling import run_auto_schedule
@@ -32,6 +33,8 @@ class WorkerSettings:
         ai_summarize,
         import_csv,
         export_csv,
+        analyze_documents,
+        create_project_from_documents,
     ]
     cron_jobs = [
         cron(process_recurring_tasks, hour={0, 6, 12, 18}),

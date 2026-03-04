@@ -284,6 +284,15 @@ from app.schemas.search_global import (
     SearchParams,
     SearchResultItem,
 )
+from app.schemas.document_import import (
+    DocumentAnalysisResponse,
+    DocumentImportResponse,
+    DocumentProjectCreateRequest,
+    DocumentUploadResponse,
+    MilestonePreview,
+    ResourceMatchPreview,
+    TaskPreview,
+)
 
 __all__ = [
     # base
@@ -536,4 +545,12 @@ __all__ = [
     # search global
     "SearchParams",
     "SearchResultItem",
+    # document import
+    "DocumentAnalysisResponse",
+    "DocumentImportResponse",
+    "DocumentProjectCreateRequest",
+    "DocumentUploadResponse",
+    "MilestonePreview",
+    "ResourceMatchPreview",
+    "TaskPreview",
 ]

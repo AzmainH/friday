@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { Plus, FolderKanban } from 'lucide-react'
+import { Plus, FolderKanban, FileUp } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { Button } from '@/components/ui/Button'
 import { SkeletonCard } from '@/components/ui/Skeleton'
@@ -42,10 +42,16 @@ export default function ProjectsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-text-primary">Projects</h1>
-        <Button onClick={() => navigate('/projects/new')}>
-          <Plus size={16} className="mr-1.5" />
-          Create Project
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" onClick={() => navigate('/projects/import-documents')}>
+            <FileUp size={16} className="mr-1.5" />
+            Import from Documents
+          </Button>
+          <Button onClick={() => navigate('/projects/new')}>
+            <Plus size={16} className="mr-1.5" />
+            Create Project
+          </Button>
+        </div>
       </div>
 
       {/* Error */}
