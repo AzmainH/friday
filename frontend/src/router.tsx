@@ -12,6 +12,8 @@ const KnowledgePage = lazy(() => import('@/pages/KnowledgePage'))
 const KnowledgePageDetail = lazy(() => import('@/pages/KnowledgePageDetail'))
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
+const ResourcePlanningPage = lazy(() => import('@/pages/ResourcePlanningPage'))
+const ExecutiveDashboardPage = lazy(() => import('@/pages/ExecutiveDashboardPage'))
 
 // Project-scoped pages
 const ProjectIssuesPage = lazy(() => import('@/pages/project/ProjectIssuesPage'))
@@ -97,6 +99,8 @@ export const router = createBrowserRouter([
       // Planning (combined: roadmaps + portfolio + releases)
       { path: 'planning', element: withSuspense(PlanningPage) },
       { path: 'planning/roadmaps/:planId', element: withSuspense(RoadmapDetailPage) },
+      { path: 'planning/resources', element: withSuspense(ResourcePlanningPage) },
+      { path: 'planning/executive', element: withSuspense(ExecutiveDashboardPage) },
 
       // Knowledge (wiki)
       { path: 'knowledge', element: withSuspense(KnowledgePage) },

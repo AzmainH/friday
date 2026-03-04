@@ -45,6 +45,8 @@ const primaryNav: NavItem[] = [
   { label: 'Home', path: '/', icon: <Home size={20} /> },
   { label: 'Projects', path: '/projects', icon: <FolderKanban size={20} /> },
   { label: 'Planning', path: '/planning', icon: <Map size={20} /> },
+  { label: 'Resources', path: '/planning/resources', icon: <Users size={20} /> },
+  { label: 'Executive', path: '/planning/executive', icon: <BarChart3 size={20} /> },
   { label: 'Knowledge', path: '/knowledge', icon: <BookOpen size={20} /> },
   { label: 'Settings', path: '/settings', icon: <Settings size={20} /> },
 ]
