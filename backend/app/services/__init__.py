@@ -43,6 +43,7 @@ from app.services.automation import AutomationService
 from app.services.ai import AIService
 from app.services.import_export import ImportExportService
 from app.services.template import TemplateService
+from app.services.document_import import DocumentImportService
 
 __all__ = [
     "MemberService",
@@ -95,4 +96,5 @@ __all__ = [
     "AIService",
     "ImportExportService",
     "TemplateService",
+    "DocumentImportService",
 ]

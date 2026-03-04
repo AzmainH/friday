@@ -11,6 +11,7 @@ from app.api.v1.endpoints import (
     custom_fields,
     dashboards,
     decisions,
+    document_import,
     favorites,
     health,
     import_export,
@@ -95,4 +96,5 @@ api_v1_router.include_router(dashboards.router)
 api_v1_router.include_router(automations.router)
 api_v1_router.include_router(ai.router)
 api_v1_router.include_router(import_export.router)
+api_v1_router.include_router(document_import.router)
 api_v1_router.include_router(templates.router)
