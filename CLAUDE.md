@@ -81,6 +81,38 @@ Every feature follows: **Model -> Repository -> Service -> Schema -> Endpoint**
 
 Add skill files to `.claude/commands/` -- each `.md` file becomes a `/project:<name>` command. See `.claude/commands/README.md` for details.
 
+## PM Skills & Commands
+
+### CCPM (Claude Code Project Manager)
+Spec-driven development pipeline: PRD → Epic → Task → Issue → Code → Commit. Uses GitHub Issues + Git worktrees for parallel agent execution.
+
+| Command | Action |
+|---------|--------|
+| `/project:pm:init` | Initialize CCPM in project |
+| `/project:pm:prd-new` | Create a new PRD |
+| `/project:pm:epic-decompose` | Decompose PRD into epics |
+| `/project:pm:epic-start` | Start working on an epic |
+| `/project:pm:issue-start` | Start working on an issue |
+| `/project:pm:status` | Show project status |
+| `/project:pm:standup` | Generate standup summary |
+| `/project:pm:help` | Full CCPM command reference |
+
+### PM Domain Skills (`.claude/skills/`)
+
+| Skill | Use For |
+|-------|---------|
+| `product-manager-toolkit` | PRD writing, roadmap planning, feature prioritization |
+| `agile-product-owner` | Backlog grooming, user stories, sprint planning |
+| `senior-pm` | Strategic planning, stakeholder management, risk assessment |
+| `scrum-master` | Sprint facilitation, agile ceremonies, velocity tracking |
+| `ux-researcher` | User research, usability testing, persona development |
+| `api-design-reviewer` | REST API design review for Friday's endpoint layer |
+| `database-designer` | Schema design for Friday's PostgreSQL/SQLAlchemy models |
+| `tech-debt-tracker` | Technical debt identification and prioritization |
+| `mcp-builder` | Build MCP servers for tool integrations |
+| `internal-comms` | Draft notification/email copy |
+| `brand-guidelines` | Maintain consistent UI branding |
+
 ## Reference
 
 See `FRIDAY_BUILD_PLAN.md` for the full phased build plan and current build state.
