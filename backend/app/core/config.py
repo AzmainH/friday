@@ -12,6 +12,18 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "FRIDAY"
     CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3001"]
     OPENAI_API_KEY: str = ""
+
+    # MCP / AI
+    MCP_BASE_URL: str = ""
+    MCP_AUTH_TOKEN: str = ""
+
+    # Azure AD / Entra ID
+    AZURE_TENANT_ID: str = ""
+    AZURE_CLIENT_ID: str = ""
+
+    # Auth mode: "local" (dev, X-User-ID header) or "jwt" (Azure AD Bearer token)
+    AUTH_MODE: str = "local"
+
     DB_POOL_SIZE: int = 5
     DB_MAX_OVERFLOW: int = 10
     DB_POOL_RECYCLE: int = 1800

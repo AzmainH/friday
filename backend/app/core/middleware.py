@@ -106,6 +106,33 @@ class RateLimitMiddleware:
         self.logger = structlog.get_logger(__name__)
         self.default_limit = settings.RATE_LIMIT_PER_MINUTE
 
+    @staticmethod
+    def _extract_identifier(request: Request) -> str:
+        """Extract a user identifier for rate-limiting.
+
+        JWT mode: parse ``sub`` or ``oid`` from the Bearer token (unverified,
+        since full validation happens later in the dependency chain).
+        Local mode: use ``X-User-ID`` header, falling back to client IP.
+        """
+        if settings.AUTH_MODE.lower() == "jwt":
+            auth_header = request.headers.get("authorization", "")
+            if auth_header.lower().startswith("bearer "):
+                token = auth_header[7:]
+                try:
+                    from jose import jwt as _jwt
+
+                    claims = _jwt.get_unverified_claims(token)
+                    uid = claims.get("oid") or claims.get("sub")
+                    if uid:
+                        return str(uid)
+                except Exception:
+                    pass
+
+        return (
+            request.headers.get("x-user-id")
+            or (request.client.host if request.client else "unknown")
+        )
+
     def _get_redis(self, scope: Scope) -> Redis | None:
         app = scope.get("app")
         if app is None:
@@ -119,10 +146,7 @@ class RateLimitMiddleware:
 
         request = Request(scope)
 
-        identifier = (
-            request.headers.get("x-user-id")
-            or (request.client.host if request.client else "unknown")
-        )
+        identifier = self._extract_identifier(request)
 
         route = scope.get("route")
         limit = self.default_limit

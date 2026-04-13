@@ -3,17 +3,12 @@ from uuid import UUID
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
 from app.core.errors import NotFoundException, ValidationException
+from app.core.mcp_client import get_mcp_client
 from app.repositories.issue_extras import TaskStatusRepository
 from app.services.ai_context import AIContextBuilder
 
 logger = structlog.get_logger()
-
-try:
-    from openai import AsyncOpenAI
-except ImportError:
-    AsyncOpenAI = None  # type: ignore[assignment,misc]
 
 VALID_TASK_TYPES = {"smart_schedule", "risk_prediction", "summarize"}
 
@@ -89,21 +84,19 @@ class AIService:
     async def chat(self, project_id: UUID, message: str) -> str:
         """Synchronous chat that returns AI response immediately.
 
-        Builds project context using AIContextBuilder, sends to OpenAI
-        with a system prompt, and returns response text directly.
-        Falls back to a helpful mock response when no API key is set.
+        Builds project context using AIContextBuilder, sends to MCP (Claude
+        via Bedrock) with a system prompt, and returns response text directly.
+        Falls back to a helpful mock response when MCP is not configured.
         """
         project_context = await self.context_builder.build_project_context(project_id)
 
-        if not settings.OPENAI_API_KEY or AsyncOpenAI is None:
+        mcp = get_mcp_client()
+        if mcp is None:
             return self._mock_chat_response(message, project_context)
 
         try:
-            client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-            response = await client.chat.completions.create(
-                model="gpt-4o-mini",
+            response = await mcp.chat(
                 messages=[
-                    {"role": "system", "content": FRIDAY_SYSTEM_PROMPT},
                     {
                         "role": "user",
                         "content": (
@@ -112,9 +105,11 @@ class AIService:
                         ),
                     },
                 ],
+                model="sonnet",
+                system=FRIDAY_SYSTEM_PROMPT,
                 max_tokens=2048,
             )
-            return response.choices[0].message.content or "No response generated."
+            return response or "No response generated."
         except Exception as exc:
             logger.warning("ai_chat_failed", error=str(exc))
             return self._mock_chat_response(message, project_context)
@@ -130,20 +125,18 @@ class AIService:
             f"{project_context}"
         )
 
-        if not settings.OPENAI_API_KEY or AsyncOpenAI is None:
+        mcp = get_mcp_client()
+        if mcp is None:
             return self._mock_status_report()
 
         try:
-            client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-            response = await client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": FRIDAY_SYSTEM_PROMPT},
-                    {"role": "user", "content": prompt},
-                ],
+            response = await mcp.chat(
+                messages=[{"role": "user", "content": prompt}],
+                model="sonnet",
+                system=FRIDAY_SYSTEM_PROMPT,
                 max_tokens=2048,
             )
-            return response.choices[0].message.content or self._mock_status_report()
+            return response or self._mock_status_report()
         except Exception as exc:
             logger.warning("ai_status_report_failed", error=str(exc))
             return self._mock_status_report()
@@ -159,27 +152,25 @@ class AIService:
             f"{issue_context}"
         )
 
-        if not settings.OPENAI_API_KEY or AsyncOpenAI is None:
+        mcp = get_mcp_client()
+        if mcp is None:
             return self._mock_decompose_response()
 
         try:
-            client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-            response = await client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": FRIDAY_SYSTEM_PROMPT},
-                    {"role": "user", "content": prompt},
-                ],
+            response = await mcp.chat(
+                messages=[{"role": "user", "content": prompt}],
+                model="sonnet",
+                system=FRIDAY_SYSTEM_PROMPT,
                 max_tokens=2048,
             )
-            return response.choices[0].message.content or self._mock_decompose_response()
+            return response or self._mock_decompose_response()
         except Exception as exc:
             logger.warning("ai_decompose_task_failed", error=str(exc))
             return self._mock_decompose_response()
 
     @staticmethod
     def _mock_chat_response(message: str, context: str) -> str:
-        """Generate a helpful mock response when OpenAI is unavailable."""
+        """Generate a helpful mock response when MCP is unavailable."""
         lower = message.lower()
         if "status" in lower or "how" in lower and "going" in lower:
             return (
@@ -212,7 +203,7 @@ class AIService:
             "- **Scheduling** - Ask about timeline or planning advice\n"
             "- **Task breakdown** - Ask me to decompose complex tasks\n\n"
             "You can also use the quick action buttons for targeted analysis. "
-            "Note: Connect an OpenAI API key for more detailed, context-aware responses."
+            "Note: Configure MCP_BASE_URL for more detailed, context-aware responses."
         )
 
     @staticmethod
@@ -232,7 +223,7 @@ class AIService:
             "### Action Items\n"
             "- Schedule backlog grooming session\n"
             "- Update issue estimates where needed\n\n"
-            "*Note: Connect an OpenAI API key for data-driven reports.*"
+            "*Note: Configure MCP_BASE_URL for data-driven reports.*"
         )
 
     @staticmethod
@@ -247,5 +238,5 @@ class AIService:
             "   Write comprehensive tests covering happy path and edge cases.\n\n"
             "4. **Integration & Documentation** (1 SP)\n"
             "   Wire up with existing code and update relevant documentation.\n\n"
-            "*Note: Connect an OpenAI API key for context-specific sub-task suggestions.*"
+            "*Note: Configure MCP_BASE_URL for context-specific sub-task suggestions.*"
         )

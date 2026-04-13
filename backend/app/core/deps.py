@@ -6,6 +6,7 @@ from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_session
 from app.models.organization import Organization
 from app.models.workspace import Workspace
@@ -19,6 +20,24 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def get_current_user_id(request: Request) -> UUID:
+    """Return the current user's UUID.
+
+    - ``AUTH_MODE=local``: reads ``X-User-ID`` header, falls back to dev user.
+    - ``AUTH_MODE=jwt``: extracts user id from the validated JWT token.
+    """
+    if settings.AUTH_MODE.lower() == "jwt":
+        from app.core.auth import get_current_user as _get_jwt_user, security
+
+        from fastapi.security import HTTPAuthorizationCredentials
+
+        credentials: HTTPAuthorizationCredentials | None = await security(request)
+        user = await _get_jwt_user(credentials)
+        try:
+            return UUID(user.id)
+        except (ValueError, TypeError):
+            return _DEV_USER_ID
+
+    # Local mode: X-User-ID header with fallback
     header = request.headers.get("x-user-id")
     if header:
         try:

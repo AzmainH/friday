@@ -7,10 +7,16 @@ const client = axios.create({
 })
 
 client.interceptors.request.use((config) => {
-  const userId = useAuthStore.getState().currentUserId
-  if (userId) {
-    config.headers['X-User-ID'] = userId
+  const { token, currentUserId } = useAuthStore.getState()
+
+  if (token) {
+    // JWT mode: send Bearer token
+    config.headers['Authorization'] = `Bearer ${token}`
+  } else if (currentUserId) {
+    // Local dev mode: send X-User-ID header
+    config.headers['X-User-ID'] = currentUserId
   }
+
   config.headers['X-Request-ID'] = crypto.randomUUID()
   return config
 })
