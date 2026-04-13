@@ -1,0 +1,180 @@
+{% extends "report_base.html" %}
+
+{% block title %}Portfolio Report - {{ workspace.name }}{% endblock %}
+
+{% block extra_styles %}
+    .project-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .project-card {
+      flex: 0 0 calc(50% - 8px);
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px 18px;
+      page-break-inside: avoid;
+    }
+
+    .project-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .project-card-header .rag-dot-sm {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .project-card-header .rag-dot-sm.green { background: #22c55e; }
+    .project-card-header .rag-dot-sm.amber { background: #f59e0b; }
+    .project-card-header .rag-dot-sm.red { background: #ef4444; }
+
+    .project-card-header .project-name {
+      font-size: 11pt;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .project-card-detail {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 9pt;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .project-card-detail:last-child {
+      border-bottom: none;
+    }
+
+    .project-card-detail .label {
+      color: #64748b;
+    }
+
+    .project-card-detail .value {
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .portfolio-summary {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .portfolio-summary .summary-card {
+      flex: 1;
+      text-align: center;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .portfolio-summary .summary-value {
+      font-size: 24pt;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .portfolio-summary .summary-label {
+      font-size: 8pt;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 4px;
+    }
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="report-header">
+  <div>
+    <h1>{{ workspace.name }}</h1>
+    <div class="subtitle">Portfolio Status Report &middot; {{ generated_at }}</div>
+  </div>
+  <div class="logo-placeholder">F</div>
+</div>
+
+<!-- Portfolio Summary -->
+{% set green_count = project_cards | selectattr("rag.status", "equalto", "green") | list | length %}
+{% set amber_count = project_cards | selectattr("rag.status", "equalto", "amber") | list | length %}
+{% set red_count = project_cards | selectattr("rag.status", "equalto", "red") | list | length %}
+
+<div class="portfolio-summary">
+  <div class="summary-card">
+    <div class="summary-value">{{ project_cards | length }}</div>
+    <div class="summary-label">Total Projects</div>
+  </div>
+  <div class="summary-card">
+    <div class="summary-value" style="color: #22c55e;">{{ green_count }}</div>
+    <div class="summary-label">On Track</div>
+  </div>
+  <div class="summary-card">
+    <div class="summary-value" style="color: #f59e0b;">{{ amber_count }}</div>
+    <div class="summary-label">At Risk</div>
+  </div>
+  <div class="summary-card">
+    <div class="summary-value" style="color: #ef4444;">{{ red_count }}</div>
+    <div class="summary-label">Off Track</div>
+  </div>
+</div>
+
+<!-- Project Cards Grid -->
+<div class="section">
+  <div class="section-title">Project Overview</div>
+  <div class="project-grid">
+    {% for card in project_cards %}
+    <div class="project-card">
+      <div class="project-card-header">
+        <div class="rag-dot-sm {{ card.rag.status }}"></div>
+        <div class="project-name">{{ card.name }}</div>
+      </div>
+
+      <div class="project-card-detail">
+        <span class="label">Completion</span>
+        <span class="value">{{ "%.1f" | format(card.pct_complete) }}%</span>
+      </div>
+
+      <div class="project-card-detail">
+        <span class="label">Progress</span>
+        <span class="value" style="flex: 1; margin-left: 12px;">
+          <div class="progress-bar-container" style="height: 8px;">
+            <div
+              class="progress-bar-fill {% if card.pct_complete >= 70 %}green{% elif card.pct_complete >= 40 %}amber{% else %}red{% endif %}"
+              style="width: {{ card.pct_complete }}%"
+            ></div>
+          </div>
+        </span>
+      </div>
+
+      <div class="project-card-detail">
+        <span class="label">Forecast End</span>
+        <span class="value">{{ card.forecast_end }}</span>
+      </div>
+
+      <div class="project-card-detail">
+        <span class="label">Top Risk</span>
+        <span class="value" style="font-weight: 400; font-size: 8.5pt;">{{ card.top_risk }}</span>
+      </div>
+
+      <div class="project-card-detail">
+        <span class="label">Status</span>
+        <span class="value">
+          <span class="risk-badge {% if card.rag.status == 'green' %}low{% elif card.rag.status == 'amber' %}medium{% else %}critical{% endif %}">
+            {{ card.rag.status | upper }}
+          </span>
+        </span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
