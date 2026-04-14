@@ -15,6 +15,7 @@ python-jose[cryptography]
 python-multipart
 watchfiles
 weasyprint
+jinja2
 aiofiles
 pytest
 pytest-asyncio

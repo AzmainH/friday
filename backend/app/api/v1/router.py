@@ -23,6 +23,8 @@ from app.api.v1.endpoints import (
     issues,
     labels,
     milestones,
+    nl_project,
+    nl_status,
     notifications,
     organizations,
     portfolio,
@@ -30,6 +32,8 @@ from app.api.v1.endpoints import (
     raci,
     recent_items,
     recurring,
+    reforecast,
+    reports_pdf,
     resource_planning,
     risks,
     roadmaps,
@@ -112,3 +116,9 @@ api_v1_router.include_router(templates.router)
 # Resource planning & EVM
 api_v1_router.include_router(resource_planning.router)
 api_v1_router.include_router(evm.router)
+
+# ProjectPilot AI features
+api_v1_router.include_router(nl_project.router)
+api_v1_router.include_router(nl_status.router)
+api_v1_router.include_router(reports_pdf.router)
+api_v1_router.include_router(reforecast.router)

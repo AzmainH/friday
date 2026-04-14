@@ -39,6 +39,7 @@ const DocumentImportWizard = lazy(() => import('@/pages/project/DocumentImportWi
 const ProjectReportsPage = lazy(() => import('@/pages/project/ReportsPage'))
 const SprintPage = lazy(() => import('@/pages/project/SprintPage'))
 const RisksPage = lazy(() => import('@/pages/project/RisksPage'))
+const AIProjectWizard = lazy(() => import('@/pages/project/AIProjectWizard'))
 
 function LazyFallback() {
   return (
@@ -67,6 +68,7 @@ export const router = createBrowserRouter([
       { path: 'projects', element: withSuspense(ProjectsPage) },
       { path: 'projects/new', element: withSuspense(ProjectCreationWizard) },
       { path: 'projects/import-documents', element: withSuspense(DocumentImportWizard) },
+      { path: 'projects/generate', element: withSuspense(AIProjectWizard) },
 
       // Project-scoped routes (wrapped by ProjectLayout to load project data)
       {

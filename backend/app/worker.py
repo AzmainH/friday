@@ -12,6 +12,7 @@ from app.tasks.import_export import export_csv, import_csv
 from app.tasks.recurring import process_recurring_tasks
 from app.tasks.scheduling import run_auto_schedule
 from app.tasks.notification_tasks import send_daily_digest, send_email_notification
+from app.tasks.reports import generate_scheduled_report
 from app.tasks.sla import check_sla_breaches
 
 
@@ -38,6 +39,7 @@ class WorkerSettings:
         create_project_from_documents,
         send_email_notification,
         send_daily_digest,
+        generate_scheduled_report,
     ]
     cron_jobs = [
         cron(process_recurring_tasks, hour={0, 6, 12, 18}),
